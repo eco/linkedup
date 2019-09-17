@@ -1,4 +1,4 @@
-package button
+package longy
 
 import (
 	"fmt"
@@ -13,7 +13,8 @@ func NewHandler(keeper Keeper) sdk.Handler {
 
 		case MsgQrScan:
 			return handleMsgQrScan(ctx, keeper, msg)
-
+		case MsgShareInfo:
+			return handleMsgShareInfo(ctx, keeper, msg)
 		default:
 			errMsg := fmt.Sprintf("Unrecognized button Msg type: %v", msg.Type())
 			return sdk.ErrUnknownRequest(errMsg).Result()
@@ -28,5 +29,13 @@ func handleMsgQrScan(ctx sdk.Context, keeper Keeper, msg MsgQrScan) sdk.Result {
 	//get the scanned address from the QR code
 
 	//update scan state
+
+	return sdk.Result{}
+}
+
+func handleMsgShareInfo(ctx sdk.Context, keeper Keeper, msg MsgShareInfo) sdk.Result {
+
+	//update scan state
+
 	return sdk.Result{}
 }

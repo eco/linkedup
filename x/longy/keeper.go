@@ -1,4 +1,4 @@
-package button
+package longy
 
 import (
 	"github.com/cosmos/cosmos-sdk/codec"
