@@ -12,9 +12,9 @@ func NewHandler(keeper Keeper) sdk.Handler {
 		switch msg := msg.(type) { //cast message
 
 		case MsgQrScan:
-			return handleMsgQrScan(ctx, keeper, msg)
+			return handleMsgQrScan(&ctx, keeper, msg)
 		case MsgShareInfo:
-			return handleMsgShareInfo(ctx, keeper, msg)
+			return handleMsgShareInfo(&ctx, keeper, msg)
 		default:
 			errMsg := fmt.Sprintf("Unrecognized button Msg type: %v", msg.Type())
 			return sdk.ErrUnknownRequest(errMsg).Result()
@@ -23,7 +23,8 @@ func NewHandler(keeper Keeper) sdk.Handler {
 }
 
 // handleMsgQrScan processes MsgQrScan
-func handleMsgQrScan(ctx sdk.Context, keeper Keeper, msg MsgQrScan) sdk.Result {
+// nolint: unparam
+func handleMsgQrScan(ctx *sdk.Context, keeper Keeper, msg MsgQrScan) sdk.Result {
 	//validate sender address is correct
 
 	//get the scanned address from the QR code
@@ -33,7 +34,8 @@ func handleMsgQrScan(ctx sdk.Context, keeper Keeper, msg MsgQrScan) sdk.Result {
 	return sdk.Result{}
 }
 
-func handleMsgShareInfo(ctx sdk.Context, keeper Keeper, msg MsgShareInfo) sdk.Result {
+// nolint: unparam
+func handleMsgShareInfo(ctx *sdk.Context, keeper Keeper, msg MsgShareInfo) sdk.Result {
 
 	//update scan state
 

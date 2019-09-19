@@ -11,7 +11,7 @@ type MsgShareInfo struct {
 	ScannedQR string         `json:"scannedQR"` //the string representation of the other attendee's QR badge
 }
 
-// NewMsgQrScan is the constructor function for MsgQrScan
+// NewMsgShareInfo is the constructor function for MsgShareInfo
 func NewMsgShareInfo(sender sdk.AccAddress, qrCode string) MsgShareInfo {
 	return MsgShareInfo{
 		Sender:    sender,
@@ -20,7 +20,7 @@ func NewMsgShareInfo(sender sdk.AccAddress, qrCode string) MsgShareInfo {
 }
 
 // Route string for this message
-func (msg MsgShareInfo) Route() string { return LONGY_ROUTE }
+func (msg MsgShareInfo) Route() string { return LongyRoute }
 
 // Type returns the message type, used to tagging transactions
 func (msg MsgShareInfo) Type() string { return "qr_scan" }

@@ -3,23 +3,28 @@ package app
 import (
 	"encoding/json"
 	"github.com/cosmos/cosmos-sdk/baseapp"
+	bam "github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	sdkparams "github.com/cosmos/cosmos-sdk/x/params"
+	"github.com/cosmos/cosmos-sdk/x/supply"
 	abci "github.com/tendermint/tendermint/abci/types"
 	cmn "github.com/tendermint/tendermint/libs/common"
-	dbm "github.com/tendermint/tendermint/libs/db"
 	"github.com/tendermint/tendermint/libs/log"
 	tmtypes "github.com/tendermint/tendermint/types"
+	dbm "github.com/tendermint/tm-db"
 )
 
 const (
-	appName    = "button"
+	appName = "longy"
+	//ModuleName us tge bane if this app
 	ModuleName = appName
 )
 
+// nolint: unused
 // base inherits the base app and contains all the KVStore keys as well as the keepers
 // to other modules we use.
 type base struct {
@@ -30,28 +35,25 @@ type base struct {
 	// the codec to use for encoding/decoding of ABCI messages
 	Cdc *codec.Codec
 
-	// store for the app blockchain data like version, consensus params, etc
-	keyMainStore *sdk.KVStoreKey
-	// store for accounts
-	keyAccountStore *sdk.KVStoreKey
-	// store for collection of fees in the anteHandler
-	keyFeeCollectionStore *sdk.KVStoreKey
-	// store for parameters for other keepers
-	keyParamsStore *sdk.KVStoreKey
-	// store for parameters for other keepers
-	tkeyParamsStore *sdk.TransientStoreKey
+	// keys to access the substores
+	keys  map[string]*sdk.KVStoreKey
+	tkeys map[string]*sdk.TransientStoreKey
 
 	// keeper for managing accounts
 	accountKeeper auth.AccountKeeper
 	// keeper for managing balances and send/receive of funds
 	bankKeeper bank.Keeper
-	// keeper for managing fees in the anteHandler
-	feeCollectionKeeper auth.FeeCollectionKeeper
+	// keeper for the supply
+	supplyKeeper supply.Keeper
 	// keeper for managing the params of other modules
 	paramsKeeper sdkparams.Keeper
+
+	// Module Manager
+	mm *module.Manager
 }
 
-// GenericGenesisState represents chain state at the start of the chain. Any initial state (account balances) are stored here.
+// GenericGenesisState represents chain state at the start of the chain.
+// Any initial state (account balances) are stored here.
 type GenericGenesisState struct {
 	// AuthData is the auth state of fees collected at genesis, used by the auth keeper
 	AuthData auth.GenesisState `json:"auth"`
@@ -81,26 +83,27 @@ func (app *base) InitApp(modules ModuleInterface, logger log.Logger, db dbm.DB) 
 
 	app.AddKeepers()
 
-	app.AddRoutes(app.Router())
-
-	// The app.QueryRouter is the main query router where each module registers its routes
-	app.AddQueryRoutes(app.QueryRouter())
+	app.AddModules()
 
 	// The initChain handles translating the genesis.json file into initial state for the network
 	app.SetInitChainer(app.initChain)
+	app.SetBeginBlocker(app.BeginBlocker)
+	app.SetEndBlocker(app.EndBlocker)
 
 	app.MountExtraStores()
 }
 
 func (app *base) LoadLatest() {
 	// loaded after all the stores are mounted
-	err := app.LoadLatestVersion(app.keyMainStore)
+	err := app.LoadLatestVersion(app.keys[bam.MainStoreKey])
 	if err != nil {
 		cmn.Exit(err.Error())
 	}
+
 	app.LastBlockHeight()
 }
 
+// nolint: gocritic
 // initChain unmarshals the genesis state on chain start up, and populates the initial state of the chain. In our
 // case it creates the accounts and assigns them the balance that the genesis file has set
 func (app *base) initChain(ctx sdk.Context, req abci.RequestInitChain) abci.ResponseInitChain {
@@ -119,15 +122,31 @@ func (app *base) initChain(ctx sdk.Context, req abci.RequestInitChain) abci.Resp
 	}
 
 	// initialize the modules with the genesis state
-	auth.InitGenesis(ctx, app.accountKeeper, app.feeCollectionKeeper, genesisState.AuthData)
+	auth.InitGenesis(ctx, app.accountKeeper, genesisState.AuthData)
 	bank.InitGenesis(ctx, app.bankKeeper, genesisState.BankData)
 
 	return abci.ResponseInitChain{}
 }
 
-// ExportAppStateAndValidators generates a state file by dumping the current state of the chain and all of the accounts and
-// their balances.
-func (app *base) ExportAppStateAndValidators() (appState json.RawMessage, validators []tmtypes.GenesisValidator, err error) {
+// nolint: gocritic
+func (app *base) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) abci.ResponseBeginBlock {
+	return app.mm.BeginBlock(ctx, req)
+}
+
+// nolint: gocritic
+func (app *base) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.ResponseEndBlock {
+	return app.mm.EndBlock(ctx, req)
+}
+
+// nolint: gocritic
+func (app *base) LoadHeight(height int64) error {
+	return app.LoadVersion(height, app.keys[bam.MainStoreKey])
+}
+
+// ExportAppStateAndValidators generates a state file by dumping the current state of the chain
+// and all of the accounts and their balances.
+func (app *base) ExportAppStateAndValidators() (appState json.RawMessage, validators []tmtypes.GenesisValidator,
+	err error) {
 	ctx := app.NewContext(true, abci.Header{})
 	var accounts []*auth.BaseAccount
 

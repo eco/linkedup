@@ -6,7 +6,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/bank"
 )
 
-// Keeper maintains the link to data storage and exposes getter/setter methods for the various parts of the state machine
+// Keeper maintains the link to data storage and exposes getter/setter
+// methods for the various parts of the state machine
 type Keeper struct {
 	coinKeeper   bank.Keeper  //Reference to the bank keeper we use play and pay out rewards
 	scanStoreKey sdk.StoreKey // Key for the scan KVStore

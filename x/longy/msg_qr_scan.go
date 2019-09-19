@@ -9,7 +9,8 @@ import (
 type MsgQrScan struct {
 	Sender    sdk.AccAddress `json:"sender"`    //Standard for all messages
 	ScannedQR string         `json:"scannedQR"` //the string representation of the other attendee's QR badge
-	ScanCode  string         `json:"scanCode"`  //the scan code from the QR account, used to validate some interaction to prevent social media posts
+	ScanCode  string         `json:"scanCode"`  //the scan code from the QR account, used to validate
+	// some interaction to prevent social media posts
 }
 
 // NewMsgQrScan is the constructor function for MsgQrScan
@@ -21,7 +22,7 @@ func NewMsgQrScan(sender sdk.AccAddress, qrCode string) MsgQrScan {
 }
 
 // Route string for this message
-func (msg MsgQrScan) Route() string { return LONGY_ROUTE }
+func (msg MsgQrScan) Route() string { return LongyRoute }
 
 // Type returns the message type, used to tagging transactions
 func (msg MsgQrScan) Type() string { return "qr_scan" }

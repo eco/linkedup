@@ -19,8 +19,8 @@ func NewQuerier(keeper Keeper) sdk.Querier {
 
 }
 
-// nolint: unparam
+// nolint: unparam, deadcode, unused
 // resolve: This takes a name and returns the value that is stored by the button. This is similar to a DNS query.
-func scanQR(ctx sdk.Context, path []string, req abci.RequestQuery, keeper Keeper) (res []byte, err sdk.Error) {
+func scanQR(ctx *sdk.Context, path []string, req *abci.RequestQuery, keeper Keeper) (res []byte, err sdk.Error) {
 	return
 }

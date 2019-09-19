@@ -1,12 +1,15 @@
 package app
 
 import (
-	"github.com/cosmos/cosmos-sdk/baseapp"
+	bam "github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
+	"github.com/cosmos/cosmos-sdk/x/params"
 	sdkparams "github.com/cosmos/cosmos-sdk/x/params"
+	"github.com/cosmos/cosmos-sdk/x/supply"
 )
 
 //ModuleInterface is the interface we use to make module integration into the base app simple
@@ -14,17 +17,15 @@ type ModuleInterface interface {
 	RegisterCodec(cdc *codec.Codec) *codec.Codec
 	AddStores()
 	AddKeepers()
-	AddRoutes(rtr baseapp.Router)
-	AddQueryRoutes(router baseapp.QueryRouter)
+	GetAppModules() []module.AppModule
 	MountExtraStores()
 }
 
 func (app *base) AddStores() {
-	app.keyMainStore = sdk.NewKVStoreKey("main")
-	app.keyAccountStore = sdk.NewKVStoreKey(auth.StoreKey)
-	app.keyFeeCollectionStore = sdk.NewKVStoreKey("fee_collection")
-	app.keyParamsStore = sdk.NewKVStoreKey("params")
-	app.tkeyParamsStore = sdk.NewTransientStoreKey("transient_params")
+	app.keys = sdk.NewKVStoreKeys(bam.MainStoreKey, auth.StoreKey,
+		supply.StoreKey, params.StoreKey)
+	app.tkeys = sdk.NewTransientStoreKeys(params.TStoreKey)
+
 	if app.modules != nil {
 		app.modules.AddStores()
 	}
@@ -32,12 +33,13 @@ func (app *base) AddStores() {
 
 func (app *base) AddKeepers() {
 	// The ParamsKeeper handles parameter storage for the application
-	app.paramsKeeper = sdkparams.NewKeeper(app.Cdc, app.keyParamsStore, app.tkeyParamsStore)
+	app.paramsKeeper = sdkparams.NewKeeper(app.Cdc, app.keys[params.StoreKey],
+		app.tkeys[params.TStoreKey], sdkparams.DefaultCodespace)
 
 	// The AccountKeeper handles address -> account lookups
 	app.accountKeeper = auth.NewAccountKeeper(
 		app.Cdc,
-		app.keyAccountStore,
+		app.keys[auth.StoreKey],
 		app.paramsKeeper.Subspace(auth.DefaultParamspace),
 		auth.ProtoBaseAccount,
 	)
@@ -47,46 +49,52 @@ func (app *base) AddKeepers() {
 		app.accountKeeper,
 		app.paramsKeeper.Subspace(bank.DefaultParamspace),
 		bank.DefaultCodespace,
+		nil,
 	)
 
-	// The FeeCollectionKeeper collects transaction fees and renders them to the fee distribution module
-	app.feeCollectionKeeper = auth.NewFeeCollectionKeeper(app.Cdc, app.keyFeeCollectionStore)
-
 	// The AnteHandler handles signature verification and transaction pre-processing
-	app.SetAnteHandler(auth.NewAnteHandler(app.accountKeeper, app.feeCollectionKeeper))
+	app.SetAnteHandler(
+		auth.NewAnteHandler(
+			app.accountKeeper,
+			app.supplyKeeper,
+			auth.DefaultSigVerificationGasConsumer,
+		),
+	)
 
 	if app.modules != nil {
 		app.modules.AddKeepers()
 	}
 }
-
-func (app *base) AddRoutes(rtr baseapp.Router) {
-	// The app.Router is the main transaction router where each module registers its routes
-	// Register the bank and button routes here
-	rtr.
-		AddRoute("bank", bank.NewHandler(app.bankKeeper))
+func (app *base) AddModules() {
+	modules := []module.AppModule{
+		auth.NewAppModule(app.accountKeeper),
+		bank.NewAppModule(app.bankKeeper, app.accountKeeper),
+		supply.NewAppModule(app.supplyKeeper, app.accountKeeper),
+	}
 
 	if app.modules != nil {
-		app.modules.AddRoutes(rtr)
+		modules = append(modules, app.modules.GetAppModules()...)
 	}
-}
 
-func (app *base) AddQueryRoutes(rtr baseapp.QueryRouter) {
-	rtr.AddRoute(auth.StoreKey, auth.NewQuerier(app.accountKeeper))
-	if app.modules != nil {
-		app.modules.AddQueryRoutes(rtr)
+	app.mm = module.NewManager(modules...)
+
+	// Sets the order of Genesis - Order matters, genutil is to always come last
+	// NOTE: The genutils moodule must occur after staking so that pools are
+	// properly initialized with tokens from genesis accounts.
+	var modNames = make([]string, len(modules))
+	for i, mod := range modules {
+		modNames[i] = mod.Name()
 	}
+	app.mm.SetOrderInitGenesis(modNames...)
+
+	// register all module routes and module queriers
+	app.mm.RegisterRoutes(app.Router(), app.QueryRouter())
 }
 
 func (app *base) MountExtraStores() {
-	//Mount all the stores to the keys
-	app.MountStores(
-		app.keyMainStore,
-		app.keyAccountStore,
-		app.keyFeeCollectionStore,
-		app.keyParamsStore,
-		app.tkeyParamsStore,
-	)
+	// initialize stores
+	app.MountKVStores(app.keys)
+	app.MountTransientStores(app.tkeys)
 
 	if app.modules != nil {
 		app.modules.MountExtraStores()
@@ -108,6 +116,7 @@ func (app *base) RegisterCodec(cdc *codec.Codec) *codec.Codec {
 	return cdc
 }
 
+//BaseCodec returns the basic codec for the pre-wired modules
 func BaseCodec(cdc *codec.Codec) *codec.Codec {
 	//accounts and coins
 	auth.RegisterCodec(cdc)
