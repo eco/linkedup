@@ -3,7 +3,7 @@ install: ly lycli
 init:
 	$(MAKE) -C scripts
 ly:
-	go install ./cmd/bly
+	go install ./cmd/ly
 
 lycli:
 	go install ./cmd/lycli
