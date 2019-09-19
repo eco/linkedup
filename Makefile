@@ -2,10 +2,10 @@ install: ly lycli
 
 init:
 	$(MAKE) -C scripts
-bt:
+ly:
 	go install ./cmd/bly
 
-btcli:
+lycli:
 	go install ./cmd/lycli
 
 all: install init
