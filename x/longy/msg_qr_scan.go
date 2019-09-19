@@ -9,6 +9,7 @@ import (
 type MsgQrScan struct {
 	Sender    sdk.AccAddress `json:"sender"`    //Standard for all messages
 	ScannedQR string         `json:"scannedQR"` //the string representation of the other attendee's QR badge
+	ScanCode  string         `json:"scanCode"`  //the scan code from the QR account, used to validate some interaction to prevent social media posts
 }
 
 // NewMsgQrScan is the constructor function for MsgQrScan
