@@ -6,6 +6,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+//Keeper is temporary
+type Keeper struct{}
+
 // NewHandler constructor for our button module
 func NewHandler(keeper Keeper) sdk.Handler {
 	return func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
