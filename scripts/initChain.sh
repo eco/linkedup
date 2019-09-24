@@ -4,7 +4,7 @@
 rm -rf $HOME/.lyd
 rm -rf $HOME/.lycli
 
-bt init --chain-id testchain
+lyd init longy --chain-id longychain
 
 PWD_FILE=passwords.txt
 
@@ -16,11 +16,26 @@ else
 fi
 
 # creates accounts keys with passwords, adds them to the keys list
-btcli keys add alice < $PWD_FILE
-btcli keys add bob < $PWD_FILE
+lycli keys add alice < $PWD_FILE
+lycli keys add bob < $PWD_FILE
 
 # Add 2 accounts, with coins to the genesis file
-bt add-genesis-account $(lycli keys show alice -a) 1000gamecoin
-bt add-genesis-account $(lycli keys show bob -a) 1000gamecoin
+lyd add-genesis-account $(lycli keys show alice -a) 1000gamecoin,100000000stake
+lyd add-genesis-account $(lycli keys show bob -a) 1000gamecoin,100000000stake
 
-bt start
+# Configure your CLI to eliminate need for chain-id flag
+lycli config chain-id longychain
+lycli config output json
+lycli config indent true
+lycli config trust-node true
+
+lyd gentx --name alice < $PWD_FILE
+lyd gentx --name bob < $PWD_FILE
+
+# input the gentx into the genesis file so chain is aware of validators
+lyd collect-gentxs
+
+# validate genesis
+lyd validate-genesis
+
+lyd start

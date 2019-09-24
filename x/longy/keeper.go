@@ -6,6 +6,11 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/bank"
 )
 
+const (
+	//StoreKey is the key for the keeper
+	StoreKey = ModuleName
+)
+
 // AttendeeKeeper maintains the link to data storage and exposes getter/setter
 // methods for the various parts of the state machine
 type AttendeeKeeper struct {
