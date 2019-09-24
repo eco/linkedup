@@ -1,34 +1,32 @@
-package longy
+package types
 
 import (
 	"encoding/json"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// MsgQrScan defines the message for starting off a QR scan meet of another attendee
-type MsgQrScan struct {
+// MsgShareInfo defines the message for sharing our info with another attendee
+type MsgShareInfo struct {
 	Sender    sdk.AccAddress `json:"sender"`    //Standard for all messages
 	ScannedQR string         `json:"scannedQR"` //the string representation of the other attendee's QR badge
-	ScanCode  string         `json:"scanCode"`  //the scan code from the QR account, used to validate
-	// some interaction to prevent social media posts
 }
 
-// NewMsgQrScan is the constructor function for MsgQrScan
-func NewMsgQrScan(sender sdk.AccAddress, qrCode string) MsgQrScan {
-	return MsgQrScan{
+// NewMsgShareInfo is the constructor function for MsgShareInfo
+func NewMsgShareInfo(sender sdk.AccAddress, qrCode string) MsgShareInfo {
+	return MsgShareInfo{
 		Sender:    sender,
 		ScannedQR: qrCode,
 	}
 }
 
 // Route string for this message
-func (msg MsgQrScan) Route() string { return LongyRoute }
+func (msg MsgShareInfo) Route() string { return RouterKey }
 
 // Type returns the message type, used to tagging transactions
-func (msg MsgQrScan) Type() string { return "qr_scan" }
+func (msg MsgShareInfo) Type() string { return "qr_scan" }
 
 // ValidateBasic performs basic checks of the message
-func (msg MsgQrScan) ValidateBasic() sdk.Error {
+func (msg MsgShareInfo) ValidateBasic() sdk.Error {
 	if msg.Sender.Empty() {
 		return sdk.ErrInvalidAddress(msg.Sender.String())
 	}
@@ -36,7 +34,7 @@ func (msg MsgQrScan) ValidateBasic() sdk.Error {
 }
 
 // GetSignBytes returns byte representation of the message
-func (msg MsgQrScan) GetSignBytes() []byte {
+func (msg MsgShareInfo) GetSignBytes() []byte {
 	b, err := json.Marshal(msg)
 	if err != nil {
 		panic(err)
@@ -46,6 +44,6 @@ func (msg MsgQrScan) GetSignBytes() []byte {
 }
 
 // GetSigners returns the signers of this message for the authentication module
-func (msg MsgQrScan) GetSigners() []sdk.AccAddress {
+func (msg MsgShareInfo) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.Sender}
 }

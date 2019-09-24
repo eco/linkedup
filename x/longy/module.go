@@ -16,13 +16,6 @@ var (
 	_ module.AppModuleBasic = AppModuleBasic{}
 )
 
-const (
-	//AppName is the app name
-	AppName = "longy"
-	//ModuleName us tge bane if this app
-	ModuleName = AppName
-)
-
 // AppModuleBasic is
 type AppModuleBasic struct{}
 

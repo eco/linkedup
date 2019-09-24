@@ -1,14 +1,9 @@
-package longy
+package internal
 
 import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
-)
-
-const (
-	//StoreKey is the key for the keeper
-	StoreKey = ModuleName
 )
 
 // AttendeeKeeper maintains the link to data storage and exposes getter/setter
