@@ -3,7 +3,9 @@ package rekeyservice
 import (
 	"context"
 	"fmt"
+	"github.com/eco/longy/rekey-service/eventbrite"
 	"github.com/eco/longy/rekey-service/handlers"
+	"github.com/eco/longy/rekey-service/masterkey"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"os"
@@ -14,8 +16,21 @@ import (
 
 var log = logrus.WithField("module", "rekeyservice")
 
-// StartHttpService will block and start the http service binded on `port`
-func StartHttpService(port int) {
+// Service composes the required modules needed to manage the lifecycle
+type Service struct {
+	ebSession eventbrite.Session
+	masterKey masterkey.Key
+}
+
+func NewService(ebSession eventbrite.Session, key masterkey.Key) Service {
+	return Service{
+		ebSession: ebSession,
+		masterKey: key,
+	}
+}
+
+// StartHTTP will block and start the http service binded on `port`
+func (srv Service) StartHTTP(port int) {
 	s := &http.Server{
 		Addr:    fmt.Sprintf(":%d", port),
 		Handler: handler.Router(),
@@ -23,8 +38,6 @@ func StartHttpService(port int) {
 
 	startServer(s)
 }
-
-// TODO: https server?
 
 func startServer(s *http.Server) {
 	stop := make(chan os.Signal, 1)
