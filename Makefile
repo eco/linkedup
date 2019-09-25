@@ -1,9 +1,9 @@
-install: ly lycli
+install: lyd lycli
 
 init:
 	$(MAKE) -C scripts
-ly:
-	go install ./cmd/ly
+lyd:
+	go install ./cmd/lyd
 
 lycli:
 	go install ./cmd/lycli
