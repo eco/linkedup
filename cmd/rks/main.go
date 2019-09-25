@@ -24,7 +24,7 @@ func init() {
 }
 
 var rootCmd = &cobra.Command{
-	Use:   "rekey",
+	Use:   "rks",
 	Short: "rekey service for the longest chain game",
 	Long:  "",
 	RunE: func(cmd *cobra.Command, args []string) error {

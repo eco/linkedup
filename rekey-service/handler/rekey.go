@@ -56,6 +56,9 @@ func rekey(eb EmailRetrievalService, mk MasterKey, mc MailService) http.HandlerF
 		if err != nil {
 			http.Error(w, "internal error. try again", http.StatusInternalServerError)
 			return
+		} else if len(email) == 0 {
+			http.Error(w, "attendee id not present in the event", http.StatusNotFound)
+			return
 		}
 
 		err = mc.SendRekeyEmail(email, sig)

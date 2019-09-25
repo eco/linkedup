@@ -44,7 +44,9 @@ func (c Client) SendRekeyEmail(dest string, signature []byte) error {
 	m.SetHeader("Subject", "Reset keys and re-enter the longy game")
 	m.SetBody("text/html", "<b>Hello!</b>")
 
-	return gomail.Send(c.sender, m)
+	err := gomail.Send(c.sender, m)
+	log.WithError(err).Warn("failed email delivery")
+	return err
 }
 
 // Close will terminate the connnection with the smtp server

@@ -73,7 +73,9 @@ func (s Session) EmailFromAttendeeID(id int) (string, error) {
 		return "", ErrInternal
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode == http.StatusNotFound {
+		return "", nil
+	} else if resp.StatusCode != http.StatusOK {
 		// TODO: emperically check the different response types. id does not exist a 403 (NotFound)?
 		// Log a warning?
 		log.Warnf("bad eventbrite api response, code=%d, attendee_id=%d", resp.StatusCode, id)
