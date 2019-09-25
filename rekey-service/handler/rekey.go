@@ -63,22 +63,10 @@ func rekey(eb EmailRetrievalService, mk MasterKey, mc MailService) http.HandlerF
 
 		err = mc.SendRekeyEmail(email, sig)
 		if err != nil {
-			var body map[string]string
-			body["msg"] = "unable to send email"
-			body["signature"] = hexStr
-			data, err := json.Marshal(body)
-			if err != nil {
-				log.WithField("handler", "rekey").Error("json parsing")
-				http.Error(w, "internal error", http.StatusInternalServerError)
-				return
-			}
-
-			w.WriteHeader(http.StatusAccepted)
-			w.Write(data)
+			http.Error(w, "email error. try again", http.StatusInternalServerError)
 			return
 		}
 
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(hexStr))
 	}
 }

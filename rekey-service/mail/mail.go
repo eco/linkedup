@@ -19,5 +19,6 @@ func NewClient() (Client, error) {
 // SendRekeyEmail will construct and send the email containing the redirect
 // uri with the given signature
 func (c Client) SendRekeyEmail(dest string, signature []byte) error {
+	// TODO
 	return nil
 }
