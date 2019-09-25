@@ -6,6 +6,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
+	"github.com/cosmos/cosmos-sdk/x/bank"
+	"github.com/cosmos/cosmos-sdk/x/genutil/types"
 	"github.com/gorilla/mux"
 	"github.com/spf13/cobra"
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -57,14 +59,18 @@ func (a AppModuleBasic) GetQueryCmd(*codec.Codec) *cobra.Command {
 // AppModule structure holding or keepers together
 type AppModule struct {
 	AppModuleBasic
-	//accountKeeper types.AccountKeeper
+	accountKeeper types.AccountKeeper
+	bankKeeper    bank.Keeper
 }
 
 // NewAppModule creates a new AppModule object
-func NewAppModule() module.AppModule {
+// nolint: gocritic
+func NewAppModule(account types.AccountKeeper, bank bank.Keeper) module.AppModule {
 
 	return module.NewGenesisOnlyAppModule(AppModule{
 		AppModuleBasic: AppModuleBasic{},
+		accountKeeper:  account,
+		bankKeeper:     bank,
 	})
 }
 

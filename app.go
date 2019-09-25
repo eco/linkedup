@@ -85,6 +85,8 @@ type LongyApp struct {
 	supplyKeeper   supply.Keeper
 	paramsKeeper   params.Keeper
 
+	longyKeeper longy.Keeper
+
 	// Module Manager
 	mm *module.Manager
 }
@@ -184,6 +186,12 @@ func NewLongyApp(
 			app.slashingKeeper.Hooks()),
 	)
 
+	app.longyKeeper = longy.NewKeeper(
+		app.bankKeeper,
+		keys[longy.StoreKey],
+		app.cdc,
+	)
+
 	app.mm = module.NewManager(
 		genaccounts.NewAppModule(app.accountKeeper),
 		genutil.NewAppModule(app.accountKeeper, app.stakingKeeper, app.BaseApp.DeliverTx),
@@ -193,6 +201,7 @@ func NewLongyApp(
 		distr.NewAppModule(app.distrKeeper, app.supplyKeeper),
 		slashing.NewAppModule(app.slashingKeeper, app.stakingKeeper),
 		staking.NewAppModule(app.stakingKeeper, app.distrKeeper, app.accountKeeper, app.supplyKeeper),
+		longy.NewAppModule(app.accountKeeper, app.bankKeeper),
 	)
 
 	app.mm.SetOrderBeginBlockers(distr.ModuleName, slashing.ModuleName)
@@ -210,6 +219,7 @@ func NewLongyApp(
 		slashing.ModuleName,
 		longy.ModuleName,
 		genutil.ModuleName,
+		longy.ModuleName,
 	)
 
 	// register all module routes and module queriers
