@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/eco/longy/rekey-service/eventbrite"
-	"github.com/eco/longy/rekey-service/handlers"
+	"github.com/eco/longy/rekey-service/handler"
+	"github.com/eco/longy/rekey-service/mail"
 	"github.com/eco/longy/rekey-service/masterkey"
 	"github.com/sirupsen/logrus"
 	"net/http"
@@ -18,14 +19,16 @@ var log = logrus.WithField("module", "rekeyservice")
 
 // Service composes the required modules needed to manage the lifecycle
 type Service struct {
-	ebSession eventbrite.Session
-	masterKey masterkey.Key
+	ebSession  eventbrite.Session
+	masterKey  masterkey.Key
+	mailClient mail.Client
 }
 
-func NewService(ebSession eventbrite.Session, key masterkey.Key) Service {
+func NewService(ebSession eventbrite.Session, key masterkey.Key, mc mail.Client) Service {
 	return Service{
-		ebSession: ebSession,
-		masterKey: key,
+		ebSession:  ebSession,
+		masterKey:  key,
+		mailClient: mc,
 	}
 }
 
@@ -33,7 +36,7 @@ func NewService(ebSession eventbrite.Session, key masterkey.Key) Service {
 func (srv Service) StartHTTP(port int) {
 	s := &http.Server{
 		Addr:    fmt.Sprintf(":%d", port),
-		Handler: handler.Router(),
+		Handler: handler.Router(srv.ebSession, srv.masterKey, srv.mailClient),
 	}
 
 	startServer(s)

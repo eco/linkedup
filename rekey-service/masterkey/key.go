@@ -8,8 +8,6 @@ import (
 	"github.com/tendermint/tendermint/crypto/tmhash"
 )
 
-type privateKey tmcrypto.PrivKeySecp256k1
-
 const (
 	PrivateKeyByteLen = 32
 )
@@ -17,7 +15,7 @@ const (
 // Key encapslates the master key for the
 // longey game
 type Key struct {
-	privKey privateKey
+	privKey tmcrypto.PrivKeySecp256k1
 }
 
 // NewMasterKey is the constructor for `Key`
@@ -31,7 +29,7 @@ func NewMasterKey(hexStr string) (Key, error) {
 			len(bytes), PrivateKeyByteLen)
 	}
 
-	var key privateKey
+	var key tmcrypto.PrivKeySecp256k1
 	copied := copy(key[:], bytes)
 	if copied != 32 {
 		panic(fmt.Sprintf("key construction %d copy failed", PrivateKeyByteLen))
@@ -45,14 +43,14 @@ func NewMasterKey(hexStr string) (Key, error) {
 }
 
 /** CreateRekeySignature generates the signature signed by the master key allowing
- * attendee `id` to reset with the given the `nonce`.
+ * attendee `id` to reset with the given `nonce`.
  *
  * The signature is over
  * SHA256("resetkey(id=<id>, nonce=<nonce>)")
  */
-func (k Key) CreateRekeySignature(id, nonce int) ([]byte, error) {
+func (k Key) RekeySignature(id, nonce int) ([]byte, error) {
 	bytesToSign := []byte(fmt.Sprintf("resetkey(id=%d, nonce=%d)", id, nonce))
-	hash := tmHash.sum(bytesToSign)
+	hash := tmhash.Sum(bytesToSign)
 
 	sig, err := k.privKey.Sign(hash)
 	if err != nil {

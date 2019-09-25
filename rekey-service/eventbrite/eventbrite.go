@@ -1,7 +1,6 @@
 package eventbrite
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -34,7 +33,7 @@ func CreateSession(authToken string, eventID int) Session {
 		authToken: authToken,
 		eventID:   eventID,
 		netClient: http.Client{
-			Timeout: 10 * time.Second,
+			Timeout: 3 * time.Second,
 		},
 	}
 }
@@ -48,9 +47,8 @@ func (s Session) WithTimeout(time time.Duration) Session {
 	return s
 }
 
-// GetEmailFromAttendeeID retrieves the email associated with the eventbrite account for `id`. The outgoing
-// request uses the corresponding context.
-func (s Session) GetEmailFromAttendeeID(ctx context.Context, id int) (string, error) {
+// GetEmailFromAttendeeID retrieves the email associated with the eventbrite account for `id`
+func (s Session) EmailFromAttendeeID(id int) (string, error) {
 	host := "https://eventbrite.com"
 	path := fmt.Sprintf("/v3/%d/attendees/%d/", s.eventID, id)
 	auth := fmt.Sprintf("Bearer %s", s.authToken)
@@ -68,7 +66,6 @@ func (s Session) GetEmailFromAttendeeID(ctx context.Context, id int) (string, er
 			"Authorization": {auth},
 		},
 	}
-	req = req.WithContext(ctx)
 
 	resp, err := s.netClient.Do(req)
 	if err != nil {
@@ -79,14 +76,14 @@ func (s Session) GetEmailFromAttendeeID(ctx context.Context, id int) (string, er
 	if resp.StatusCode != http.StatusOK {
 		// TODO: emperically check the different response types. id does not exist a 403 (NotFound)?
 		// Log a warning?
-		log.Warnf("non status 200 response, id=%d", id)
+		log.Warnf("non 200 response, code=%d, attendee_id=%d", resp.StatusCode, id)
 		return "", ErrInternal
 	}
 
 	return getEmailFromBody(resp.Body)
 }
 
-func getEmailFromBody(body io.ReadCloser) (string, error) {
+func getEmailFromBody(body io.Reader) (string, error) {
 	var jsonResp map[string]json.RawMessage
 	d := json.NewDecoder(body)
 	if err := d.Decode(&jsonResp); err != nil {
