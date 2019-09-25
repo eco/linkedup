@@ -15,7 +15,6 @@ var (
 	// internal
 	log = logrus.WithField("module", "eventbrite")
 
-	ErrTimeout  = errors.New("request timed out")
 	ErrInternal = errors.New("internal error")
 )
 
@@ -55,7 +54,8 @@ func (s Session) EmailFromAttendeeID(id int) (string, error) {
 
 	url, err := url.Parse(host + path)
 	if err != nil {
-		return "", fmt.Errorf("%w. invalid url", ErrInternal)
+		log.Warnf("bad event url: %s", host+path)
+		return "", ErrInternal
 	}
 
 	// create the http request
@@ -69,14 +69,14 @@ func (s Session) EmailFromAttendeeID(id int) (string, error) {
 
 	resp, err := s.netClient.Do(req)
 	if err != nil {
-		log.Warnf("eventbrite api error: %s", err)
+		log.WithError(err).Warn("eventbrite api request delivery")
 		return "", ErrInternal
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
 		// TODO: emperically check the different response types. id does not exist a 403 (NotFound)?
 		// Log a warning?
-		log.Warnf("non 200 response, code=%d, attendee_id=%d", resp.StatusCode, id)
+		log.Warnf("bad eventbrite api response, code=%d, attendee_id=%d", resp.StatusCode, id)
 		return "", ErrInternal
 	}
 

@@ -49,5 +49,6 @@ func (c Client) SendRekeyEmail(dest string, signature []byte) error {
 
 // Close will terminate the connnection with the smtp server
 func (c Client) Close() error {
+	log.Info("terminating connection with smtp server")
 	return c.sender.Close()
 }

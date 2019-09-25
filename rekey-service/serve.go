@@ -46,7 +46,9 @@ func (srv Service) StartHTTP(port int) {
 }
 
 func (srv Service) Close() error {
-	return srv.mailClient.Close()
+	err := srv.mailClient.Close()
+	log.Info("done")
+	return err
 }
 
 func startServer(s *http.Server) {
