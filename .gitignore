@@ -1,4 +1,6 @@
+.DS_Store
 .idea
 cmd/rks/rks
-vendor
+cmd/lycli/lycli
+cmd/lyd/lyd
 
