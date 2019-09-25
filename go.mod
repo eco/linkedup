@@ -12,4 +12,5 @@ require (
 	github.com/tendermint/go-amino v0.15.0
 	github.com/tendermint/tendermint v0.32.4
 	github.com/tendermint/tm-db v0.2.0
+	gopkg.in/mail.v2 v2.3.1 // indirect
 )

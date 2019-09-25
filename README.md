@@ -28,7 +28,7 @@ The service defines two endpoints
 
 1. `/ping` which simple returns a status 200 and a "pong" response. This endpoint' intended use is health checks.
 2. `/rekey/<attendee_id>?nonce=<nonce>` main url path which will generate the rekey signature and send the email containing the appropriate redirect. The
-attendee's email is fetched from eventbrite using `attendee_id`.
+attendee's email is fetched from eventbrite using `attendee_id`. The signature is over `SHA256("resetkey(id=<id>, nonce=<nonce>)")
   Response Codes:
   1. 200 - All went well!
   2. 403 - The attentee ID was not found in the event
