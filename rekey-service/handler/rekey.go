@@ -1,8 +1,6 @@
 package handler
 
 import (
-	"encoding/hex"
-	"encoding/json"
 	"github.com/gorilla/mux"
 	"net/http"
 	"strconv"
@@ -53,7 +51,6 @@ func rekey(eb EmailRetrievalService, mk MasterKey, mc MailService) http.HandlerF
 			http.Error(w, "internal error. try again", http.StatusInternalServerError)
 			return
 		}
-		hexStr := hex.EncodeToString(sig)
 
 		email, err := eb.EmailFromAttendeeID(id)
 		if err != nil {

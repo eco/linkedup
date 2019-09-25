@@ -9,11 +9,12 @@ import (
 
 var log = logrus.WithField("module", "mail")
 
-// Client used to sent emails
+// Client used to send emails
 type Client struct {
 	sender gomail.SendCloser
 }
 
+// NewClient constructs `Client` with the corresponding credentials
 func NewClient(host string, port int, username string, pwd string) (Client, error) {
 	log.Info("establishing connection with smtp server")
 	d := gomail.NewDialer(host, port, username, pwd)
@@ -45,6 +46,7 @@ func (c Client) SendRekeyEmail(dest string, signature []byte) error {
 	return gomail.Send(c.sender, m)
 }
 
+// Close will terminate the connnection with the smtp server
 func (c Client) Close() error {
 	return c.sender.Close()
 }

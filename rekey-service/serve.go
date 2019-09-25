@@ -39,7 +39,14 @@ func (srv Service) StartHTTP(port int) {
 		Handler: handler.Router(srv.ebSession, srv.masterKey, srv.mailClient),
 	}
 
+	// will block
 	startServer(s)
+
+	srv.Close()
+}
+
+func (srv Service) Close() error {
+	return srv.mailClient.Close()
 }
 
 func startServer(s *http.Server) {
@@ -48,7 +55,7 @@ func startServer(s *http.Server) {
 
 	go func() {
 		log.Infof("listening on %s", s.Addr)
-		if err := s.ListenAndServe(); err != nil {
+		if err := s.ListenAndServe(); err != http.ErrServerClosed {
 			log.Fatal(err)
 		}
 	}()
