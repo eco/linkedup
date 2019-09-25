@@ -16,7 +16,7 @@ type Client struct {
 
 // NewClient constructs `Client` with the corresponding credentials
 func NewClient(host string, port int, username string, pwd string) (Client, error) {
-	log.Info("establishing connection with smtp server")
+	log.Infof("establishing connection with smtp server. %s:%d", host, port)
 	d := gomail.NewDialer(host, port, username, pwd)
 	// TODO: change this for production!
 	d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
@@ -38,6 +38,7 @@ func NewClient(host string, port int, username string, pwd string) (Client, erro
 func (c Client) SendRekeyEmail(dest string, signature []byte) error {
 	// construct message
 	m := gomail.NewMessage()
+	m.SetHeader("From", "testecolongy@gmail.com")
 	m.SetHeader("To", dest)
 	m.SetHeader("From", "alex@example.com")
 	m.SetHeader("Subject", "Reset keys and re-enter the longy game")

@@ -18,9 +18,18 @@ type Key struct {
 	privKey tmcrypto.PrivKeySecp256k1
 }
 
-// NewMasterKey is the constructor for `Key`
+// NewMasterKey is the constructor for `Key`. A new key will be
+// generated if an empty string is provided
 func NewMasterKey(hexStr string) (Key, error) {
 	hexStr = util.TrimHex(hexStr)
+	if len(hexStr) == 0 {
+		key := Key{
+			privKey: tmcrypto.GenPrivKey(),
+		}
+
+		return key, nil
+	}
+
 	bytes, err := hex.DecodeString(hexStr)
 	if err != nil {
 		return Key{}, fmt.Errorf("hex: %s", err)

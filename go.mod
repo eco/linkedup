@@ -15,4 +15,5 @@ require (
 	github.com/stretchr/testify v1.4.0
 	github.com/tendermint/tendermint v0.32.3
 	github.com/tendermint/tm-db v0.2.0
+	gopkg.in/mail.v2 v2.3.1 // indirect
 )
