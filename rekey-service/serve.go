@@ -24,6 +24,7 @@ type Service struct {
 	mailClient mail.Client
 }
 
+// NewService is the creator the the rekey-service
 func NewService(ebSession eventbrite.Session, key masterkey.Key, mc mail.Client) Service {
 	return Service{
 		ebSession:  ebSession,
@@ -33,7 +34,7 @@ func NewService(ebSession eventbrite.Session, key masterkey.Key, mc mail.Client)
 }
 
 // StartHTTP will block and start the http service binded on `port`
-func (srv Service) StartHTTP(port int) {
+func (srv *Service) StartHTTP(port int) {
 	s := &http.Server{
 		Addr:    fmt.Sprintf(":%d", port),
 		Handler: handler.Router(srv.ebSession, srv.masterKey, srv.mailClient),
@@ -42,13 +43,14 @@ func (srv Service) StartHTTP(port int) {
 	// will block
 	startServer(s)
 
+	// server closed
 	srv.Close()
 }
 
-func (srv Service) Close() error {
-	err := srv.mailClient.Close()
+// Close will release the resources used by the server
+func (srv *Service) Close() {
+	srv.mailClient.Close() //nolint
 	log.Info("done")
-	return err
 }
 
 func startServer(s *http.Server) {
@@ -69,5 +71,5 @@ func startServer(s *http.Server) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	s.Shutdown(ctx)
+	s.Shutdown(ctx) //nolint
 }

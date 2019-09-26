@@ -39,7 +39,7 @@ func LogHTTP(underlying http.Handler) http.HandlerFunc {
 
 		start := time.Now()
 		underlying.ServeHTTP(&sw, r)
-		latency := time.Now().Sub(start)
+		latency := time.Since(start)
 
 		log.Infof("method=%s, remote=%s, url=%s, content-length=%d, status=%d, latency=%s",
 			r.Method, r.RemoteAddr, r.URL, r.ContentLength, sw.status, latency)

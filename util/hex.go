@@ -1,5 +1,7 @@
 package util
 
+// TrimHex will remove the "0x" hex prefix if present and also 0-pad the
+// hex string to an even length
 func TrimHex(hexStr string) string {
 	if len(hexStr) == 0 {
 		return hexStr

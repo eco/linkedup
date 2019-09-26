@@ -1,31 +1,22 @@
 package handler
 
 import (
+	"github.com/eco/longy/rekey-service/eventbrite"
+	"github.com/eco/longy/rekey-service/mail"
+	"github.com/eco/longy/rekey-service/masterkey"
 	"github.com/gorilla/mux"
 	"net/http"
 	"strconv"
 )
 
-type EmailRetrievalService interface {
-	EmailFromAttendeeID(id int) (string, error)
-}
-
-type MasterKey interface {
-	RekeySignature(id, nonce int) ([]byte, error)
-}
-
-type MailService interface {
-	SendRekeyEmail(email string, sig []byte) error
-}
-
-func registerRekey(r *mux.Router, eb EmailRetrievalService, mk MasterKey, mc MailService) {
+func registerRekey(r *mux.Router, eb eventbrite.Session, mk masterkey.Key, mc mail.Client) {
 	r.HandleFunc("/rekey/{id:[0-9]+}", rekey(eb, mk, mc)).Methods("GET")
 }
 
 // All core logic is implemented here. If there are plans to expand this service,
 // logic (email retrieval, etc) can be lifted into http middleware to allow for better
 // composability
-func rekey(eb EmailRetrievalService, mk MasterKey, mc MailService) http.HandlerFunc {
+func rekey(eb eventbrite.Session, mk masterkey.Key, mc mail.Client) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		nonceStr := r.FormValue("nonce")

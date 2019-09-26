@@ -6,18 +6,20 @@ import (
 	"strings"
 )
 
-func HostAndPort(server string) (string, int, error) {
-	if len(server) == 0 {
-		return "", -1, errors.New("empty server destination")
+// HostAndPort will parse the `address` into it's host and port. An error is
+// returned if address is in the incorrect format, expected; "host:port"
+func HostAndPort(address string) (string, int, error) {
+	if len(address) == 0 {
+		return "", -1, errors.New("empty address destination")
 	}
 
-	if !strings.Contains(server, ":") {
+	if !strings.Contains(address, ":") {
 		return "", -1, errors.New("expected host:port")
 	}
 
-	split := strings.Split(server, ":")
+	split := strings.Split(address, ":")
 	if len(split) != 2 {
-		return "", -1, errors.New("only expected a single `:` seperator")
+		return "", -1, errors.New("only expected a single `:` separator")
 	}
 
 	host := split[0]

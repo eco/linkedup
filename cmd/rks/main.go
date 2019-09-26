@@ -15,7 +15,7 @@ import (
 func init() {
 	// TODO: remote these defaults before making the repo public
 	rootCmd.Flags().Int("port", 1337, "port to bind the rekey service")
-	rootCmd.Flags().String("longy-masterkey", "", "master private key for the longy game. A new keypair will be generated if not provided")
+	rootCmd.Flags().String("longy-masterkey", "", "master private key for the longy game")
 	rootCmd.Flags().String("smtp-server", "smtp.gmail.com:587", "host:port of the smtp server")
 	rootCmd.Flags().String("smtp-username", "testecolongy@gmail.com", "username of the email account")
 	rootCmd.Flags().String("smtp-password", "2019longygame", "password of the email account")
@@ -28,7 +28,7 @@ var rootCmd = &cobra.Command{
 	Short: "rekey service for the longest chain game",
 	Long:  "",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		viper.BindPFlags(cmd.Flags())
+		viper.BindPFlags(cmd.Flags()) //nolint
 
 		port := viper.GetInt("port")
 		authToken := viper.GetString("eb-auth-token")

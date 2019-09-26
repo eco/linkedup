@@ -2,6 +2,7 @@ package mail
 
 import (
 	"crypto/tls"
+	"encoding/hex"
 	"fmt"
 	gomail "github.com/go-mail/mail"
 	"github.com/sirupsen/logrus"
@@ -18,8 +19,9 @@ type Client struct {
 func NewClient(host string, port int, username string, pwd string) (Client, error) {
 	log.Infof("establishing connection with smtp server. %s:%d", host, port)
 	d := gomail.NewDialer(host, port, username, pwd)
-	// TODO: change this for production!
-	d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
+	d.TLSConfig = &tls.Config{
+		ServerName: host,
+	}
 	d.StartTLSPolicy = gomail.MandatoryStartTLS
 
 	// try and dial
@@ -36,16 +38,20 @@ func NewClient(host string, port int, username string, pwd string) (Client, erro
 // SendRekeyEmail will construct and send the email containing the redirect
 // uri with the given signature
 func (c Client) SendRekeyEmail(dest string, signature []byte) error {
+	hexStr := hex.EncodeToString(signature)
+
 	// construct message
 	m := gomail.NewMessage()
 	m.SetHeader("From", "testecolongy@gmail.com")
 	m.SetHeader("To", dest)
 	m.SetHeader("From", "alex@example.com")
 	m.SetHeader("Subject", "Reset keys and re-enter the longy game")
-	m.SetBody("text/html", "<b>Hello!</b>")
+	m.SetBody("text/html", fmt.Sprintf("<b>Hello!</b> Signature: %s", hexStr))
 
 	err := gomail.Send(c.sender, m)
-	log.WithError(err).Warn("failed email delivery")
+	if err != nil {
+		log.WithError(err).Warnf("failed email delivery. email: %s", dest)
+	}
 	return err
 }
 

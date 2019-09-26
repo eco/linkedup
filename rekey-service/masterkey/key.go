@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	PrivateKeyByteLen = 32
+	privateKeyByteLen = 32
 )
 
 // Key encapslates the master key for the
@@ -18,8 +18,7 @@ type Key struct {
 	privKey tmcrypto.PrivKeySecp256k1
 }
 
-// NewMasterKey is the constructor for `Key`. A new key will be
-// generated if an empty string is provided
+// NewMasterKey is the constructor for `Key`. A new key will be generated hexStr is empty
 func NewMasterKey(hexStr string) (Key, error) {
 	hexStr = util.TrimHex(hexStr)
 	if len(hexStr) == 0 {
@@ -33,15 +32,15 @@ func NewMasterKey(hexStr string) (Key, error) {
 	bytes, err := hex.DecodeString(hexStr)
 	if err != nil {
 		return Key{}, fmt.Errorf("hex: %s", err)
-	} else if len(bytes) != PrivateKeyByteLen {
+	} else if len(bytes) != privateKeyByteLen {
 		return Key{}, fmt.Errorf("incorrect byte length. got %d, expected: %d",
-			len(bytes), PrivateKeyByteLen)
+			len(bytes), privateKeyByteLen)
 	}
 
 	var key tmcrypto.PrivKeySecp256k1
 	copied := copy(key[:], bytes)
 	if copied != 32 {
-		panic(fmt.Sprintf("key construction %d copy failed", PrivateKeyByteLen))
+		panic(fmt.Sprintf("key construction %d copy failed", privateKeyByteLen))
 	}
 
 	k := Key{
@@ -51,12 +50,11 @@ func NewMasterKey(hexStr string) (Key, error) {
 	return k, nil
 }
 
-/** CreateRekeySignature generates the signature signed by the master key allowing
- * attendee `id` to reset with the given `nonce`.
- *
- * The signature is over
- * SHA256("resetkey(id=<id>, nonce=<nonce>)")
- */
+// RekeySignature generates the signature signed by the master key allowing
+// attendee `id` to reset with the given `nonce`.
+//
+// The signature is over
+// SHA256("resetkey(id=<id>, nonce=<nonce>)")
 func (k Key) RekeySignature(id, nonce int) ([]byte, error) {
 	bytesToSign := []byte(fmt.Sprintf("resetkey(id=%d, nonce=%d)", id, nonce))
 	hash := tmhash.Sum(bytesToSign)

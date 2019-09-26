@@ -15,10 +15,11 @@ var (
 	// internal
 	log = logrus.WithField("module", "eventbrite")
 
+	// ErrInternal -
 	ErrInternal = errors.New("internal error")
 )
 
-// Config required to hook into the eventbrite API
+// Session to hook into the eventbrite API
 type Session struct {
 	authToken string
 	eventID   int
@@ -46,7 +47,7 @@ func (s Session) WithTimeout(time time.Duration) Session {
 	return s
 }
 
-// GetEmailFromAttendeeID retrieves the email associated with the eventbrite account for `id`
+// EmailFromAttendeeID retrieves the email associated with the eventbrite account for `id`
 func (s Session) EmailFromAttendeeID(id int) (string, error) {
 	host := "https://eventbrite.com"
 	path := fmt.Sprintf("/v3/%d/attendees/%d/", s.eventID, id)
@@ -72,7 +73,7 @@ func (s Session) EmailFromAttendeeID(id int) (string, error) {
 		log.WithError(err).Warn("eventbrite api request delivery")
 		return "", ErrInternal
 	}
-	defer resp.Body.Close()
+	defer resp.Body.Close() //nolint
 	if resp.StatusCode == http.StatusNotFound {
 		return "", nil
 	} else if resp.StatusCode != http.StatusOK {
