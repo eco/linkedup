@@ -5,10 +5,10 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// MsgClaimID defines the message for starting off a QR scan meet of another attendee
+// MsgClaimID defines the message for assigning an address to an id
 type MsgClaimID struct {
 	Sender  sdk.AccAddress `json:"sender"`  //Standard for all messages
-	ID      string         `json:"id"`      //the string representation of the other attendee's QR badgeID
+	ID      string         `json:"id"`      //the string representation of the attendee's QR badgeID
 	Address sdk.AccAddress `json:"address"` //the account address to be associated to the id
 }
 

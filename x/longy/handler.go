@@ -12,6 +12,8 @@ func NewHandler(keeper Keeper) sdk.Handler {
 	return func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
 		switch msg := msg.(type) { //cast message
 
+		case types.MsgClaimID:
+			return handleMsgClaimID(&ctx, keeper, msg)
 		case types.MsgQrScan:
 			return handleMsgQrScan(&ctx, keeper, msg)
 		case types.MsgShareInfo:
@@ -21,6 +23,12 @@ func NewHandler(keeper Keeper) sdk.Handler {
 			return sdk.ErrUnknownRequest(errMsg).Result()
 		}
 	}
+}
+
+// handleMsgClaimID processes MsgClaimID in order to associate an address with an id
+// nolint: unparam
+func handleMsgClaimID(context *sdk.Context, keeper Keeper, id types.MsgClaimID) sdk.Result {
+	return sdk.Result{}
 }
 
 // handleMsgQrScan processes MsgQrScan
