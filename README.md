@@ -28,13 +28,15 @@ The service defines two endpoints
 
 1. `/ping` which simple returns a status 200 and a "pong" response. This endpoint' intended use is health checks.
 2. `/rekey/<attendee_id>?nonce=<nonce>` main url path which will generate the rekey signature and send the email containing the appropriate redirect. The
-attendee's email is fetched from eventbrite using `attendee_id`. The signature is over `SHA256("resetkey(id=<id>, nonce=<nonce>)")
+attendee's email is fetched from eventbrite using `attendee_id`. The signature is over `SHA256("resetkey(id=<id>, nonce=<nonce>)")`
   Response Codes:
   1. 200 - All went well!
   2. 403 - The attentee ID was not found in the event
   3. 500 - something went wrong. Check the logs. Email probably didn't send
 
-## Install & Test
+See the [installation](#install-and-test) section below to deploy the rekey-service alongside a full node in a single deployment using docker-compose.
+
+# Install and Test
 To build the project:
 ```
 make install
