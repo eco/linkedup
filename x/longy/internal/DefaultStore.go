@@ -8,8 +8,8 @@ import (
 
 // Store is the structure for the Store class.
 type Store struct {
-	ekataStoreKey sdk.StoreKey // Unexposed key to access verifier store from sdk.Context
-	cdc           *codec.Codec
+	storeKey sdk.StoreKey // Unexposed key to access verifier store from sdk.Context
+	cdc      *codec.Codec
 }
 
 // StoreItem is
@@ -18,10 +18,10 @@ type StoreItem interface {
 }
 
 // NewDefaultStore creates a new instance of an Store
-func NewDefaultStore(ekataStoreKey sdk.StoreKey, cdc *codec.Codec) Store {
+func NewDefaultStore(storeKey sdk.StoreKey, cdc *codec.Codec) Store {
 	return Store{
-		ekataStoreKey: ekataStoreKey,
-		cdc:           cdc,
+		storeKey: storeKey,
+		cdc:      cdc,
 	}
 }
 
@@ -61,7 +61,7 @@ func (s Store) RemoveItem(ctx *sdk.Context, key []byte) {
 }
 
 func (s Store) getStore(ctx *sdk.Context) sdk.KVStore {
-	return ctx.KVStore(s.ekataStoreKey)
+	return ctx.KVStore(s.storeKey)
 }
 
 //nolint: unused
