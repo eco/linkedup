@@ -187,7 +187,8 @@ func NewLongyApp(
 	)
 
 	app.longyKeeper = longy.NewKeeper(
-		app.bankKeeper,
+		&app.accountKeeper,
+		&app.bankKeeper,
 		keys[longy.StoreKey],
 		app.cdc,
 	)
