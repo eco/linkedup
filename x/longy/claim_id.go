@@ -21,9 +21,9 @@ func NewClaimIDHandler(ctx *sdk.Context, keeper *Keeper,
 	}
 }
 
-// HandleClaimIDMsg processes MsgClaimID in order to associate an address with an id
+// handleClaimIDMsg processes MsgClaimID in order to associate an address with an id
 // nolint: unparam
-func HandleClaimIDMsg(ctx *sdk.Context, keeper *Keeper, msg *types.MsgClaimID) sdk.Result {
+func handleClaimIDMsg(ctx *sdk.Context, keeper *Keeper, msg *types.MsgClaimID) sdk.Result {
 	return NewClaimIDHandler(ctx, keeper, msg).handleMsgClaimID()
 }
 

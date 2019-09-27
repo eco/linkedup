@@ -1,8 +1,9 @@
-package app
+package sim
 
 import (
 	"encoding/json"
 	"github.com/eco/longy/x/longy"
+	"io"
 	"os"
 
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -78,15 +79,15 @@ type LongyApp struct {
 	tkeys map[string]*sdk.TransientStoreKey
 
 	// Keepers
-	accountKeeper  auth.AccountKeeper
-	bankKeeper     bank.Keeper
+	AccountKeeper  auth.AccountKeeper
+	BankKeeper     bank.Keeper
 	stakingKeeper  staking.Keeper
 	slashingKeeper slashing.Keeper
 	distrKeeper    distr.Keeper
 	supplyKeeper   supply.Keeper
 	paramsKeeper   params.Keeper
 
-	longyKeeper longy.Keeper
+	LongyKeeper longy.Keeper
 
 	// Module Manager
 	mm *module.Manager
@@ -95,7 +96,8 @@ type LongyApp struct {
 // NewLongyApp is a constructor function for LongyApp
 //nolint: dupl
 func NewLongyApp(
-	logger log.Logger, db dbm.DB, baseAppOptions ...func(*bam.BaseApp),
+	logger log.Logger, db dbm.DB, traceStore io.Writer, loadLatest bool,
+	invCheckPeriod uint, baseAppOptions ...func(*bam.BaseApp),
 ) *LongyApp {
 
 	// First define the top level codec that will be shared by the different modules
@@ -103,6 +105,7 @@ func NewLongyApp(
 
 	// BaseApp handles interactions with Tendermint through the ABCI protocol
 	bApp := bam.NewBaseApp(appName, logger, db, auth.DefaultTxDecoder(cdc), baseAppOptions...)
+	bApp.SetCommitMultiStoreTracer(traceStore)
 
 	keys := sdk.NewKVStoreKeys(bam.MainStoreKey, auth.StoreKey, staking.StoreKey,
 		supply.StoreKey, distr.StoreKey, slashing.StoreKey, params.StoreKey, longy.StoreKey)
@@ -127,7 +130,7 @@ func NewLongyApp(
 	slashingSubspace := app.paramsKeeper.Subspace(slashing.DefaultParamspace)
 
 	// The AccountKeeper handles address -> account lookups
-	app.accountKeeper = auth.NewAccountKeeper(
+	app.AccountKeeper = auth.NewAccountKeeper(
 		app.cdc,
 		keys[auth.StoreKey],
 		authSubspace,
@@ -135,8 +138,8 @@ func NewLongyApp(
 	)
 
 	// The BankKeeper allows you perform sdk.Coins interactions
-	app.bankKeeper = bank.NewBaseKeeper(
-		app.accountKeeper,
+	app.BankKeeper = bank.NewBaseKeeper(
+		app.AccountKeeper,
 		bankSupspace,
 		bank.DefaultCodespace,
 		app.ModuleAccountAddrs(),
@@ -146,8 +149,8 @@ func NewLongyApp(
 	app.supplyKeeper = supply.NewKeeper(
 		app.cdc,
 		keys[supply.StoreKey],
-		app.accountKeeper,
-		app.bankKeeper,
+		app.AccountKeeper,
+		app.BankKeeper,
 		maccPerms,
 	)
 
@@ -188,23 +191,23 @@ func NewLongyApp(
 			app.slashingKeeper.Hooks()),
 	)
 
-	app.longyKeeper = longy.NewKeeper(
-		&app.accountKeeper,
-		&app.bankKeeper,
+	app.LongyKeeper = longy.NewKeeper(
+		&app.AccountKeeper,
+		&app.BankKeeper,
 		keys[longy.StoreKey],
 		app.cdc,
 	)
 
 	app.mm = module.NewManager(
-		genaccounts.NewAppModule(app.accountKeeper),
-		genutil.NewAppModule(app.accountKeeper, app.stakingKeeper, app.BaseApp.DeliverTx),
-		auth.NewAppModule(app.accountKeeper),
-		bank.NewAppModule(app.bankKeeper, app.accountKeeper),
-		supply.NewAppModule(app.supplyKeeper, app.accountKeeper),
+		genaccounts.NewAppModule(app.AccountKeeper),
+		genutil.NewAppModule(app.AccountKeeper, app.stakingKeeper, app.BaseApp.DeliverTx),
+		auth.NewAppModule(app.AccountKeeper),
+		bank.NewAppModule(app.BankKeeper, app.AccountKeeper),
+		supply.NewAppModule(app.supplyKeeper, app.AccountKeeper),
 		distr.NewAppModule(app.distrKeeper, app.supplyKeeper),
 		slashing.NewAppModule(app.slashingKeeper, app.stakingKeeper),
-		staking.NewAppModule(app.stakingKeeper, app.distrKeeper, app.accountKeeper, app.supplyKeeper),
-		longy.NewAppModule(app.accountKeeper, app.bankKeeper, app.longyKeeper),
+		staking.NewAppModule(app.stakingKeeper, app.distrKeeper, app.AccountKeeper, app.supplyKeeper),
+		longy.NewAppModule(app.AccountKeeper, app.BankKeeper, app.LongyKeeper),
 	)
 
 	app.mm.SetOrderBeginBlockers(distr.ModuleName, slashing.ModuleName)
@@ -238,7 +241,7 @@ func NewLongyApp(
 	// The AnteHandler handles signature verification and transaction pre-processing
 	app.SetAnteHandler(
 		auth.NewAnteHandler(
-			app.accountKeeper,
+			app.AccountKeeper,
 			app.supplyKeeper,
 			auth.DefaultSigVerificationGasConsumer,
 		),
@@ -251,14 +254,6 @@ func NewLongyApp(
 	}
 
 	return app
-}
-
-// GenesisState represents chain state at the start of the chain. Any initial state (account balances) are stored here.
-type GenesisState map[string]json.RawMessage
-
-// NewDefaultGenesisState returns the combined default genesis file fo the modules
-func NewDefaultGenesisState() GenesisState {
-	return ModuleBasics.DefaultGenesis()
 }
 
 // InitChainer initializes the chain from the genesis state

@@ -13,7 +13,7 @@ func NewHandler(keeper Keeper) sdk.Handler {
 		switch msg := msg.(type) { //cast message
 
 		case types.MsgClaimID:
-			return HandleClaimIDMsg(&ctx, &keeper, &msg)
+			return handleClaimIDMsg(&ctx, &keeper, &msg)
 		case types.MsgQrScan:
 			return handleMsgQrScan(&ctx, keeper, msg)
 		case types.MsgShareInfo:
