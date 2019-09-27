@@ -1,8 +1,7 @@
-package handlers
+package longy
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/eco/longy/x/longy"
 	"github.com/eco/longy/x/longy/errors"
 	"github.com/eco/longy/x/longy/internal/types"
 )
@@ -14,7 +13,7 @@ type ClaimIDHandler struct {
 }
 
 //NewClaimIDHandler initializes a new handler and returns a pointer to it
-func NewClaimIDHandler(ctx *sdk.Context, keeper *longy.Keeper,
+func NewClaimIDHandler(ctx *sdk.Context, keeper *Keeper,
 	msg *types.MsgClaimID) *ClaimIDHandler {
 	return &ClaimIDHandler{
 		BaseHandler: NewBaseHandler(ctx, keeper),
@@ -22,9 +21,9 @@ func NewClaimIDHandler(ctx *sdk.Context, keeper *longy.Keeper,
 	}
 }
 
-// handleMsgClaimID processes MsgClaimID in order to associate an address with an id
+// HandleClaimIDMsg processes MsgClaimID in order to associate an address with an id
 // nolint: unparam
-func handleClaimIDMsg(ctx *sdk.Context, keeper *longy.Keeper, msg *types.MsgClaimID) sdk.Result {
+func HandleClaimIDMsg(ctx *sdk.Context, keeper *Keeper, msg *types.MsgClaimID) sdk.Result {
 	return NewClaimIDHandler(ctx, keeper, msg).handleMsgClaimID()
 }
 

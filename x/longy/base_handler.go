@@ -1,19 +1,18 @@
-package handlers
+package longy
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/eco/longy/x/longy"
 	"github.com/eco/longy/x/longy/internal/types"
 )
 
 //BaseHandler is a struct that supplies data and methods common across all message handlers.
 type BaseHandler struct {
 	ctx    *sdk.Context
-	keeper *longy.Keeper
+	keeper *Keeper
 }
 
 //NewBaseHandler initializes a new handler and returns a pointer to it
-func NewBaseHandler(ctx *sdk.Context, keeper *longy.Keeper) *BaseHandler {
+func NewBaseHandler(ctx *sdk.Context, keeper *Keeper) *BaseHandler {
 	return &BaseHandler{
 		ctx:    ctx,
 		keeper: keeper,
