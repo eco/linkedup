@@ -8,6 +8,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/genutil/types"
+	"github.com/eco/longy/x/longy/internal"
 	"github.com/gorilla/mux"
 	"github.com/spf13/cobra"
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -61,16 +62,18 @@ type AppModule struct {
 	AppModuleBasic
 	accountKeeper types.AccountKeeper
 	bankKeeper    bank.Keeper
+	longyKeeper   internal.Keeper
 }
 
 // NewAppModule creates a new AppModule object
 // nolint: gocritic
-func NewAppModule(account types.AccountKeeper, bank bank.Keeper) module.AppModule {
+func NewAppModule(account types.AccountKeeper, bank bank.Keeper, longy Keeper) module.AppModule {
 
 	return module.NewGenesisOnlyAppModule(AppModule{
 		AppModuleBasic: AppModuleBasic{},
 		accountKeeper:  account,
 		bankKeeper:     bank,
+		longyKeeper:    longy,
 	})
 }
 

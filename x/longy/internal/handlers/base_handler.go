@@ -20,9 +20,19 @@ func NewBaseHandler(ctx *sdk.Context, keeper *longy.Keeper) *BaseHandler {
 	}
 }
 
+func (h *ClaimIDHandler) isSuperUser(acc sdk.AccAddress) bool {
+	//todo make superuser and update func
+	return true
+}
+
 //nolint: unused
 func (h *BaseHandler) getAttendee(id string) (attendee *types.Attendee, err sdk.Error) {
 	store := h.keeper.GetAttendeeStore()
 	attendee, err = store.GetAttendee(h.ctx, []byte(id))
 	return
+}
+
+func (h *BaseHandler) setAttendee(attendee *types.Attendee) {
+	store := h.keeper.GetAttendeeStore()
+	store.SetAttendee(h.ctx, attendee)
 }

@@ -3,6 +3,7 @@ package handlers
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/eco/longy/x/longy"
+	"github.com/eco/longy/x/longy/errors"
 	"github.com/eco/longy/x/longy/internal/types"
 )
 
@@ -28,6 +29,17 @@ func handleClaimIDMsg(ctx *sdk.Context, keeper *longy.Keeper, msg *types.MsgClai
 }
 
 func (h *ClaimIDHandler) handleMsgClaimID() sdk.Result {
+	if !h.isSuperUser(h.msg.Sender) {
+		return errors.ErrInsufficientPrivileges("Insufficient privilege to make this call").Result()
+	}
+
+	attendee, err := h.getAttendee(h.msg.ID)
+	if err != nil {
+		return err.Result()
+	}
+
+	attendee.Address = h.msg.Address
+	h.setAttendee(attendee)
 
 	return sdk.Result{}
 }
