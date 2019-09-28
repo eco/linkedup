@@ -24,9 +24,9 @@ func init() {
 }
 
 var rootCmd = &cobra.Command{
-	Use:   "rks",
-	Short: "rekey service for the longest chain game",
-	Long:  "",
+	Use:          "rks",
+	Short:        "rekey service for the longest chain game",
+	SilenceUsage: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		viper.BindPFlags(cmd.Flags()) //nolint
 
@@ -36,7 +36,10 @@ var rootCmd = &cobra.Command{
 		smtpServer := viper.GetString("smtp-server")
 		smtpUsername := viper.GetString("smtp-username")
 		smtpPassword := viper.GetString("smtp-password")
-		key := viper.GetString("longy-masterkey")
+		key, err := mk.Secp256k1FromHex(viper.GetString("longy-masterkey"))
+		if err != nil {
+			return fmt.Errorf("masterkey: %s", err)
+		}
 
 		smtpHost, smtpPort, err := util.HostAndPort(smtpServer)
 		if err != nil {

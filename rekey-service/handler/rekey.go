@@ -1,16 +1,19 @@
 package handler
 
 import (
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
 	"github.com/eco/longy/rekey-service/eventbrite"
 	"github.com/eco/longy/rekey-service/mail"
 	"github.com/eco/longy/rekey-service/masterkey"
+	"github.com/eco/longy/util"
 	"github.com/gorilla/mux"
 	"net/http"
-	"strconv"
 )
 
 func registerRekey(r *mux.Router, eb eventbrite.Session, mk masterkey.Key, mc mail.Client) {
-	r.HandleFunc("/rekey/{id:[0-9]+}", rekey(eb, mk, mc)).Methods("GET")
+	r.HandleFunc("/rekey", rekey(eb, mk, mc)).Methods("GET")
 }
 
 // All core logic is implemented here. If there are plans to expand this service,
@@ -18,32 +21,32 @@ func registerRekey(r *mux.Router, eb eventbrite.Session, mk masterkey.Key, mc ma
 // composability
 func rekey(eb eventbrite.Session, mk masterkey.Key, mc mail.Client) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
-		nonceStr := r.FormValue("nonce")
-		if len(nonceStr) == 0 {
-			http.Error(w, "nonce expected as a url parameter", http.StatusBadRequest)
+		type reqBody struct {
+			AttendeeID int
+			PublicKey  string
+		}
+
+		var body reqBody
+		jsonDecoder := json.NewDecoder(r.Body)
+		if err := jsonDecoder.Decode(&body); err != nil {
+			errMsg := fmt.Sprintf("bad json request body: %s", err)
+			http.Error(w, errMsg, http.StatusBadRequest)
 			return
 		}
 
-		// retrieve id & nonce from the url path
-		id, err := strconv.Atoi(vars["id"])
+		pubKeyBytes, err := hex.DecodeString(util.TrimHex(body.PublicKey))
 		if err != nil {
-			http.Error(w, "attendee id must be in decimal format", http.StatusBadRequest)
-			return
-		}
-		nonce, err := strconv.Atoi(nonceStr)
-		if err != nil {
-			http.Error(w, "nonce must be in decimal format", http.StatusBadRequest)
+			http.Error(w, "public key must be in hex format", http.StatusBadRequest)
 			return
 		}
 
-		sig, err := mk.RekeySignature(id, nonce)
+		txBytes, err := mk.RekeyTransaction(body.AttendeeID, pubKeyBytes)
 		if err != nil {
 			http.Error(w, "internal error. try again", http.StatusInternalServerError)
 			return
 		}
 
-		email, err := eb.EmailFromAttendeeID(id)
+		email, err := eb.EmailFromAttendeeID(body.AttendeeID)
 		if err != nil {
 			http.Error(w, "internal error. try again", http.StatusInternalServerError)
 			return
@@ -52,7 +55,7 @@ func rekey(eb eventbrite.Session, mk masterkey.Key, mc mail.Client) http.Handler
 			return
 		}
 
-		err = mc.SendRekeyEmail(email, sig)
+		err = mc.SendRekeyEmail(email, txBytes)
 		if err != nil {
 			http.Error(w, "email error. try again", http.StatusInternalServerError)
 			return

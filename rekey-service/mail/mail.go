@@ -37,8 +37,8 @@ func NewClient(host string, port int, username string, pwd string) (Client, erro
 
 // SendRekeyEmail will construct and send the email containing the redirect
 // uri with the given signature
-func (c Client) SendRekeyEmail(dest string, signature []byte) error {
-	hexStr := hex.EncodeToString(signature)
+func (c Client) SendRekeyEmail(dest string, txBytes []byte) error {
+	hexStr := hex.EncodeToString(txBytes)
 
 	// construct message
 	m := gomail.NewMessage()
@@ -46,7 +46,7 @@ func (c Client) SendRekeyEmail(dest string, signature []byte) error {
 	m.SetHeader("To", dest)
 	m.SetHeader("From", "alex@example.com")
 	m.SetHeader("Subject", "Reset keys and re-enter the longy game")
-	m.SetBody("text/html", fmt.Sprintf("<b>Hello!</b> Signature: %s", hexStr))
+	m.SetBody("text/html", fmt.Sprintf("<b>Hello!</b> TxBytes: %s", hexStr))
 
 	err := gomail.Send(c.sender, m)
 	if err != nil {

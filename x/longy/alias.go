@@ -6,20 +6,26 @@ import (
 )
 
 const (
-	//ModuleName is the name of the module
+	// ModuleName is the name of the module
 	ModuleName = types.ModuleName
-	//RouterKey is the key for routing messages to our handler
+	// RouterKey is the key for routing messages to our handler
 	RouterKey = types.RouterKey
-	//StoreKey is the key for the keeper store
+	// StoreKey is the key for the keeper store
 	StoreKey = types.StoreKey
 )
 
 var (
-	//NewKeeper is the new keeper function alias for longy
+	// NewKeeper is the new keeper function alias for longy
 	NewKeeper = internal.NewKeeper
+
+	// NewRekeyMsg is the function alias for the RekeyMsg type
+	NewRekeyMsg = types.NewRekeyMsg
 )
 
 type (
-	//Keeper is the keeper alias for longy
+	// Keeper is the keeper alias for longy
 	Keeper = internal.Keeper
+
+	// RekeyMsg is the type alias for the Rekey Message
+	RekeyMsg = types.RekeyMsg
 )
