@@ -10,6 +10,7 @@ import (
 // GenesisState is the state that must be provided at genesis
 type GenesisState struct {
 	Attendees []types.Attendee
+	Rewards   []types.Reward
 }
 
 func DefaultGenesisState() GenesisState {

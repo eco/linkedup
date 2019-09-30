@@ -21,4 +21,5 @@ func RegisterCodec(cdc *codec.Codec) {
 
 	// register types
 	cdc.RegisterConcrete(Attendee{}, RouterKey+"/attendee", nil)
+	cdc.RegisterConcrete(Reward{}, RouterKey+"/reward", nil)
 }
