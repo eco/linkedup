@@ -13,9 +13,9 @@ func NewHandler(keeper Keeper) sdk.Handler {
 		switch msg := msg.(type) { //cast message
 
 		case types.MsgQrScan:
-			return handleMsgQrScan(&ctx, keeper, msg)
+			return handleMsgQrScan(ctx, keeper, msg)
 		case types.MsgShareInfo:
-			return handleMsgShareInfo(&ctx, keeper, msg)
+			return handleMsgShareInfo(ctx, keeper, msg)
 		case types.MsgRekey:
 			return handleMsgRekey(ctx, keeper, msg)
 		default:
@@ -27,7 +27,7 @@ func NewHandler(keeper Keeper) sdk.Handler {
 
 // handleMsgQrScan processes MsgQrScan
 // nolint: unparam
-func handleMsgQrScan(ctx *sdk.Context, keeper Keeper, msg types.MsgQrScan) sdk.Result {
+func handleMsgQrScan(ctx sdk.Context, k Keeper, msg types.MsgQrScan) sdk.Result {
 	//validate sender address is correct
 
 	//get the scanned address from the QR code
@@ -38,15 +38,23 @@ func handleMsgQrScan(ctx *sdk.Context, keeper Keeper, msg types.MsgQrScan) sdk.R
 }
 
 // nolint: unparam
-func handleMsgShareInfo(ctx *sdk.Context, keeper Keeper, msg types.MsgShareInfo) sdk.Result {
+func handleMsgShareInfo(ctx sdk.Context, k Keeper, msg types.MsgShareInfo) sdk.Result {
 
 	//update scan state
 
 	return sdk.Result{}
 }
 
-func handleMsgRekey(ctx sdk.Context, keeper Keeper, msg types.MsgRekey) sdk.Result {
+func handleMsgRekey(ctx sdk.Context, k Keeper, msg types.MsgRekey) sdk.Result {
 	// authorization passed, we simply need to update the attendee's public key
+
+	attendee, ok := k.GetAttendeeByID(ctx, msg.AttendeeID)
+	if !ok {
+		return types.ErrAttendeeDoesNotExist().Result()
+	}
+
+	attendee.PublicKey = msg.NewAttendeePublicKey
+	k.SetAttendee(ctx, attendee)
 
 	return sdk.Result{}
 }

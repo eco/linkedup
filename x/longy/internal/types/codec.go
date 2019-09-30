@@ -8,6 +8,7 @@ import (
 var ModuleCdc = codec.New()
 
 func init() {
+	codec.RegisterCrypto(ModuleCdc)
 	RegisterCodec(ModuleCdc)
 }
 

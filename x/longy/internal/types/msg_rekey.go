@@ -9,7 +9,7 @@ var _ sdk.Msg = MsgRekey{}
 
 // MsgRekey implements the `sdk.Msg` interface
 type MsgRekey struct {
-	AttendeeID           int
+	AttendeeID           string
 	NewAttendeePublicKey sdk.AccAddress
 
 	// expected signer of this message
@@ -17,7 +17,7 @@ type MsgRekey struct {
 }
 
 // NewMsgRekey is the creator for `RekeyMsg`
-func NewMsgRekey(id int, newPublicKey, masterPublicKey sdk.AccAddress) MsgRekey {
+func NewMsgRekey(id string, newPublicKey, masterPublicKey sdk.AccAddress) MsgRekey {
 	return MsgRekey{
 		AttendeeID:           id,
 		NewAttendeePublicKey: newPublicKey,
