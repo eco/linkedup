@@ -13,7 +13,11 @@ func init() {
 
 // RegisterCodec registers concrete types on wire codec
 func RegisterCodec(cdc *codec.Codec) {
-	cdc.RegisterConcrete(MsgQrScan{}, RouterKey+"/QRScan", nil)
-	cdc.RegisterConcrete(MsgShareInfo{}, RouterKey+"/ShareInfo", nil)
-	cdc.RegisterConcrete(MsgRekey{}, RouterKey+"/rekey", nil)
+	// register msgs
+	cdc.RegisterConcrete(MsgQrScan{}, RouterKey+"/MsgQRScan", nil)
+	cdc.RegisterConcrete(MsgShareInfo{}, RouterKey+"/MsgShareInfo", nil)
+	cdc.RegisterConcrete(MsgRekey{}, RouterKey+"/MsgRekey", nil)
+
+	// register types
+	cdc.RegisterConcrete(Attendee{}, RouterKey+"/attendee", nil)
 }
