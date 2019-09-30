@@ -12,9 +12,9 @@ type Keeper struct {
 }
 
 // NewKeeper is a creator for `Keeper`
-func NewKeeper(scanKey sdk.StoreKey, cdc *codec.Codec) Keeper {
+func NewKeeper(longyStoreKey sdk.StoreKey, cdc *codec.Codec) Keeper {
 	return Keeper{
-		contextStoreKey: scanKey,
+		contextStoreKey: longyStoreKey,
 		cdc:             cdc,
 	}
 }

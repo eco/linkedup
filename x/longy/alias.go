@@ -14,6 +14,9 @@ const (
 )
 
 var (
+	// RegisterCodec is the function alias to register types
+	RegisterCodec = types.RegisterCodec
+
 	// NewKeeper is the new keeper function alias for longy
 	NewKeeper = keeper.NewKeeper
 

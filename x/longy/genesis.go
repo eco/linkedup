@@ -1,14 +1,18 @@
-package types
+package longy
 
 import (
 	"fmt"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/eco/longy/x/longy/internal/keeper"
+	"github.com/eco/longy/x/longy/internal/types"
 )
 
 // GenesisState is the state that must be provided at genesis
 type GenesisState struct {
-	Attendees []Attendee
+	Attendees []types.Attendee
 }
 
+// ValidateGensis runs sanity checks `state`
 func ValidateGenesis(state GenesisState) error {
 	var seenIds map[string]bool
 	for _, a := range state.Attendees {
@@ -23,4 +27,8 @@ func ValidateGenesis(state GenesisState) error {
 	}
 
 	return nil
+}
+
+// InitGenesis will run module initialization using the genesis state
+func InitGenesis(ctx sdk.Context, k keeper.Keeper, state GenesisState) {
 }
