@@ -12,7 +12,13 @@ type GenesisState struct {
 	Attendees []types.Attendee
 }
 
-// ValidateGensis runs sanity checks `state`
+func DefaultGenesisState() GenesisState {
+	return GenesisState{
+		Attendees: nil,
+	}
+}
+
+// ValidateGenesis runs sanity checks `state`
 func ValidateGenesis(state GenesisState) error {
 	var seenIds map[string]bool
 	for _, a := range state.Attendees {
