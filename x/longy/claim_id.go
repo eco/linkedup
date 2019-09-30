@@ -13,7 +13,8 @@ type ClaimIDHandler struct {
 }
 
 //NewClaimIDHandler initializes a new handler and returns a pointer to it
-func NewClaimIDHandler(ctx *sdk.Context, keeper *Keeper,
+// nolint: gocritic
+func NewClaimIDHandler(ctx sdk.Context, keeper *Keeper,
 	msg *types.MsgClaimID) *ClaimIDHandler {
 	return &ClaimIDHandler{
 		BaseHandler: NewBaseHandler(ctx, keeper),
@@ -22,8 +23,8 @@ func NewClaimIDHandler(ctx *sdk.Context, keeper *Keeper,
 }
 
 // handleClaimIDMsg processes MsgClaimID in order to associate an address with an id
-// nolint: unparam
-func handleClaimIDMsg(ctx *sdk.Context, keeper *Keeper, msg *types.MsgClaimID) sdk.Result {
+// nolint: unparam, gocritic
+func handleClaimIDMsg(ctx sdk.Context, keeper *Keeper, msg *types.MsgClaimID) sdk.Result {
 	return NewClaimIDHandler(ctx, keeper, msg).handleMsgClaimID()
 }
 

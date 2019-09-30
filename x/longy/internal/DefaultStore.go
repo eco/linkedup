@@ -26,18 +26,21 @@ func NewDefaultStore(storeKey sdk.StoreKey, cdc *codec.Codec) Store {
 }
 
 // AddItem adds an item to the store.
-func (s Store) AddItem(ctx *sdk.Context, item StoreItem) {
+// nolint: gocritic
+func (s Store) AddItem(ctx sdk.Context, item StoreItem) {
 	s.PutItem(ctx, item.GetIDBytes(), item)
 }
 
 // PutItem adds an item to the store using the given key.
-func (s Store) PutItem(ctx *sdk.Context, key []byte, item interface{}) {
+// nolint: gocritic
+func (s Store) PutItem(ctx sdk.Context, key []byte, item interface{}) {
 	store := s.getStore(ctx)
 	store.Set(key, s.cdc.MustMarshalBinaryBare(item))
 }
 
 // GetItemBytes returns an item from the store.
-func (s Store) GetItemBytes(ctx *sdk.Context, key []byte) (v []byte, err sdk.Error) {
+// nolint: gocritic
+func (s Store) GetItemBytes(ctx sdk.Context, key []byte) (v []byte, err sdk.Error) {
 	store := s.getStore(ctx)
 	v = store.Get(key)
 	if len(v) == 0 {
@@ -49,18 +52,21 @@ func (s Store) GetItemBytes(ctx *sdk.Context, key []byte) (v []byte, err sdk.Err
 }
 
 // ExistsItem returns true if a given dentity exists in the store.
-func (s Store) ExistsItem(ctx *sdk.Context, key []byte) bool {
+// nolint: gocritic
+func (s Store) ExistsItem(ctx sdk.Context, key []byte) bool {
 	_, err := s.GetItemBytes(ctx, key)
 	return err == nil
 }
 
 // RemoveItem removes an item from the store.
-func (s Store) RemoveItem(ctx *sdk.Context, key []byte) {
+// nolint: gocritic
+func (s Store) RemoveItem(ctx sdk.Context, key []byte) {
 	store := s.getStore(ctx)
 	store.Delete(key)
 }
 
-func (s Store) getStore(ctx *sdk.Context) sdk.KVStore {
+// nolint: gocritic
+func (s Store) getStore(ctx sdk.Context) sdk.KVStore {
 	return ctx.KVStore(s.storeKey)
 }
 

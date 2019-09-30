@@ -26,7 +26,8 @@ func NewAttendeeStore(attendeeStoreKey sdk.StoreKey, cdc *codec.Codec) AttendeeS
 
 // GetAttendee returns the attendee for a given key, or an error if it could not be found. The key is
 // the attendee.GetIDBytes()
-func (a *AttendeeStore) GetAttendee(ctx *sdk.Context, key []byte) (attendee *types.Attendee, err sdk.Error) {
+// nolint: gocritic
+func (a *AttendeeStore) GetAttendee(ctx sdk.Context, key []byte) (attendee *types.Attendee, err sdk.Error) {
 	item, err := a.GetItemBytes(ctx, key)
 
 	if err != nil {
@@ -42,6 +43,7 @@ func (a *AttendeeStore) GetAttendee(ctx *sdk.Context, key []byte) (attendee *typ
 }
 
 // SetAttendee sets the attendee
-func (a *AttendeeStore) SetAttendee(ctx *sdk.Context, attendee *types.Attendee) {
+// nolint: gocritic
+func (a *AttendeeStore) SetAttendee(ctx sdk.Context, attendee *types.Attendee) {
 	a.PutItem(ctx, attendee.GetIDBytes(), attendee)
 }

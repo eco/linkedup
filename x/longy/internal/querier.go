@@ -19,7 +19,7 @@ func NewQuerier(keeper Keeper) sdk.Querier {
 
 		switch queryType {
 		case AttendeeStoreKey:
-			return queryAttendee(&ctx, queryArgs, &keeper)
+			return queryAttendee(ctx, queryArgs, &keeper)
 		default:
 			return nil, sdk.ErrUnknownRequest("unknown query endpoint")
 		}
@@ -27,11 +27,11 @@ func NewQuerier(keeper Keeper) sdk.Querier {
 }
 
 // nolint
-func queryAttendee(ctx *sdk.Context, path []string, keeper *Keeper) (attendee []byte, err sdk.Error) {
+func queryAttendee(ctx sdk.Context, path []string, keeper *Keeper) (attendee []byte, err sdk.Error) {
 	return
 }
 
 // nolint
-func scanQR(ctx *sdk.Context, path []string, req *abci.RequestQuery, keeper Keeper) (res []byte, err sdk.Error) {
+func scanQR(ctx sdk.Context, path []string, req *abci.RequestQuery, keeper Keeper) (res []byte, err sdk.Error) {
 	return
 }
