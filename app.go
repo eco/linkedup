@@ -41,16 +41,11 @@ type LongyApp struct {
 
 // NewLongyApp is a constructor function for LongyApp
 func NewLongyApp(logger log.Logger, db dbm.DB, baseAppOptions ...func(*bam.BaseApp)) *LongyApp {
-
-	// First define the top level codec that will be shared by the different modules
 	cdc := MakeCodec()
-
-	// BaseApp handles interactions with Tendermint through the ABCI protocol
 	bApp := bam.NewBaseApp(appName, logger, db, nil, baseAppOptions...)
 
 	longyStoreKey := sdk.NewKVStoreKey("longy")
 
-	// Here you initialize your application with the store keys it requires
 	var app = &LongyApp{
 		BaseApp: bApp,
 
