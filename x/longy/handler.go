@@ -16,6 +16,8 @@ func NewHandler(keeper Keeper) sdk.Handler {
 			return handleMsgQrScan(&ctx, keeper, msg)
 		case types.MsgShareInfo:
 			return handleMsgShareInfo(&ctx, keeper, msg)
+		case types.MsgRekey:
+			return handleMsgRekey(ctx, keeper, msg)
 		default:
 			errMsg := fmt.Sprintf("Unrecognized button Msg type: %v", msg.Type())
 			return sdk.ErrUnknownRequest(errMsg).Result()
@@ -39,6 +41,12 @@ func handleMsgQrScan(ctx *sdk.Context, keeper Keeper, msg types.MsgQrScan) sdk.R
 func handleMsgShareInfo(ctx *sdk.Context, keeper Keeper, msg types.MsgShareInfo) sdk.Result {
 
 	//update scan state
+
+	return sdk.Result{}
+}
+
+func handleMsgRekey(ctx sdk.Context, keeper Keeper, msg types.MsgRekey) sdk.Result {
+	// authorization passed, we simply need to update the attendee's public key
 
 	return sdk.Result{}
 }

@@ -19,7 +19,7 @@ var (
 	NewKeeper = internal.NewKeeper
 
 	// NewRekeyMsg is the function alias for the RekeyMsg type
-	NewRekeyMsg = types.NewRekeyMsg
+	NewRekeyMsg = types.NewMsgRekey
 )
 
 type (
@@ -27,5 +27,5 @@ type (
 	Keeper = internal.Keeper
 
 	// RekeyMsg is the type alias for the Rekey Message
-	RekeyMsg = types.RekeyMsg
+	RekeyMsg = types.MsgRekey
 )

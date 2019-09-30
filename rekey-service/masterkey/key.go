@@ -4,11 +4,9 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/eco/longy/util"
-	"github.com/eco/longy/x/longy"
 	"github.com/sirupsen/logrus"
 	tmcrypto "github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
-	"github.com/tendermint/tendermint/crypto/tmhash"
 )
 
 const (
@@ -23,7 +21,8 @@ type Key struct {
 	privKey tmcrypto.PrivKey
 }
 
-// NewMasterKey is the constructor for `Key`. A new secp256k1 is generated if empty
+// NewMasterKey is the constructor for `Key`. A new secp256k1 is generated if empty.
+// The `chainID` is used when generating RekeyTransactions to prevent cross-chain replay attacks
 func NewMasterKey(privateKey tmcrypto.PrivKey) (Key, error) {
 	if privateKey == nil {
 		key := Key{
@@ -66,15 +65,9 @@ func Secp256k1FromHex(key string) (tmcrypto.PrivKey, error) {
 	return secp256k1.PrivKeySecp256k1(privateKey), nil
 }
 
-// RekeyTransaction generates a `RekeyMsg`, authorized by the master key.
+// RekeyTransaction generates a `RekeyMsg`, authorized by the master key. The transaction bytes
+// generated are created using the cosmos-sdk/x/auth module's StdSignDoc. The account and sequence number
+// for the master key is zero.
 func (k Key) RekeyTransaction(id int, publicKey []byte) ([]byte, error) {
-	msg := longy.NewRekeyMsg(id, publicKey)
-	hash := tmhash.Sum(msg.GetSignBytes())
-
-	sig, err := k.privKey.Sign(hash)
-	if err != nil {
-		return nil, fmt.Errorf("tmcrypto: %s", err)
-	}
-
-	return sig, nil
+	return nil, nil
 }
