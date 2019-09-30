@@ -1,12 +1,12 @@
 package types
 
 const (
-	//AppName is the app name
-	AppName = "longy"
-	//ModuleName us tge bane if this app
-	ModuleName = AppName
-	//StoreKey is the key for the keeper
+	// ModuleName is the name of this module
+	ModuleName = "longy"
+
+	// StoreKey is the key for the keeper
 	StoreKey = AppName
-	//RouterKey is the package route
+
+	// RouterKey is the package route
 	RouterKey = AppName
 )
