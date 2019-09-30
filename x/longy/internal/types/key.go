@@ -13,11 +13,18 @@ const (
 )
 
 var (
-	attendeePrefix = []byte{0x0}
+	attendeePrefix  = []byte{0x0}
+	masterKeyPrefix = []byte{0x1}
 )
 
+// AttendeeKeyByID will construct the appropriate key for the attendee with `id`
 func AttendeeKeyByID(id string) []byte {
 	return prefixKey(attendeePrefix, []byte(id))
+}
+
+// MasterKey will return the store key for the master key
+func MasterKey() []byte {
+	return prefixKey(masterKeyPrefix, []byte("master"))
 }
 
 func prefixKey(prefix, key []byte) []byte {
