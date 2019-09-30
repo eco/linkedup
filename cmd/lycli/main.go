@@ -8,7 +8,10 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/keys"
 	"github.com/cosmos/cosmos-sdk/client/lcd"
 	"github.com/cosmos/cosmos-sdk/client/rpc"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/version"
+	authcmd "github.com/cosmos/cosmos-sdk/x/auth/client/cli"
+	bankcmd "github.com/cosmos/cosmos-sdk/x/bank/client/cli"
 	app "github.com/eco/longy"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -18,7 +21,16 @@ import (
 
 func main() {
 	cobra.EnableCommandSorting = false
+
 	cdc := app.MakeCodec()
+
+	// Read in the configuration file for the sdk
+	config := sdk.GetConfig()
+	config.SetBech32PrefixForAccount(sdk.Bech32PrefixAccAddr, sdk.Bech32PrefixAccPub)
+	config.SetBech32PrefixForValidator(sdk.Bech32PrefixValAddr, sdk.Bech32PrefixValPub)
+	config.SetBech32PrefixForConsensusNode(sdk.Bech32PrefixConsAddr, sdk.Bech32PrefixConsPub)
+	config.Seal()
+
 	rootCmd := &cobra.Command{
 		Use:   "lycli",
 		Short: "longy the longest chain command line client",
@@ -35,6 +47,7 @@ func main() {
 		rpc.StatusCommand(),
 		client.ConfigCmd(app.DefaultCLIHome),
 		queryCmd(cdc),
+		txCmd(cdc),
 		client.LineBreak,
 		lcd.ServeCommand(cdc, registerRoutes),
 		client.LineBreak,
@@ -53,22 +66,53 @@ func main() {
 
 func registerRoutes(rs *lcd.RestServer) {
 	client.RegisterRoutes(rs.CliCtx, rs.Mux)
+	app.ModuleBasics.RegisterRESTRoutes(rs.CliCtx, rs.Mux)
 }
 
 func queryCmd(cdc *amino.Codec) *cobra.Command {
 	queryCmd := &cobra.Command{
-		Use:   "query",
-		Short: "Querying subcommands",
+		Use:     "query",
+		Aliases: []string{"q"},
+		Short:   "Querying subcommands",
 	}
 
 	queryCmd.AddCommand(
+		authcmd.GetAccountCmd(cdc),
 		client.LineBreak,
 		rpc.ValidatorCommand(cdc),
 		rpc.BlockCommand(),
+		authcmd.QueryTxsByEventsCmd(cdc),
+		authcmd.QueryTxCmd(cdc),
 		client.LineBreak,
 	)
 
+	// add modules' query commands
+	app.ModuleBasics.AddQueryCommands(queryCmd, cdc)
+
 	return queryCmd
+}
+
+func txCmd(cdc *amino.Codec) *cobra.Command {
+	txCmd := &cobra.Command{
+		Use:   "tx",
+		Short: "Transactions subcommands",
+	}
+
+	txCmd.AddCommand(
+		bankcmd.SendTxCmd(cdc),
+		client.LineBreak,
+		authcmd.GetSignCommand(cdc),
+		authcmd.GetMultiSignCommand(cdc),
+		client.LineBreak,
+		authcmd.GetBroadcastCommand(cdc),
+		authcmd.GetEncodeCommand(cdc),
+		client.LineBreak,
+	)
+
+	// add modules' tx commands
+	app.ModuleBasics.AddTxCommands(txCmd, cdc)
+
+	return txCmd
 }
 
 func initConfig(cmd *cobra.Command) error {
