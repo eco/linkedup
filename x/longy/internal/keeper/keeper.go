@@ -3,20 +3,29 @@ package keeper
 import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth"
 )
 
 // Keeper maintains the link to data storage
 type Keeper struct {
 	contextStoreKey sdk.StoreKey
-	cdc             *codec.Codec
+
+	accountKeeper auth.AccountKeeper
+	cdc           *codec.Codec
 }
 
 // NewKeeper is a creator for `Keeper`
-func NewKeeper(longyStoreKey sdk.StoreKey, cdc *codec.Codec) Keeper {
+func NewKeeper(longyStoreKey sdk.StoreKey, accKeeper auth.AccountKeeper, cdc *codec.Codec) Keeper {
 	return Keeper{
 		contextStoreKey: longyStoreKey,
+		accountKeeper:   accKeeper,
 		cdc:             cdc,
 	}
+}
+
+// AccountKeeper returns the auth module's account keeper composed with this module
+func (k Keeper) AccountKeeper() auth.AccountKeeper {
+	return k.accountKeeper
 }
 
 // Set sets the key value pair in the store

@@ -45,16 +45,16 @@ func handleMsgShareInfo(ctx sdk.Context, k Keeper, msg types.MsgShareInfo) sdk.R
 	return sdk.Result{}
 }
 
+// nolint: unparam
 func handleMsgRekey(ctx sdk.Context, k Keeper, msg types.MsgRekey) sdk.Result {
+	accountKeeper := k.AccountKeeper()
+
 	// authorization passed, we simply need to update the attendee's public key
+	acc := accountKeeper.GetAccount(ctx, msg.AttendeeAddress)
+	acc.SetPubKey(msg.NewAttendeePublicKey)
 
-	attendee, ok := k.GetAttendeeByID(ctx, msg.AttendeeID)
-	if !ok {
-		return types.ErrAttendeeDoesNotExist().Result()
-	}
-
-	attendee.PublicKey = msg.NewAttendeePublicKey
-	k.SetAttendee(ctx, attendee)
+	// update the account
+	accountKeeper.SetAccount(ctx, acc)
 
 	return sdk.Result{}
 }

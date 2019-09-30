@@ -2,50 +2,49 @@ package types
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/eco/longy/util"
 )
+
+// GenesisAttendee is all the information needed to create an
+// attendee at genesis
+type GenesisAttendee struct {
+	ID string `json:"id"`
+}
 
 // Attendee encapsulates attendee information
 type Attendee struct {
-	ID        string
-	PublicKey sdk.AccAddress
-
-	isSuperUser bool
-	rep         int
+	id      string
+	address sdk.AccAddress
+	rep     int
 }
 
-// NewAttendee is the constructor for `Attendee`. New attendee's default to 0 rep
-func NewAttendee(id string, publicKey sdk.AccAddress, isSuperUser bool) Attendee {
-	return Attendee{
-		ID:          id,
-		PublicKey:   publicKey,
-		isSuperUser: isSuperUser,
+// NewAttendee is the constructor for `Attendee`. New attendees default to 0 rep
+func NewAttendee(id string) Attendee {
+	addr := util.IDToAddress(id)
 
-		rep: 0,
+	return Attendee{
+		id:      id,
+		address: addr,
+		rep:     0,
 	}
 }
 
-// GetID returns the attendee's identifier
-func (a Attendee) GetID() string {
-	return a.ID
+// NewAttendeeFromGenesis will create an `Attendee` from `GenesisAttendee`
+func NewAttendeeFromGenesis(ga GenesisAttendee) Attendee {
+	return NewAttendee(ga.ID)
 }
 
-// Address returns the public key associated with the attendee
+// ID returns the attendee identifier
+func (a Attendee) ID() string {
+	return a.id
+}
+
+// Address returns the deterministic address associated with the attendee
 func (a Attendee) Address() sdk.AccAddress {
-	return a.PublicKey
-}
-
-// IsSuperUser is the indicator for the master account
-func (a Attendee) IsSuperUser() bool {
-	return a.isSuperUser
+	return a.address
 }
 
 // Rep returns the attendee's current rep
 func (a Attendee) Rep() int {
 	return a.rep
-}
-
-// AddRep will increment `a`'s rep by `change` amount. An unsigned integer must
-// be passed in to enforce a positive change
-func (a *Attendee) AddRep(change uint) {
-	a.rep += int(change)
 }

@@ -2,11 +2,15 @@ package types
 
 import (
 	"bytes"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 const (
 	// ModuleName is the name of this module
 	ModuleName = "longy"
+
+	// StoreKey is the key used to access the store
+	StoreKey = ModuleName
 
 	// RouterKey is the package route
 	RouterKey = ModuleName
@@ -19,8 +23,8 @@ var (
 )
 
 // AttendeeKeyByID will construct the appropriate key for the attendee with `id`
-func AttendeeKeyByID(id string) []byte {
-	return prefixKey(attendeePrefix, []byte(id))
+func AttendeeKey(addr sdk.AccAddress) []byte {
+	return prefixKey(attendeePrefix, addr[:])
 }
 
 // MasterKey will return the store key for the master key

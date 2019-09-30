@@ -9,6 +9,9 @@ const (
 	// ModuleName is the name of the module
 	ModuleName = types.ModuleName
 
+	// StoreKey is the key used to access the store
+	StoreKey = ModuleName
+
 	// RouterKey is the key for routing messages to our handler
 	RouterKey = types.RouterKey
 )

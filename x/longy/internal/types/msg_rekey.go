@@ -1,25 +1,25 @@
 package types
 
 import (
-	"encoding/json"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	tmcrypto "github.com/tendermint/tendermint/crypto"
 )
 
 var _ sdk.Msg = MsgRekey{}
 
 // MsgRekey implements the `sdk.Msg` interface
 type MsgRekey struct {
-	AttendeeID           string
-	NewAttendeePublicKey sdk.AccAddress
+	AttendeeAddress      sdk.AccAddress
+	NewAttendeePublicKey tmcrypto.PubKey
 
 	// expected signer of this message
 	MasterPublicKey sdk.AccAddress
 }
 
 // NewMsgRekey is the creator for `RekeyMsg`
-func NewMsgRekey(id string, newPublicKey, masterPublicKey sdk.AccAddress) MsgRekey {
+func NewMsgRekey(attendeeAddress, masterPublicKey sdk.AccAddress, newPublicKey tmcrypto.PubKey) MsgRekey {
 	return MsgRekey{
-		AttendeeID:           id,
+		AttendeeAddress:      attendeeAddress,
 		NewAttendeePublicKey: newPublicKey,
 		MasterPublicKey:      masterPublicKey,
 	}
@@ -37,7 +37,9 @@ func (msg MsgRekey) Type() string {
 
 // ValidateBasic peforms sanity checks on the message
 func (msg MsgRekey) ValidateBasic() sdk.Error {
-	if msg.NewAttendeePublicKey.Empty() {
+	if msg.AttendeeAddress.Empty() {
+		return sdk.ErrInvalidAddress("attendee address is empty")
+	} else if len(msg.NewAttendeePublicKey.Bytes()) == 0 {
 		return sdk.ErrInvalidAddress("new attendee public key is empty")
 	} else if msg.MasterPublicKey.Empty() {
 		return sdk.ErrInvalidAddress("master public key is empty")
@@ -48,12 +50,8 @@ func (msg MsgRekey) ValidateBasic() sdk.Error {
 
 // GetSignBytes returns the byte array that is signed over
 func (msg MsgRekey) GetSignBytes() []byte {
-	b, err := json.Marshal(msg)
-	if err != nil {
-		panic(err)
-	}
-
-	return sdk.MustSortJSON(b)
+	bz := ModuleCdc.MustMarshalJSON(msg)
+	return sdk.MustSortJSON(bz)
 }
 
 // GetSigners returns the the master public key expected to sign this message
