@@ -14,13 +14,24 @@ const (
 // NewQuerier is the module level router for state queries
 func NewQuerier(keeper Keeper) sdk.Querier {
 	return func(ctx sdk.Context, path []string, req abci.RequestQuery) (res []byte, err sdk.Error) {
-		return
-	}
+		queryType := path[0]
+		queryArgs := path[1:]
 
+		switch queryType {
+		case AttendeeStoreKey:
+			return queryAttendee(ctx, queryArgs, &keeper)
+		default:
+			return nil, sdk.ErrUnknownRequest("unknown query endpoint")
+		}
+	}
 }
 
-// nolint: unparam, deadcode, unused
-// resolve: This takes a name and returns the value that is stored by the button. This is similar to a DNS query.
-func scanQR(ctx *sdk.Context, path []string, req *abci.RequestQuery, keeper Keeper) (res []byte, err sdk.Error) {
+// nolint
+func queryAttendee(ctx sdk.Context, path []string, keeper *Keeper) (attendee []byte, err sdk.Error) {
+	return
+}
+
+// nolint
+func scanQR(ctx sdk.Context, path []string, req *abci.RequestQuery, keeper Keeper) (res []byte, err sdk.Error) {
 	return
 }

@@ -17,6 +17,10 @@ const (
 var (
 	//NewKeeper is the new keeper function alias for longy
 	NewKeeper = internal.NewKeeper
+	//RegisterCodec is the codec register
+	RegisterCodec = types.RegisterCodec
+	//ModuleCdc is the cdc for all the message types
+	ModuleCdc = types.ModuleCdc
 )
 
 type (
