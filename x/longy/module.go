@@ -6,8 +6,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
-	"github.com/cosmos/cosmos-sdk/x/bank"
-	"github.com/cosmos/cosmos-sdk/x/genutil/types"
 	"github.com/gorilla/mux"
 	"github.com/spf13/cobra"
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -27,18 +25,22 @@ func (a AppModuleBasic) Name() string {
 }
 
 //RegisterCodec registers module to the codec
-func (a AppModuleBasic) RegisterCodec(*codec.Codec) {
-
+func (a AppModuleBasic) RegisterCodec(cdc *codec.Codec) {
+	RegisterCodec(cdc)
 }
 
 //DefaultGenesis returns the default genesis for this module if any
 func (a AppModuleBasic) DefaultGenesis() json.RawMessage {
-	return nil
+	gen := DefaultGenesisState()
+	return ModuleCdc.MustMarshalJSON(gen)
 }
 
 //ValidateGenesis validates that the json genesis is valid to our module
-func (a AppModuleBasic) ValidateGenesis(json.RawMessage) error {
-	return nil
+func (a AppModuleBasic) ValidateGenesis(data json.RawMessage) error {
+	var gen GenesisState
+	ModuleCdc.MustUnmarshalJSON(data, &gen)
+
+	return ValidateGenesis(gen)
 }
 
 //RegisterRESTRoutes registers our module rest endpoints
@@ -59,24 +61,27 @@ func (a AppModuleBasic) GetQueryCmd(*codec.Codec) *cobra.Command {
 // AppModule structure holding or keepers together
 type AppModule struct {
 	AppModuleBasic
-	accountKeeper types.AccountKeeper
-	bankKeeper    bank.Keeper
+
+	keeper Keeper
 }
 
 // NewAppModule creates a new AppModule object
 // nolint: gocritic
-func NewAppModule(account types.AccountKeeper, bank bank.Keeper) module.AppModule {
+func NewAppModule(keeper Keeper) module.AppModule {
 
 	return module.NewGenesisOnlyAppModule(AppModule{
 		AppModuleBasic: AppModuleBasic{},
-		accountKeeper:  account,
-		bankKeeper:     bank,
+		keeper:         keeper,
 	})
 }
 
 // InitGenesis init-genesis
 // nolint: gocritic
 func (am AppModule) InitGenesis(ctx sdk.Context, data json.RawMessage) []abci.ValidatorUpdate {
+	var gen GenesisState
+	ModuleCdc.MustUnmarshalJSON(data, &gen)
+
+	InitGenesis(ctx, am.keeper, gen)
 	return []abci.ValidatorUpdate{}
 }
 

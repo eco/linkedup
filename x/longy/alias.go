@@ -17,6 +17,9 @@ const (
 )
 
 var (
+	// ModuleCdc is the alias for the amino with the module's types registered
+	ModuleCdc = types.ModuleCdc
+
 	// RegisterCodec is the function alias to register types
 	RegisterCodec = types.RegisterCodec
 
