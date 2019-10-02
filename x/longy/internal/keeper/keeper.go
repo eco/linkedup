@@ -15,7 +15,7 @@ type Keeper struct {
 }
 
 // NewKeeper is a creator for `Keeper`
-func NewKeeper(longyStoreKey sdk.StoreKey, accKeeper auth.AccountKeeper, cdc *codec.Codec) Keeper {
+func NewKeeper(cdc *codec.Codec, longyStoreKey sdk.StoreKey, accKeeper auth.AccountKeeper) Keeper {
 	return Keeper{
 		contextStoreKey: longyStoreKey,
 		accountKeeper:   accKeeper,

@@ -18,6 +18,8 @@ func NewHandler(keeper Keeper) sdk.Handler {
 			return handleMsgShareInfo(ctx, keeper, msg)
 		case types.MsgRekey:
 			return handleMsgRekey(ctx, keeper, msg)
+		case types.MsgClaimID:
+			return handleMsgClaimKey(ctx, keeper, msg)
 		default:
 			errMsg := fmt.Sprintf("Unrecognized button Msg type: %v", msg.Type())
 			return sdk.ErrUnknownRequest(errMsg).Result()
@@ -26,7 +28,7 @@ func NewHandler(keeper Keeper) sdk.Handler {
 }
 
 // handleMsgQrScan processes MsgQrScan
-// nolint: unparam
+// nolint: unparam, gocritic
 func handleMsgQrScan(ctx sdk.Context, k Keeper, msg types.MsgQrScan) sdk.Result {
 	//validate sender address is correct
 
@@ -37,7 +39,7 @@ func handleMsgQrScan(ctx sdk.Context, k Keeper, msg types.MsgQrScan) sdk.Result 
 	return sdk.Result{}
 }
 
-// nolint: unparam
+// nolint: unparam, gocritic
 func handleMsgShareInfo(ctx sdk.Context, k Keeper, msg types.MsgShareInfo) sdk.Result {
 
 	//update scan state
@@ -66,7 +68,7 @@ func handleMsgRekey(ctx sdk.Context, k Keeper, msg types.MsgRekey) sdk.Result {
 	return sdk.Result{}
 }
 
-func handleMsgClaim(ctx sdk.Context, k Keeper, msg types.MsgClaimKey) sdk.Result {
+func handleMsgClaimKey(ctx sdk.Context, k Keeper, msg types.MsgClaimKey) sdk.Result {
 	attendee, ok := k.GetAttendee(ctx, msg.AttendeeAddress)
 	if !ok {
 		return types.ErrAttendeeDoesNotExist().Result()

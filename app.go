@@ -28,6 +28,7 @@ import (
 
 const appName = longy.ModuleName
 
+//nolint: dupl
 var (
 	// DefaultCLIHome is the default home directories for the application CLI
 	DefaultCLIHome = os.ExpandEnv("$HOME/.lycli")
@@ -47,7 +48,7 @@ var (
 		slashing.AppModuleBasic{},
 		supply.AppModuleBasic{},
 
-		//nameservice.AppModule{},
+		longy.AppModule{},
 	)
 	// account permissions
 	maccPerms = map[string][]string{
@@ -92,6 +93,7 @@ type LongyApp struct {
 }
 
 // NewLongyApp is a constructor function for LongyApp
+//nolint: dupl
 func NewLongyApp(
 	logger log.Logger, db dbm.DB, baseAppOptions ...func(*bam.BaseApp),
 ) *LongyApp {
@@ -187,9 +189,9 @@ func NewLongyApp(
 	)
 
 	app.longyKeeper = longy.NewKeeper(
+		app.cdc,
 		keys[longy.StoreKey],
 		app.accountKeeper,
-		app.cdc,
 	)
 
 	app.mm = module.NewManager(
@@ -225,11 +227,13 @@ func NewLongyApp(
 	// register all module routes and module queriers
 	app.mm.RegisterRoutes(app.Router(), app.QueryRouter())
 
+	// initialize stores
+	app.MountKVStores(keys)
+	app.MountTransientStores(tkeys)
+
 	// The initChainer handles translating the genesis.json file into initial state for the network
 	app.SetInitChainer(app.InitChainer)
 	app.SetBeginBlocker(app.BeginBlocker)
-	app.SetEndBlocker(app.EndBlocker)
-
 	// The AnteHandler handles signature verification and transaction pre-processing
 	app.SetAnteHandler(
 		auth.NewAnteHandler(
@@ -238,10 +242,7 @@ func NewLongyApp(
 			auth.DefaultSigVerificationGasConsumer,
 		),
 	)
-
-	// initialize stores
-	app.MountKVStores(keys)
-	app.MountTransientStores(tkeys)
+	app.SetEndBlocker(app.EndBlocker)
 
 	err := app.LoadLatestVersion(app.keys[bam.MainStoreKey])
 	if err != nil {
