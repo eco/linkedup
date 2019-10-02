@@ -11,7 +11,6 @@ import (
 type GenesisState struct {
 	MasterKey sdk.AccAddress
 	Attendees []types.GenesisAttendee
-	Rewards   []types.Reward
 }
 
 // DefaultGenesisState is an empty `GenesisState`
@@ -19,7 +18,6 @@ func DefaultGenesisState() GenesisState {
 	return GenesisState{
 		MasterKey: nil,
 		Attendees: nil,
-		Rewards:   nil,
 	}
 }
 

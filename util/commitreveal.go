@@ -11,7 +11,7 @@ type Commitment []byte
 
 // NewCommitment will create a Commitmentment using `secret`
 func NewCommitment(secret []byte) Commitment {
-	hash := tmcrypto.Sha256(secret)
+	hash := tmcrypto.Sha256([]byte(secret))
 
 	return Commitment(hash)
 }
@@ -37,8 +37,8 @@ func (c Commitment) Empty() bool {
 }
 
 // VerifyReveal will verify the Commitmentment against `reveal`
-func (c Commitment) VerifyReveal(reveal []byte) bool {
-	expected := NewCommitment(reveal)
+func (c Commitment) VerifyReveal(secret []byte) bool {
+	expected := NewCommitment(secret)
 
 	return c.Equals(expected)
 }

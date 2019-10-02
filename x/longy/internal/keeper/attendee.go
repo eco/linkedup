@@ -10,10 +10,11 @@ import (
 // the secp256k1 key using `id` as the secret. returns false if the attendee does not exist
 func (k Keeper) GetAttendeeByID(ctx sdk.Context, id string) (types.Attendee, bool) {
 	address := util.IDToAddress(id)
-	return k.GetAttendeeByAddress(ctx, address)
+	return k.GetAttendee(ctx, address)
 }
 
-func (k Keeper) GetAttendeeByAddress(ctx sdk.Context, address sdk.AccAddress) (types.Attendee, bool) {
+// GetAttendee will retrieve the attendee via `address`
+func (k Keeper) GetAttendee(ctx sdk.Context, address sdk.AccAddress) (types.Attendee, bool) {
 	key := types.AttendeeKey(address)
 	bz := k.Get(ctx, key)
 	if bz == nil {

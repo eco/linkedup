@@ -8,9 +8,13 @@ import (
 const (
 	DefaultCodespace sdk.CodespaceType = ModuleName
 
-	QRCodeDoesNotExist   sdk.CodeType = 101
-	AttendeeDoesNotExist sdk.CodeType = 102
-	RewardDoesNotExist   sdk.CodeType = 103
+	QRCodeDoesNotExist sdk.CodeType = 101
+
+	AttendeeDoesNotExist   sdk.CodeType = 102
+	AttendeeUnclaimed      sdk.CodeType = 103
+	AttendeeAlreadyClaimed sdk.CodeType = 104
+
+	InvalidCommitmentReveal sdk.CodeType = 105
 )
 
 // ErrQRCodeDoesNotExist is the error for when a QR code does not exist in our keeper
@@ -23,7 +27,16 @@ func ErrAttendeeDoesNotExist() sdk.Error {
 	return sdk.NewError(DefaultCodespace, AttendeeDoesNotExist, "attendee does not exist")
 }
 
-// ErrRewardDoesNotExist indicates a reward type that doesn't exist
-func ErrRewardDoesNotExist() sdk.Error {
-	return sdk.NewError(DefaultCodespace, RewardDoesNotExist, "reward does note exist")
+// ErrAttendeeUnclaimed indicates a attendee that is unclaimed
+func ErrAttendeeUnclaimed() sdk.Error {
+	return sdk.NewError(DefaultCodespace, AttendeeUnclaimed, "attendee unclaimed")
+}
+
+// ErrAttendeeAlreadyClaimed indicates a attendee that is unclaimed
+func ErrAttendeeAlreadyClaimed() sdk.Error {
+	return sdk.NewError(DefaultCodespace, AttendeeAlreadyClaimed, "attendee claimed")
+}
+
+func ErrInvalidCommitmentReveal() sdk.Error {
+	return sdk.NewError(DefaultCodespace, InvalidCommitmentReveal, "reveal to the commitment is incorrect")
 }

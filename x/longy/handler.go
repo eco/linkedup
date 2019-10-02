@@ -52,9 +52,38 @@ func handleMsgRekey(ctx sdk.Context, k Keeper, msg types.MsgRekey) sdk.Result {
 	// authorization passed, we simply need to update the attendee's public key
 	acc := accountKeeper.GetAccount(ctx, msg.AttendeeAddress)
 	acc.SetPubKey(msg.NewAttendeePublicKey)
-
-	// update the account
 	accountKeeper.SetAccount(ctx, acc)
+
+	// update the attendee to unclaimed
+	attendee, ok := k.GetAttendee(ctx, msg.AttendeeAddress)
+	if !ok {
+		return types.ErrAttendeeDoesNotExist().Result()
+	}
+	attendee.SetCommitment(msg.Commitment)
+	attendee.SetUnclaimed()
+	k.SetAttendee(ctx, attendee)
+
+	return sdk.Result{}
+}
+
+func handleMsgClaim(ctx sdk.Context, k Keeper, msg types.MsgClaimKey) sdk.Result {
+	attendee, ok := k.GetAttendee(ctx, msg.AttendeeAddress)
+	if !ok {
+		return types.ErrAttendeeDoesNotExist().Result()
+	}
+
+	if attendee.IsClaimed() {
+		return types.ErrAttendeeAlreadyClaimed().Result()
+	}
+
+	if !attendee.CurrentCommitment().VerifyReveal(msg.Secret) {
+		return types.ErrInvalidCommitmentReveal().Result()
+	}
+
+	// all checks passed. mark the attendee as claimed
+	attendee.ResetCommitment()
+	attendee.SetClaimed()
+	k.SetAttendee(ctx, attendee)
 
 	return sdk.Result{}
 }

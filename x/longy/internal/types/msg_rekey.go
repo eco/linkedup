@@ -2,6 +2,7 @@ package types
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/eco/longy/util"
 	tmcrypto "github.com/tendermint/tendermint/crypto"
 )
 
@@ -14,14 +15,19 @@ type MsgRekey struct {
 
 	// expected signer of this message
 	MasterPublicKey sdk.AccAddress
+
+	// Commitmentment that needs to be reclaimed
+	Commitment util.Commitment
 }
 
 // NewMsgRekey is the creator for `RekeyMsg`
-func NewMsgRekey(attendeeAddress, masterPublicKey sdk.AccAddress, newPublicKey tmcrypto.PubKey) MsgRekey {
+func NewMsgRekey(attendeeAddress, masterPublicKey sdk.AccAddress, newPublicKey tmcrypto.PubKey, commit util.Commitment) MsgRekey {
 	return MsgRekey{
 		AttendeeAddress:      attendeeAddress,
 		NewAttendeePublicKey: newPublicKey,
 		MasterPublicKey:      masterPublicKey,
+
+		Commitment: commit,
 	}
 }
 
