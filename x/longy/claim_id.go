@@ -33,13 +33,5 @@ func (h *ClaimIDHandler) handleMsgClaimID() sdk.Result {
 		return errors.ErrInsufficientPrivileges("Insufficient privilege to make this call").Result()
 	}
 
-	attendee, err := h.getAttendee(h.msg.ID)
-	if err != nil {
-		return err.Result()
-	}
-
-	attendee.Address = h.msg.Address
-	h.setAttendee(attendee)
-
 	return sdk.Result{}
 }

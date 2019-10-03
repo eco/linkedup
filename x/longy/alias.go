@@ -26,4 +26,11 @@ var (
 type (
 	//Keeper is the keeper alias for longy
 	Keeper = internal.Keeper
+
+	//GenesisAttendees is the array of attendees for the genesis file
+	GenesisAttendees = types.GenesisAttendees
+	//GenesisAttendee is the attendee for the genesis file
+	GenesisAttendee = types.GenesisAttendee
+	//GenesisService is the re-key service genesis type
+	GenesisService = types.GenesisService
 )
