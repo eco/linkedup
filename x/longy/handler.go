@@ -85,6 +85,11 @@ func handleMsgClaimKey(ctx sdk.Context, k Keeper, msg types.MsgClaimKey) sdk.Res
 	// all checks passed. mark the attendee as claimed
 	attendee.ResetCommitment()
 	attendee.SetClaimed()
+	if !attendee.HasPreviouslyClaimed() {
+		// TODO: this probably will change
+		attendee.AddRep(uint(5))
+	}
+
 	k.SetAttendee(ctx, attendee)
 
 	return sdk.Result{}

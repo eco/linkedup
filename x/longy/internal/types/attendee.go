@@ -16,10 +16,11 @@ type Attendee struct {
 	ID      string
 	Address sdk.AccAddress
 
-	Commitment util.Commitment
-	Claimed    bool
+	Commitment       util.Commitment
+	Claimed          bool
+	FirstTimeClaimed bool
 
-	Rep int
+	Rep uint
 }
 
 // NewAttendee is the constructor for `Attendee`. New attendees default to 0 rep
@@ -31,8 +32,9 @@ func NewAttendee(id string) Attendee {
 		ID:      id,
 		Address: addr,
 
-		Commitment: nil,
-		Claimed:    false,
+		Commitment:       nil,
+		Claimed:          false,
+		FirstTimeClaimed: false,
 
 		Rep: 0,
 	}
@@ -54,8 +56,13 @@ func (a Attendee) GetAddress() sdk.AccAddress {
 }
 
 // GetRep returns the attendee's current rep
-func (a Attendee) GetRep() int {
+func (a Attendee) GetRep() uint {
 	return a.Rep
+}
+
+// AddRep will add rep to the attendee {
+func (a *Attendee) AddRep(r uint) {
+	a.Rep = a.Rep + r
 }
 
 // CurrentCommitment returns the current commitment associated with this attendee
@@ -80,9 +87,18 @@ func (a Attendee) IsClaimed() bool {
 	return a.Claimed
 }
 
+// HasPreviouslyClaimed is an indicator for the first time an attendee
+// has been claimed
+func (a Attendee) HasPreviouslyClaimed() bool {
+	return a.FirstTimeClaimed
+}
+
 // SetClaimed will mark this attendee as claimed
 func (a *Attendee) SetClaimed() {
 	a.Claimed = true
+	if !a.FirstTimeClaimed {
+		a.FirstTimeClaimed = true
+	}
 }
 
 // SetUnclaimed will mark this attendee as unclaimed

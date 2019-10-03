@@ -103,14 +103,14 @@ func Secp256k1FromHex(key string) (tmcrypto.PrivKey, error) {
 
 // SendRekeyTransaction generates a `RekeyMsg`, authorized by the master key. The transaction bytes
 // generated are created using the cosmos-sdk/x/auth module's StdSignDoc.
-func (mk Key) SendRekeyTransaction(attendeeID string, secret []byte, newPublicKey tmcrypto.PubKey) error {
+func (mk Key) SendRekeyTransaction(attendeeID string, newPublicKey tmcrypto.PubKey, commitment util.Commitment) error {
 	var err error
 
 	/** Block until we submit the transaction **/
 	mk.seqLock.Lock()
 
 	// construct bytes and send to the full node
-	txBytes, err := mk.createTxBytes(attendeeID, secret, newPublicKey)
+	txBytes, err := mk.createTxBytes(attendeeID, commitment, newPublicKey)
 	if err == nil {
 		_, err = mk.longyCliCtx.BroadcastTxSync(txBytes)
 	}
@@ -120,14 +120,14 @@ func (mk Key) SendRekeyTransaction(attendeeID string, secret []byte, newPublicKe
 	return err
 }
 
-func (mk Key) createTxBytes(attendeeID string, secret []byte, newPublicKey tmcrypto.PubKey) ([]byte, error) {
+func (mk Key) createTxBytes(attendeeID string, commitment util.Commitment, newPublicKey tmcrypto.PubKey) ([]byte, error) {
 	attendeeAddr := util.IDToAddress(attendeeID)
-	msgs := []sdk.Msg{longy.NewRekeyMsg(attendeeAddr, mk.address, newPublicKey, secret)}
+	msgs := []sdk.Msg{longy.NewRekeyMsg(attendeeAddr, mk.address, newPublicKey, commitment)}
 	signBytes := auth.StdSignBytes(
 		mk.chainID,
 		mk.accNum,
 		mk.sequenceNum,
-		nil,
+		auth.StdFee{},
 		msgs,
 		"",
 	)
@@ -141,7 +141,7 @@ func (mk Key) createTxBytes(attendeeID string, secret []byte, newPublicKey tmcry
 		PubKey:    mk.pubKey,
 		Signature: sig,
 	}
-	tx := auth.NewStdTx(msgs, nil, []auth.StdSignature{stdSig}, "")
+	tx := auth.NewStdTx(msgs, auth.StdFee{}, []auth.StdSignature{stdSig}, "")
 
 	return auth.DefaultTxEncoder(mk.cdc)(tx)
 }

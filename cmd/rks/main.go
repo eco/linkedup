@@ -15,6 +15,7 @@ import (
 func init() {
 	// TODO: remote these defaults before making the repo public
 	rootCmd.Flags().Int("port", 1337, "port to bind the rekey service")
+	rootCmd.Flags().String("longy-chain-id", "longy", "chain-id of the running longy game")
 	rootCmd.Flags().String("longy-restservice", "localhost:26657", "scheme://host:port of the full node rest client")
 	rootCmd.Flags().String("longy-fullnode", "tcp://localhost:26656", "tcp://host:port the full node for tx submission")
 	rootCmd.Flags().String("longy-masterkey", "", "master private key for the longy game")
@@ -38,6 +39,9 @@ var rootCmd = &cobra.Command{
 		smtpServer := viper.GetString("smtp-server")
 		smtpUsername := viper.GetString("smtp-username")
 		smtpPassword := viper.GetString("smtp-password")
+		longyChainID := viper.GetString("longy-chain-id")
+		longyFullNodeURL := viper.GetString("longy-fullnode")
+		longyRestURL := viper.GetString("longy-restservice")
 		key, err := mk.Secp256k1FromHex(viper.GetString("longy-masterkey"))
 		if err != nil {
 			return fmt.Errorf("masterkey: %s", err)
@@ -53,7 +57,7 @@ var rootCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("mail client: %s", err)
 		}
-		mKey, err := mk.NewMasterKey(key)
+		mKey, err := mk.NewMasterKey(key, longyRestURL, longyFullNodeURL, longyChainID)
 		if err != nil {
 			return fmt.Errorf("master key: %s", err)
 		}

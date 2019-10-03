@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"github.com/eco/longy/rekey-service/eventbrite"
@@ -9,6 +8,7 @@ import (
 	"github.com/eco/longy/rekey-service/masterkey"
 	"github.com/eco/longy/util"
 	"github.com/gorilla/mux"
+	"github.com/tendermint/tendermint/crypto/secp256k1"
 	"net/http"
 )
 
@@ -22,8 +22,8 @@ func registerRekey(r *mux.Router, eb eventbrite.Session, mk masterkey.Key, mc ma
 func rekey(eb eventbrite.Session, mk masterkey.Key, mc mail.Client) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		type reqBody struct {
-			AttendeeID int
-			PublicKey  string
+			AttendeeID string
+			PublicKey  secp256k1.PubKeySecp256k1
 		}
 
 		var body reqBody
@@ -34,13 +34,8 @@ func rekey(eb eventbrite.Session, mk masterkey.Key, mc mail.Client) http.Handler
 			return
 		}
 
-		pubKeyBytes, err := hex.DecodeString(util.TrimHex(body.PublicKey))
-		if err != nil {
-			http.Error(w, "public key must be in hex format", http.StatusBadRequest)
-			return
-		}
-
-		txBytes, err := mk.RekeyTransaction(body.AttendeeID, pubKeyBytes)
+		secret, commitment := util.CreateCommitment()
+		err := mk.SendRekeyTransaction(body.AttendeeID, body.PublicKey, commitment)
 		if err != nil {
 			http.Error(w, "internal error. try again", http.StatusInternalServerError)
 			return
@@ -55,7 +50,7 @@ func rekey(eb eventbrite.Session, mk masterkey.Key, mc mail.Client) http.Handler
 			return
 		}
 
-		err = mc.SendRekeyEmail(email, txBytes)
+		err = mc.SendRekeyEmail(email, secret)
 		if err != nil {
 			http.Error(w, "email error. try again", http.StatusInternalServerError)
 			return
