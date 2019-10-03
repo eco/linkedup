@@ -18,7 +18,7 @@ func NewHandler(keeper Keeper) sdk.Handler {
 			return handleMsgShareInfo(ctx, keeper, msg)
 		case types.MsgRekey:
 			return handleMsgRekey(ctx, keeper, msg)
-		case types.MsgClaimID:
+		case types.MsgClaimKey:
 			return handleMsgClaimKey(ctx, keeper, msg)
 		default:
 			errMsg := fmt.Sprintf("Unrecognized button Msg type: %v", msg.Type())

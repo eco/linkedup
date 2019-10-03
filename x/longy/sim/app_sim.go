@@ -192,10 +192,9 @@ func NewLongyApp(
 	)
 
 	app.LongyKeeper = longy.NewKeeper(
-		&app.AccountKeeper,
-		&app.BankKeeper,
-		keys[longy.StoreKey],
 		app.cdc,
+		keys[longy.StoreKey],
+		app.AccountKeeper,
 	)
 
 	app.mm = module.NewManager(
@@ -207,7 +206,7 @@ func NewLongyApp(
 		distr.NewAppModule(app.distrKeeper, app.supplyKeeper),
 		slashing.NewAppModule(app.slashingKeeper, app.stakingKeeper),
 		staking.NewAppModule(app.stakingKeeper, app.distrKeeper, app.AccountKeeper, app.supplyKeeper),
-		longy.NewAppModule(app.AccountKeeper, app.BankKeeper, app.LongyKeeper),
+		longy.NewAppModule(app.LongyKeeper),
 	)
 
 	app.mm.SetOrderBeginBlockers(distr.ModuleName, slashing.ModuleName)
