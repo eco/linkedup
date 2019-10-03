@@ -15,6 +15,8 @@ import (
 func init() {
 	// TODO: remote these defaults before making the repo public
 	rootCmd.Flags().Int("port", 1337, "port to bind the rekey service")
+	rootCmd.Flags().String("longy-restservice", "localhost:26657", "scheme://host:port of the full node rest client")
+	rootCmd.Flags().String("longy-fullnode", "tcp://localhost:26656", "tcp://host:port the full node for tx submission")
 	rootCmd.Flags().String("longy-masterkey", "", "master private key for the longy game")
 	rootCmd.Flags().String("smtp-server", "smtp.gmail.com:587", "host:port of the smtp server")
 	rootCmd.Flags().String("smtp-username", "testecolongy@gmail.com", "username of the email account")

@@ -21,7 +21,7 @@ var (
 	masterKeyPrefix = []byte{0x1}
 )
 
-// AttendeeKeyByID will construct the appropriate key for the attendee with `id`
+// AttendeeKey will construct the appropriate key for the attendee with `id`
 func AttendeeKey(addr sdk.AccAddress) []byte {
 	return prefixKey(attendeePrefix, addr[:])
 }

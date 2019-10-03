@@ -6,7 +6,7 @@ import (
 	"github.com/eco/longy/x/longy/internal/types"
 )
 
-// GetAttendeeByID will retrieve the attendee by `id`. The Address of an attendee is generated using
+// GetAttendeeWithID will retrieve the attendee by `id`. The Address of an attendee is generated using
 // the secp256k1 key using `id` as the secret. returns false if the attendee does not exist
 func (k Keeper) GetAttendeeWithID(ctx sdk.Context, id string) (types.Attendee, bool) {
 	address := util.IDToAddress(id)

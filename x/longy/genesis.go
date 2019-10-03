@@ -43,7 +43,7 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, state GenesisState) {
 	// set the master public key
 	k.SetMasterPublicKey(ctx, state.MasterKey)
 
-	// create and set all the attendees
+	// create and set of all the attendees
 	for _, a := range state.Attendees {
 		attendee := types.NewAttendeeFromGenesis(a)
 		k.SetAttendee(ctx, attendee)

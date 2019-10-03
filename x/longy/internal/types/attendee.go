@@ -66,7 +66,7 @@ func (a Attendee) CurrentCommitment() util.Commitment {
 // SetCommitment will set the claim hash for this attendee
 func (a *Attendee) SetCommitment(commitment util.Commitment) {
 	bz := make([]byte, commitment.Len())
-	copy(bz[:], commitment.Bytes())
+	copy(bz, commitment.Bytes())
 	a.Commitment = bz
 }
 

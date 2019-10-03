@@ -32,7 +32,7 @@ var (
 	// NewRekeyMsg is the function alias for the RekeyMsg type
 	NewRekeyMsg = types.NewMsgRekey
 
-	// NewQuerier is the fucntion alias for creating a new querier
+	// NewQuerier is the function alias for creating a new querier
 	NewQuerier = keeper.NewQuerier
 )
 

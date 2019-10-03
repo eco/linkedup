@@ -14,18 +14,21 @@ type MsgRekey struct {
 	NewAttendeePublicKey tmcrypto.PubKey
 
 	// expected signer of this message
-	MasterPublicKey sdk.AccAddress
+	MasterAddress sdk.AccAddress
 
 	// Commitmentment that needs to be reclaimed
 	Commitment util.Commitment
 }
 
 // NewMsgRekey is the creator for `RekeyMsg`
-func NewMsgRekey(attendeeAddress, masterPublicKey sdk.AccAddress, newPublicKey tmcrypto.PubKey, commit util.Commitment) MsgRekey {
+func NewMsgRekey(attendeeAddress, masterAddress sdk.AccAddress,
+	newPublicKey tmcrypto.PubKey, commit util.Commitment) MsgRekey {
+
 	return MsgRekey{
 		AttendeeAddress:      attendeeAddress,
 		NewAttendeePublicKey: newPublicKey,
-		MasterPublicKey:      masterPublicKey,
+
+		MasterAddress: masterAddress,
 
 		Commitment: commit,
 	}
@@ -47,7 +50,7 @@ func (msg MsgRekey) ValidateBasic() sdk.Error {
 		return sdk.ErrInvalidAddress("attendee address is empty")
 	} else if len(msg.NewAttendeePublicKey.Bytes()) == 0 {
 		return sdk.ErrInvalidAddress("new attendee public key is empty")
-	} else if msg.MasterPublicKey.Empty() {
+	} else if msg.MasterAddress.Empty() {
 		return sdk.ErrInvalidAddress("master public key is empty")
 	}
 
@@ -62,5 +65,5 @@ func (msg MsgRekey) GetSignBytes() []byte {
 
 // GetSigners returns the the master public key expected to sign this message
 func (msg MsgRekey) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.MasterPublicKey}
+	return []sdk.AccAddress{msg.MasterAddress}
 }

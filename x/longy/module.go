@@ -95,7 +95,7 @@ func (am AppModule) NewQuerierHandler() sdk.Querier {
 	return nil
 }
 
-// BeginBlock runs at the begining of each block
+// BeginBlock runs at the beginning of each block
 func (am AppModule) BeginBlock(sdk.Context, abci.RequestBeginBlock) {
 }
 
