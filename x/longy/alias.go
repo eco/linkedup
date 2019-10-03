@@ -26,6 +26,9 @@ var (
 	// NewKeeper is the new keeper function alias for longy
 	NewKeeper = keeper.NewKeeper
 
+	// NewAttendee is the function alias for creating a new attendee
+	NewAttendee = types.NewAttendee
+
 	// NewRekeyMsg is the function alias for the RekeyMsg type
 	NewRekeyMsg = types.NewMsgRekey
 
@@ -36,6 +39,9 @@ var (
 type (
 	// Keeper is the keeper alias for longy
 	Keeper = keeper.Keeper
+
+	// Attendee is the type alias for Attendee
+	Attendee = types.Attendee
 
 	// RekeyMsg is the type alias for the Rekey Message
 	RekeyMsg = types.MsgRekey

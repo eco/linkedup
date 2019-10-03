@@ -19,7 +19,6 @@ const (
 var (
 	attendeePrefix  = []byte{0x0}
 	masterKeyPrefix = []byte{0x1}
-	rewardKeyPrefix = []byte{0x2}
 )
 
 // AttendeeKeyByID will construct the appropriate key for the attendee with `id`
@@ -30,11 +29,6 @@ func AttendeeKey(addr sdk.AccAddress) []byte {
 // MasterKey will return the store key for the master key
 func MasterKey() []byte {
 	return masterKeyPrefix
-}
-
-// RewardKey creates the key for reward of type 'kind`
-func RewardKey(kind string) []byte {
-	return prefixKey(rewardKeyPrefix, []byte(kind))
 }
 
 func prefixKey(prefix, key []byte) []byte {

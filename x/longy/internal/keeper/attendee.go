@@ -8,7 +8,7 @@ import (
 
 // GetAttendeeByID will retrieve the attendee by `id`. The Address of an attendee is generated using
 // the secp256k1 key using `id` as the secret. returns false if the attendee does not exist
-func (k Keeper) GetAttendeeByID(ctx sdk.Context, id string) (types.Attendee, bool) {
+func (k Keeper) GetAttendeeWithID(ctx sdk.Context, id string) (types.Attendee, bool) {
 	address := util.IDToAddress(id)
 	return k.GetAttendee(ctx, address)
 }
@@ -22,15 +22,21 @@ func (k Keeper) GetAttendee(ctx sdk.Context, address sdk.AccAddress) (types.Atte
 	}
 
 	var a types.Attendee
-	k.cdc.MustUnmarshalBinaryLengthPrefixed(bz, &a)
+	err := k.cdc.UnmarshalBinaryLengthPrefixed(bz, &a)
+	if err != nil {
+		panic(err)
+	}
 	return a, true
 }
 
 // SetAttendee will set the attendee `a` to the store using it's address
 func (k Keeper) SetAttendee(ctx sdk.Context, a types.Attendee) {
-	addr := a.Address()
+	addr := a.GetAddress()
 	key := types.AttendeeKey(addr)
 
-	bz := k.cdc.MustMarshalBinaryLengthPrefixed(a)
+	bz, err := k.cdc.MarshalBinaryLengthPrefixed(a)
+	if err != nil {
+		panic(err)
+	}
 	k.Set(ctx, key, bz)
 }

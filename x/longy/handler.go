@@ -21,7 +21,7 @@ func NewHandler(keeper Keeper) sdk.Handler {
 		case types.MsgClaimKey:
 			return handleMsgClaimKey(ctx, keeper, msg)
 		default:
-			errMsg := fmt.Sprintf("Unrecognized button Msg type: %v", msg.Type())
+			errMsg := fmt.Sprintf("unrecognized longy msg type: %v", msg.Type())
 			return sdk.ErrUnknownRequest(errMsg).Result()
 		}
 	}

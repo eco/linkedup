@@ -13,13 +13,13 @@ type GenesisAttendee struct {
 
 // Attendee encapsulates attendee information
 type Attendee struct {
-	id      string
-	address sdk.AccAddress
+	ID      string
+	Address sdk.AccAddress
 
-	commitment util.Commitment
-	claimed    bool
+	Commitment util.Commitment
+	Claimed    bool
 
-	rep int
+	Rep int
 }
 
 // NewAttendee is the constructor for `Attendee`. New attendees default to 0 rep
@@ -28,13 +28,13 @@ func NewAttendee(id string) Attendee {
 	addr := util.IDToAddress(id)
 
 	return Attendee{
-		id:      id,
-		address: addr,
+		ID:      id,
+		Address: addr,
 
-		commitment: util.Commitment{},
-		claimed:    false,
+		Commitment: nil,
+		Claimed:    false,
 
-		rep: 0,
+		Rep: 0,
 	}
 }
 
@@ -43,47 +43,49 @@ func NewAttendeeFromGenesis(ga GenesisAttendee) Attendee {
 	return NewAttendee(ga.ID)
 }
 
-// ID returns the attendee identifier
-func (a Attendee) ID() string {
-	return a.id
+// GetID returns the attendee identifier
+func (a Attendee) GetID() string {
+	return a.ID
 }
 
-// Address returns the deterministic address associated with the attendee
-func (a Attendee) Address() sdk.AccAddress {
-	return a.address
+// GetAddress returns the deterministic address associated with the attendee
+func (a Attendee) GetAddress() sdk.AccAddress {
+	return a.Address
 }
 
-// Rep returns the attendee's current rep
-func (a Attendee) Rep() int {
-	return a.rep
+// GetRep returns the attendee's current rep
+func (a Attendee) GetRep() int {
+	return a.Rep
 }
 
 // CurrentCommitment returns the current commitment associated with this attendee
 func (a Attendee) CurrentCommitment() util.Commitment {
-	return a.commitment
+	return a.Commitment
 }
 
 // SetCommitment will set the claim hash for this attendee
 func (a *Attendee) SetCommitment(commitment util.Commitment) {
-	copy(a.commitment[:], commitment)
+	bz := make([]byte, commitment.Len())
+	copy(bz[:], commitment.Bytes())
+	a.Commitment = bz
 }
 
 // ResetCommitment will reset this attendee's commitment to nil
 func (a *Attendee) ResetCommitment() {
-	a.commitment = util.Commitment{}
+	a.Commitment = nil
 }
 
 // IsClaimed indicates if this attendee is claimed
 func (a Attendee) IsClaimed() bool {
-	return a.claimed
+	return a.Claimed
 }
 
-// SetClaim will mark this attendee as claimed
+// SetClaimed will mark this attendee as claimed
 func (a *Attendee) SetClaimed() {
-	a.claimed = true
+	a.Claimed = true
 }
 
-// SetUnclaim will mark this attendee as unclaimed
+// SetUnclaimed will mark this attendee as unclaimed
 func (a *Attendee) SetUnclaimed() {
-	a.claimed = false
+	a.Claimed = false
 }

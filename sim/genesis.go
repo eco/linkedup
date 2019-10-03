@@ -2,7 +2,6 @@ package sim
 
 import (
 	"encoding/json"
-	app "github.com/eco/longy"
 )
 
 // GenesisState The genesis state of the blockchain is represented here as a map of raw json
@@ -16,5 +15,5 @@ type GenesisState map[string]json.RawMessage
 
 // NewDefaultGenesisState generates the default state for the application.
 func NewDefaultGenesisState() GenesisState {
-	return app.ModuleBasics.DefaultGenesis()
+	return ModuleBasics.DefaultGenesis()
 }

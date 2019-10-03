@@ -36,6 +36,16 @@ func (c Commitment) Empty() bool {
 	return len(c) == 0
 }
 
+// Bytes returns the underlying bytes of this commitment
+func (c Commitment) Bytes() []byte {
+	return c[:]
+}
+
+// Len returns the byte length of this commitment {
+func (c Commitment) Len() int {
+	return len(c.Bytes())
+}
+
 // VerifyReveal will verify the Commitmentment against `reveal`
 func (c Commitment) VerifyReveal(secret []byte) bool {
 	expected := NewCommitment(secret)
