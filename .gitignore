@@ -1,6 +1,5 @@
 .DS_Store
 .idea
-cmd/rks/rks
 cmd/lycli/lycli
 cmd/lyd/lyd
 
