@@ -78,8 +78,8 @@ type LongyApp struct {
 	tkeys map[string]*sdk.TransientStoreKey
 
 	// Main Keepers
-	AccountKeeper auth.AccountKeeper
-	LongyKeeper   longy.Keeper
+	accountKeeper auth.AccountKeeper
+	longyKeeper   longy.Keeper
 
 	// Keepers relating to staking
 	bankKeeper     bank.Keeper
@@ -127,8 +127,8 @@ func NewLongyApp(
 	distrSubspace := app.paramsKeeper.Subspace(distr.DefaultParamspace)
 	slashingSubspace := app.paramsKeeper.Subspace(slashing.DefaultParamspace)
 
-	// The AccountKeeper handles address -> account lookups
-	app.AccountKeeper = auth.NewAccountKeeper(
+	// The accountKeeper handles address -> account lookups
+	app.accountKeeper = auth.NewAccountKeeper(
 		app.cdc,
 		keys[auth.StoreKey],
 		authSubspace,
@@ -137,7 +137,7 @@ func NewLongyApp(
 
 	// The BankKeeper allows you perform sdk.Coins interactions
 	app.bankKeeper = bank.NewBaseKeeper(
-		app.AccountKeeper,
+		app.accountKeeper,
 		bankSupspace,
 		bank.DefaultCodespace,
 		app.ModuleAccountAddrs(),
@@ -147,7 +147,7 @@ func NewLongyApp(
 	app.supplyKeeper = supply.NewKeeper(
 		app.cdc,
 		keys[supply.StoreKey],
-		app.AccountKeeper,
+		app.accountKeeper,
 		app.bankKeeper,
 		maccPerms,
 	)
@@ -189,22 +189,22 @@ func NewLongyApp(
 			app.slashingKeeper.Hooks()),
 	)
 
-	app.LongyKeeper = longy.NewKeeper(
+	app.longyKeeper = longy.NewKeeper(
 		app.cdc,
 		keys[longy.StoreKey],
-		app.AccountKeeper,
+		app.accountKeeper,
 	)
 
 	app.mm = module.NewManager(
-		genaccounts.NewAppModule(app.AccountKeeper),
-		genutil.NewAppModule(app.AccountKeeper, app.stakingKeeper, app.BaseApp.DeliverTx),
-		auth.NewAppModule(app.AccountKeeper),
-		bank.NewAppModule(app.bankKeeper, app.AccountKeeper),
-		supply.NewAppModule(app.supplyKeeper, app.AccountKeeper),
+		genaccounts.NewAppModule(app.accountKeeper),
+		genutil.NewAppModule(app.accountKeeper, app.stakingKeeper, app.BaseApp.DeliverTx),
+		auth.NewAppModule(app.accountKeeper),
+		bank.NewAppModule(app.bankKeeper, app.accountKeeper),
+		supply.NewAppModule(app.supplyKeeper, app.accountKeeper),
 		distr.NewAppModule(app.distrKeeper, app.supplyKeeper),
 		slashing.NewAppModule(app.slashingKeeper, app.stakingKeeper),
-		staking.NewAppModule(app.stakingKeeper, app.distrKeeper, app.AccountKeeper, app.supplyKeeper),
-		longy.NewAppModule(app.LongyKeeper),
+		staking.NewAppModule(app.stakingKeeper, app.distrKeeper, app.accountKeeper, app.supplyKeeper),
+		longy.NewAppModule(app.longyKeeper),
 	)
 
 	app.mm.SetOrderBeginBlockers(distr.ModuleName, slashing.ModuleName)
@@ -238,7 +238,7 @@ func NewLongyApp(
 	// The AnteHandler handles signature verification and transaction pre-processing
 	app.SetAnteHandler(
 		auth.NewAnteHandler(
-			app.AccountKeeper,
+			app.accountKeeper,
 			app.supplyKeeper,
 			auth.DefaultSigVerificationGasConsumer,
 		),

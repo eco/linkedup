@@ -44,7 +44,7 @@ func CreateTestApp(isCheckTx bool) (*LongyApp, sdk.Context) {
 
 // CreateContextAndKeepers will create a in-memory backed keepers and sdk.Context for
 // message handler testing
-func CreateContextAndKeepers() (sdk.Context, longy.Keeper, auth.AccountKeeper) {
+func CreateContextAndKeepers() (sdk.Context, longy.Keeper, auth.accountKeeper) {
 	db := db.NewMemDB()
 	ms := cosmosStore.NewCommitMultiStore(db)
 

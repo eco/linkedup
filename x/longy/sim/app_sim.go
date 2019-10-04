@@ -127,7 +127,7 @@ func NewLongyApp(
 	distrSubspace := app.paramsKeeper.Subspace(distr.DefaultParamspace)
 	slashingSubspace := app.paramsKeeper.Subspace(slashing.DefaultParamspace)
 
-	// The AccountKeeper handles address -> account lookups
+	// The accountKeeper handles address -> account lookups
 	app.AccountKeeper = auth.NewAccountKeeper(
 		app.cdc,
 		keys[auth.StoreKey],

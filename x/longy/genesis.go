@@ -1,9 +1,9 @@
 package longy
 
 import (
-	"github.com/eco/longy/x/longy/errors"
 	"fmt"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/eco/longy/x/longy/errors"
 	"github.com/eco/longy/x/longy/internal/keeper"
 	"github.com/eco/longy/x/longy/internal/types"
 )
@@ -30,19 +30,20 @@ func ValidateGenesis(data GenesisState) error {
 	}
 
 	var seenIds = make(map[string]bool)
-	for _, a := range state.Attendees {
+	for _, a := range data.Attendees {
 		if seenIds[a.ID] {
 			return fmt.Errorf("duplicate id: %s", a.ID)
 		}
 		seenIds[a.ID] = true
 	}
+	return nil
 }
 
 // InitGenesis will run module initialization using the genesis state
 //nolint:gocritic
 func InitGenesis(ctx sdk.Context, k keeper.Keeper, state GenesisState) {
 	// set the master public key
-	k.SetMasterPublicKey(ctx, state.MasterKey)
+	k.SetMasterPublicKey(ctx, state.Service.Address)
 
 	// create and set of all the attendees
 	for _, a := range state.Attendees {
