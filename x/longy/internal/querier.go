@@ -12,14 +12,13 @@ const (
 )
 
 // NewQuerier is the module level router for state queries
+//nolint: staticcheck, gocritic
 func NewQuerier(keeper Keeper) sdk.Querier {
 	return func(ctx sdk.Context, path []string, req abci.RequestQuery) (res []byte, err sdk.Error) {
 		queryType := path[0]
-		queryArgs := path[1:]
+		//queryArgs := path[1:]
 
 		switch queryType {
-		case AttendeeStoreKey:
-			return queryAttendee(ctx, queryArgs, &keeper)
 		default:
 			return nil, sdk.ErrUnknownRequest("unknown query endpoint")
 		}

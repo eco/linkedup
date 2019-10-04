@@ -12,18 +12,15 @@ import (
 type Keeper struct {
 	accountKeeper *auth.AccountKeeper //The keeper for managing accounts
 	bankKeeper    *bank.Keeper        // Reference to the bank keeper that we will use to prevent spamming if we have time
-	attendeeStore AttendeeStore       // Store for the scan KVStore
 	cdc           *codec.Codec        // The wire codec for binary encoding/decoding.0
 }
 
 // NewKeeper creates new instances of the button Keeper
 func NewKeeper(accountKeeper *auth.AccountKeeper, bankKeeper *bank.Keeper, attendeeStoreKey sdk.StoreKey,
 	cdc *codec.Codec) Keeper {
-	attendeeStore := NewAttendeeStore(attendeeStoreKey, cdc)
 	return Keeper{
 		accountKeeper: accountKeeper,
 		bankKeeper:    bankKeeper,
-		attendeeStore: attendeeStore,
 		cdc:           cdc,
 	}
 }
@@ -36,9 +33,4 @@ func (k *Keeper) GetAccountKeeper() *auth.AccountKeeper {
 //GetBankKeeper returns the bank keeper
 func (k *Keeper) GetBankKeeper() *bank.Keeper {
 	return k.bankKeeper
-}
-
-//GetAttendeeStore returns the store for managing attendee state
-func (k *Keeper) GetAttendeeStore() AttendeeStore {
-	return k.attendeeStore
 }
