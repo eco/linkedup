@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"fmt"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	abci "github.com/tendermint/tendermint/abci/types"
 )
@@ -9,12 +10,9 @@ import (
 //nolint:gocritic
 func NewQuerier(keeper Keeper) sdk.Querier {
 	return func(ctx sdk.Context, path []string, req abci.RequestQuery) (res []byte, err sdk.Error) {
-		queryType := path[0]
+		//queryType := path[0]
 		//queryArgs := path[1:]
 
-		switch queryType {
-		default:
-			return nil, sdk.ErrUnknownRequest("unknown query endpoint")
-		}
+		return nil, sdk.ErrUnknownRequest("unknown query endpoint")
 	}
 }
