@@ -3,7 +3,7 @@ module github.com/eco/longy
 go 1.13
 
 require (
-	github.com/cosmos/cosmos-sdk v0.37.2
+	github.com/cosmos/cosmos-sdk v0.37.1
 	github.com/go-mail/mail v2.3.1+incompatible
 	github.com/google/uuid v1.1.1
 	github.com/gorilla/mux v1.7.3
