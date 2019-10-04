@@ -23,6 +23,9 @@ lycli keys add bob < $PWD_FILE
 lyd add-genesis-account $(lycli keys show alice -a) 1000gamecoin,100000000stake
 lyd add-genesis-account $(lycli keys show bob -a) 1000gamecoin,100000000stake
 
+# Generate the genesis attendees from the eventbrite api
+lyd add-genesis-attendees $(lycli keys show alice -a)
+
 # Configure your CLI to eliminate need for chain-id flag
 lycli config chain-id longychain
 lycli config output json

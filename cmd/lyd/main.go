@@ -52,7 +52,7 @@ func main() {
 		// AddGenesisAccountCmd allows users to add accounts to the genesis file
 		genaccscli.AddGenesisAccountCmd(ctx, cdc, app.DefaultNodeHome, app.DefaultCLIHome),
 		// AddAttendeesCmd allows users to add the list of attendees to the chain by their eventbrite id
-		client.AddGenesisAttendeesCmd(ctx, cdc, app.DefaultNodeHome, app.DefaultCLIHome),
+		client.AddGenesisAttendeesCmd(ctx, cdc),
 	)
 
 	server.AddCommands(ctx, cdc, rootCmd, newApp, exportAppStateAndTMValidators)
