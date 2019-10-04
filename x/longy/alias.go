@@ -8,10 +8,8 @@ import (
 const (
 	// ModuleName is the name of the module
 	ModuleName = types.ModuleName
-
 	// StoreKey is the key used to access the store
 	StoreKey = ModuleName
-
 	// RouterKey is the key for routing messages to our handler
 	RouterKey = types.RouterKey
 )
@@ -45,4 +43,11 @@ type (
 
 	// RekeyMsg is the type alias for the Rekey Message
 	RekeyMsg = types.MsgRekey
+
+	//GenesisAttendees is the array of attendees for the genesis file
+	GenesisAttendees = types.GenesisAttendees
+	//GenesisAttendee is the attendee for the genesis file
+	GenesisAttendee = types.GenesisAttendee
+	//GenesisService is the re-key service genesis type
+	GenesisService = types.GenesisService
 )

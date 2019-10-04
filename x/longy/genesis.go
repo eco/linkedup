@@ -1,30 +1,32 @@
 package longy
 
 import (
+	"github.com/eco/longy/x/longy/errors"
 	"fmt"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/eco/longy/x/longy/internal/keeper"
 	"github.com/eco/longy/x/longy/internal/types"
 )
 
-// GenesisState is the state that must be provided at genesis
+//GenesisState is the genesis struct for the longy module
 type GenesisState struct {
-	MasterKey sdk.AccAddress
-	Attendees []types.GenesisAttendee
+	Service   GenesisService   `json:"service"`
+	Attendees GenesisAttendees `json:"attendees"`
 }
 
-// DefaultGenesisState is an empty `GenesisState`
+//DefaultGenesisState returns the default genesis struct for the longy module
 func DefaultGenesisState() GenesisState {
-	return GenesisState{
-		MasterKey: nil,
-		Attendees: nil,
-	}
+	return GenesisState{Service: GenesisService{}, Attendees: GenesisAttendees{}}
 }
 
-// ValidateGenesis runs sanity checks `state`
-func ValidateGenesis(state GenesisState) error {
-	if state.MasterKey.Empty() {
-		return fmt.Errorf("empty master key")
+//ValidateGenesis validates that the passed genesis state is valid
+func ValidateGenesis(data GenesisState) error {
+	if data.Service.Address.Empty() {
+		return errors.ErrGenesisServiceAddressEmpty("Re-Key Service address must be set")
+	}
+
+	if data.Attendees == nil {
+		return errors.ErrGenesisAttendeesEmpty("Genesis attendees cannot be empty")
 	}
 
 	var seenIds = make(map[string]bool)
@@ -34,8 +36,6 @@ func ValidateGenesis(state GenesisState) error {
 		}
 		seenIds[a.ID] = true
 	}
-
-	return nil
 }
 
 // InitGenesis will run module initialization using the genesis state
