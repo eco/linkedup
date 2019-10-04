@@ -35,22 +35,27 @@ func NewMsgRekey(attendeeAddress, masterAddress sdk.AccAddress,
 }
 
 // Route defines the route for this message
+//nolint:gocritic
 func (msg MsgRekey) Route() string {
 	return RouterKey
 }
 
 // Type is the message type
+//nolint:gocritic
 func (msg MsgRekey) Type() string {
 	return "rekey"
 }
 
 // ValidateBasic peforms sanity checks on the message
+//nolint:gocritic
 func (msg MsgRekey) ValidateBasic() sdk.Error {
 	if msg.AttendeeAddress.Empty() {
 		return sdk.ErrInvalidAddress("attendee address is empty")
 	} else if len(msg.NewAttendeePublicKey.Bytes()) == 0 {
 		return sdk.ErrInvalidAddress("new attendee public key is empty")
-	} else if msg.MasterAddress.Empty() {
+	}
+
+	if msg.MasterAddress.Empty() {
 		return sdk.ErrInvalidAddress("master public key is empty")
 	}
 
@@ -58,12 +63,14 @@ func (msg MsgRekey) ValidateBasic() sdk.Error {
 }
 
 // GetSignBytes returns the byte array that is signed over
+//nolint:gocritic
 func (msg MsgRekey) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }
 
 // GetSigners returns the the master public key expected to sign this message
+//nolint:gocritic
 func (msg MsgRekey) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.MasterAddress}
 }

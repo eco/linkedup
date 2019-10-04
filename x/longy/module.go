@@ -76,35 +76,42 @@ func NewAppModule(keeper Keeper) module.AppModule {
 }
 
 // Route returns the route key for the the appropriate messages
+//nolint:gocritic
 func (am AppModule) Route() string {
 	return RouterKey
 }
 
 // NewHandler return's the module's handler
+//nolint:gocritic
 func (am AppModule) NewHandler() sdk.Handler {
 	return NewHandler(am.keeper)
 }
 
 // QuerierRoute returns the key for the router
+//nolint:gocritic
 func (am AppModule) QuerierRoute() string {
 	return RouterKey
 }
 
 // NewQuerierHandler returns the handler for the querier
+//nolint:gocritic
 func (am AppModule) NewQuerierHandler() sdk.Querier {
 	return nil
 }
 
 // BeginBlock runs at the beginning of each block
+//nolint:gocritic
 func (am AppModule) BeginBlock(sdk.Context, abci.RequestBeginBlock) {
 }
 
 // EndBlock runs at the end of each block
+//nolint:gocritic
 func (am AppModule) EndBlock(sdk.Context, abci.RequestEndBlock) []abci.ValidatorUpdate {
 	return []abci.ValidatorUpdate{}
 }
 
 // RegisterInvariants registers the invariants for this module
+//nolint:gocritic
 func (am AppModule) RegisterInvariants(sdk.InvariantRegistry) {
 }
 

@@ -31,6 +31,7 @@ func MasterKey() []byte {
 	return masterKeyPrefix
 }
 
+//nolint:gosec
 func prefixKey(prefix, key []byte) []byte {
 	buf := new(bytes.Buffer)
 	buf.Write(prefix)

@@ -6,6 +6,7 @@ import (
 )
 
 // GetMasterPublicKey will retrieve the master key set by the module
+//nolint:gocritic
 func (k Keeper) GetMasterPublicKey(ctx sdk.Context) sdk.AccAddress {
 	key := types.MasterKey()
 	bz := k.Get(ctx, key)
@@ -14,6 +15,7 @@ func (k Keeper) GetMasterPublicKey(ctx sdk.Context) sdk.AccAddress {
 }
 
 // SetMasterPublicKey will set the module's master key
+//nolint:gocritic
 func (k Keeper) SetMasterPublicKey(ctx sdk.Context, publicKey sdk.AccAddress) {
 	key := types.MasterKey()
 	bz := publicKey.Bytes()

@@ -27,7 +27,7 @@ func ValidateGenesis(state GenesisState) error {
 		return fmt.Errorf("empty master key")
 	}
 
-	var seenIds map[string]bool
+	var seenIds = make(map[string]bool)
 	for _, a := range state.Attendees {
 		if seenIds[a.ID] {
 			return fmt.Errorf("duplicate id: %s", a.ID)
@@ -39,6 +39,7 @@ func ValidateGenesis(state GenesisState) error {
 }
 
 // InitGenesis will run module initialization using the genesis state
+//nolint:gocritic
 func InitGenesis(ctx sdk.Context, k keeper.Keeper, state GenesisState) {
 	// set the master public key
 	k.SetMasterPublicKey(ctx, state.MasterKey)

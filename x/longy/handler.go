@@ -8,6 +8,7 @@ import (
 )
 
 // NewHandler constructor for our button module
+//nolint:gocritic
 func NewHandler(keeper Keeper) sdk.Handler {
 	return func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
 		switch msg := msg.(type) { //cast message
@@ -28,7 +29,7 @@ func NewHandler(keeper Keeper) sdk.Handler {
 }
 
 // handleMsgQrScan processes MsgQrScan
-// nolint: unparam, gocritic
+//nolint: unparam, gocritic
 func handleMsgQrScan(ctx sdk.Context, k Keeper, msg types.MsgQrScan) sdk.Result {
 	//validate sender address is correct
 
@@ -39,7 +40,7 @@ func handleMsgQrScan(ctx sdk.Context, k Keeper, msg types.MsgQrScan) sdk.Result 
 	return sdk.Result{}
 }
 
-// nolint: unparam, gocritic
+//nolint: unparam, gocritic
 func handleMsgShareInfo(ctx sdk.Context, k Keeper, msg types.MsgShareInfo) sdk.Result {
 
 	//update scan state
@@ -47,13 +48,13 @@ func handleMsgShareInfo(ctx sdk.Context, k Keeper, msg types.MsgShareInfo) sdk.R
 	return sdk.Result{}
 }
 
-// nolint: unparam
+//nolint: unparam, gocritic
 func handleMsgRekey(ctx sdk.Context, k Keeper, msg types.MsgRekey) sdk.Result {
 	accountKeeper := k.AccountKeeper()
 
 	// authorization passed, we simply need to update the attendee's public key
 	acc := accountKeeper.GetAccount(ctx, msg.AttendeeAddress)
-	acc.SetPubKey(msg.NewAttendeePublicKey)
+	_ = acc.SetPubKey(msg.NewAttendeePublicKey)
 	accountKeeper.SetAccount(ctx, acc)
 
 	// update the attendee to unclaimed
@@ -68,6 +69,7 @@ func handleMsgRekey(ctx sdk.Context, k Keeper, msg types.MsgRekey) sdk.Result {
 	return sdk.Result{}
 }
 
+//nolint: unparam, gocritic
 func handleMsgClaimKey(ctx sdk.Context, k Keeper, msg types.MsgClaimKey) sdk.Result {
 	attendee, ok := k.GetAttendee(ctx, msg.AttendeeAddress)
 	if !ok {

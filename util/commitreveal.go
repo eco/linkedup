@@ -11,7 +11,7 @@ type Commitment []byte
 
 // NewCommitment will create a Commitmentment using `secret`
 func NewCommitment(secret []byte) Commitment {
-	hash := tmcrypto.Sha256([]byte(secret))
+	hash := tmcrypto.Sha256(secret)
 
 	return Commitment(hash)
 }

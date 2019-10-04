@@ -46,31 +46,36 @@ func NewAttendeeFromGenesis(ga GenesisAttendee) Attendee {
 }
 
 // GetID returns the attendee identifier
+//nolint:gocritic
 func (a Attendee) GetID() string {
 	return a.ID
 }
 
 // GetAddress returns the deterministic address associated with the attendee
+//nolint:gocritic
 func (a Attendee) GetAddress() sdk.AccAddress {
 	return a.Address
 }
 
 // GetRep returns the attendee's current rep
+//nolint:gocritic
 func (a Attendee) GetRep() uint {
 	return a.Rep
 }
 
 // AddRep will add rep to the attendee {
 func (a *Attendee) AddRep(r uint) {
-	a.Rep = a.Rep + r
+	a.Rep += r
 }
 
 // CurrentCommitment returns the current commitment associated with this attendee
+//nolint:gocritic
 func (a Attendee) CurrentCommitment() util.Commitment {
 	return a.Commitment
 }
 
 // SetCommitment will set the claim hash for this attendee
+//nolint:gocritic
 func (a *Attendee) SetCommitment(commitment util.Commitment) {
 	bz := make([]byte, commitment.Len())
 	copy(bz, commitment.Bytes())
@@ -83,12 +88,14 @@ func (a *Attendee) ResetCommitment() {
 }
 
 // IsClaimed indicates if this attendee is claimed
+//nolint:gocritic
 func (a Attendee) IsClaimed() bool {
 	return a.Claimed
 }
 
 // HasPreviouslyClaimed is an indicator for the first time an attendee
 // has been claimed
+//nolint:gocritic
 func (a Attendee) HasPreviouslyClaimed() bool {
 	return a.FirstTimeClaimed
 }

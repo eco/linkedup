@@ -37,6 +37,7 @@ func ErrAttendeeAlreadyClaimed() sdk.Error {
 	return sdk.NewError(DefaultCodespace, AttendeeAlreadyClaimed, "attendee claimed")
 }
 
+// ErrInvalidCommitmentReveal indicates that the reveal is incorrect for the commitment
 func ErrInvalidCommitmentReveal() sdk.Error {
 	return sdk.NewError(DefaultCodespace, InvalidCommitmentReveal, "reveal to the commitment is incorrect")
 }
