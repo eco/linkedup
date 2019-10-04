@@ -27,6 +27,11 @@ const (
 	//AttendeeCountMismatch is the code for when there is a mis match between the expected and received number of
 	//attendees from the indexing of the eventbrite calls
 	AttendeeCountMismatch
+	//GenesisServiceAccountInvalid is the code when the service account bech32 address is invalidly passed to gen
+	GenesisServiceAccountInvalid
+	//GenesisServiceAccountNotPresent is the code when the service account is not found in the genesis accounts
+	GenesisServiceAccountNotPresent
+
 	//DefaultError is the code for when a random error occurs that we do not provide a unique code to
 	DefaultError
 )
@@ -69,6 +74,16 @@ func ErrNetworkResponseError(format string, args ...interface{}) sdk.Error {
 //ErrAttendeeCountMismatch occurs when network response that is not what is expected, ie 200/201
 func ErrAttendeeCountMismatch(format string, args ...interface{}) sdk.Error {
 	return sdk.NewError(LongyCodeSpace, AttendeeCountMismatch, format, args...)
+}
+
+//ErrGenesisServiceAccountInvalid occurs when the service account bech32 address is invalidly passed to gen
+func ErrGenesisServiceAccountInvalid(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, GenesisServiceAccountInvalid, format, args...)
+}
+
+//ErrGenesisServiceAccountNotPresent occurs when the service account is not found in the genesis accounts
+func ErrGenesisServiceAccountNotPresent(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, GenesisServiceAccountNotPresent, format, args...)
 }
 
 //ErrDefault occurs when a random error occurs that we do not provide a unique code to
