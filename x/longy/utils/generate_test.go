@@ -13,10 +13,10 @@ import (
 
 func TestMonitor(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Longy Module Test Suite")
+	RunSpecs(t, "Utils Test Suite")
 }
 
-var _ = Describe("Claim Id Tests", func() {
+var _ = Describe("Generate Attendee Genesis Tests", func() {
 	var key string
 	BeforeEach(func() {
 		key = os.Getenv(utils.EventbriteEnvKey)

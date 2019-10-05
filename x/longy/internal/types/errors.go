@@ -30,8 +30,8 @@ const (
 	GenesisServiceAccountInvalid
 	//GenesisServiceAccountNotPresent is the code when the service account is not found in the genesis accounts
 	GenesisServiceAccountNotPresent
-	//QRCodeDoesNotExist is the code when
-	QRCodeDoesNotExist
+	//QRCodeInvalid is the code when a scan message has an invalid QR code, ie not a positive integer
+	QRCodeInvalid
 	//AttendeeUnclaimed is the code when
 	AttendeeUnclaimed
 	//AttendeeAlreadyClaimed is the code when
@@ -97,9 +97,9 @@ func ErrGenesisServiceAccountNotPresent(format string, args ...interface{}) sdk.
 	return sdk.NewError(LongyCodeSpace, GenesisServiceAccountNotPresent, format, args...)
 }
 
-// ErrQRCodeDoesNotExist is the error for when a QR code does not exist in our keeper
-func ErrQRCodeDoesNotExist() sdk.Error {
-	return sdk.NewError(LongyCodeSpace, QRCodeDoesNotExist, "name does not exist")
+// ErrQRCodeInvalid occurs when a scan message has an invalid QR code, ie not a positive integer
+func ErrQRCodeInvalid(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, QRCodeInvalid, format, args...)
 }
 
 // ErrAttendeeUnclaimed indicates a attendee that is unclaimed

@@ -13,7 +13,7 @@ func NewHandler(keeper Keeper) sdk.Handler {
 	return func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
 		switch msg := msg.(type) { //cast message
 
-		case types.MsgQrScan:
+		case types.MsgScanQr:
 			return handleMsgQrScan(ctx, keeper, msg)
 		case types.MsgShareInfo:
 			return handleMsgShareInfo(ctx, keeper, msg)
@@ -28,9 +28,9 @@ func NewHandler(keeper Keeper) sdk.Handler {
 	}
 }
 
-// handleMsgQrScan processes MsgQrScan
+// handleMsgQrScan processes MsgScanQr
 //nolint: unparam, gocritic
-func handleMsgQrScan(ctx sdk.Context, k Keeper, msg types.MsgQrScan) sdk.Result {
+func handleMsgQrScan(ctx sdk.Context, k Keeper, msg types.MsgScanQr) sdk.Result {
 	//validate sender address is correct
 
 	//get the scanned address from the QR code
