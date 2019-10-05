@@ -18,12 +18,12 @@ type Scan struct {
 }
 
 //NewScan creates a new scan and sets its id
-func NewScan(s1 sdk.AccAddress, s2 sdk.AccAddress) (*Scan, sdk.Error) {
+func NewScan(s1 sdk.AccAddress, s2 sdk.AccAddress) (Scan, sdk.Error) {
 	id, err := GenID(s1, s2)
 	if err != nil {
-		return nil, err
+		return Scan{}, err
 	}
-	return &Scan{
+	return Scan{
 		ID:       id,
 		S1:       s1,
 		S2:       s2,

@@ -44,6 +44,9 @@ const (
 	ScanAccountsSame
 	//AccountAddressEmpty is the code when an AccAddress is the empty address
 	AccountAddressEmpty
+	//ScanQRAlreadyOccurred is the code for when the scan message has already been sent by the scanner or the scan
+	//is complete for those two parties
+	ScanQRAlreadyOccurred
 
 	//DefaultError is the code for when a random error occurs that we do not provide a unique code to
 	DefaultError
@@ -132,6 +135,12 @@ func ErrScanAccountsSame(format string, args ...interface{}) sdk.Error {
 //ErrAccountAddressEmpty occurs when an AccAddress is the empty address
 func ErrAccountAddressEmpty(format string, args ...interface{}) sdk.Error {
 	return sdk.NewError(LongyCodeSpace, AccountAddressEmpty, format, args...)
+}
+
+//ErrScanQRAlreadyOccurred occurs when the scan message has already been sent by the scanner or the scan
+//is complete for those two parties
+func ErrScanQRAlreadyOccurred(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, ScanQRAlreadyOccurred, format, args...)
 }
 
 //ErrDefault occurs when a random error occurs that we do not provide a unique code to

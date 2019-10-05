@@ -2,6 +2,7 @@ package longy
 
 import (
 	"fmt"
+	"github.com/eco/longy/x/longy/internal/handler"
 	"github.com/eco/longy/x/longy/internal/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -14,7 +15,7 @@ func NewHandler(keeper Keeper) sdk.Handler {
 		switch msg := msg.(type) { //cast message
 
 		case types.MsgScanQr:
-			return handleMsgQrScan(ctx, keeper, msg)
+			return handler.HandleMsgQrScan(ctx, keeper, msg)
 		case types.MsgShareInfo:
 			return handleMsgShareInfo(ctx, keeper, msg)
 		case types.MsgRekey:
@@ -26,18 +27,6 @@ func NewHandler(keeper Keeper) sdk.Handler {
 			return sdk.ErrUnknownRequest(errMsg).Result()
 		}
 	}
-}
-
-// handleMsgQrScan processes MsgScanQr
-//nolint: unparam, gocritic
-func handleMsgQrScan(ctx sdk.Context, k Keeper, msg types.MsgScanQr) sdk.Result {
-	//validate sender address is correct
-
-	//get the scanned address from the QR code
-
-	//update scan state
-
-	return sdk.Result{}
 }
 
 //nolint: unparam, gocritic

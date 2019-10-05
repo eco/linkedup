@@ -9,9 +9,9 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("Scan Tests", func() {
+var _ = Describe("Scan Keeper Tests", func() {
 	var keeper longy.Keeper
-	var scan *types.Scan
+	var scan types.Scan
 	BeforeEach(func() {
 		BeforeTestRun()
 		keeper = simApp.LongyKeeper
@@ -31,7 +31,7 @@ var _ = Describe("Scan Tests", func() {
 	})
 
 	It("should succeed to get a scan that exists", func() {
-		keeper.SetScan(ctx, scan)
+		keeper.SetScan(ctx, &scan)
 
 		storeScan, err := keeper.GetScanByID(ctx, scan.ID)
 		Expect(err).To(BeNil())
