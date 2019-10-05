@@ -18,7 +18,7 @@ func (k Keeper) GetAttendeeWithID(ctx sdk.Context, id string) (types.Attendee, b
 //nolint:gocritic
 func (k Keeper) GetAttendee(ctx sdk.Context, address sdk.AccAddress) (attendee types.Attendee, exists bool) {
 	key := types.AttendeeKey(address)
-	bz := k.Get(ctx, key)
+	bz, _ := k.Get(ctx, key)
 	if bz == nil {
 		return
 	}

@@ -12,6 +12,8 @@ const (
 	ItemNotFound sdk.CodeType = iota + 1
 	//AttendeeNotFound is the code for when the attendee cannot be found in the keeper
 	AttendeeNotFound
+	//ScanNotFound is the code when we cannot find a scan in the keeper with the given id
+	ScanNotFound
 	//InsufficientPrivileges is the code for when a transaction signer doesn't have the necessary privilege
 	InsufficientPrivileges
 	//GenesisServiceAddressEmpty is the code for when the service account address is not set in the genesis file
@@ -30,14 +32,21 @@ const (
 	GenesisServiceAccountInvalid
 	//GenesisServiceAccountNotPresent is the code when the service account is not found in the genesis accounts
 	GenesisServiceAccountNotPresent
-	//QRCodeDoesNotExist is the code when
-	QRCodeDoesNotExist
+	//QRCodeInvalid is the code when a scan message has an invalid QR code, ie not a positive integer
+	QRCodeInvalid
 	//AttendeeUnclaimed is the code when
 	AttendeeUnclaimed
 	//AttendeeAlreadyClaimed is the code when
 	AttendeeAlreadyClaimed
 	//InvalidCommitmentReveal is the code when
 	InvalidCommitmentReveal
+	//ScanAccountsSame is the code when a scan of with the same 1 account is attempted
+	ScanAccountsSame
+	//AccountAddressEmpty is the code when an AccAddress is the empty address
+	AccountAddressEmpty
+	//ScanQRAlreadyOccurred is the code for when the scan message has already been sent by the scanner or the scan
+	//is complete for those two parties
+	ScanQRAlreadyOccurred
 
 	//DefaultError is the code for when a random error occurs that we do not provide a unique code to
 	DefaultError
@@ -46,6 +55,11 @@ const (
 //ErrItemNotFound occurs when we cannot find an item in the default store
 func ErrItemNotFound(format string, args ...interface{}) sdk.Error {
 	return sdk.NewError(LongyCodeSpace, ItemNotFound, format, args...)
+}
+
+//ErrScanNotFound occurs when we cannot find a scan in the keeper with the given id
+func ErrScanNotFound(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, ScanNotFound, format, args...)
 }
 
 //ErrAttendeeNotFound occurs when we cannot find the attendee
@@ -93,9 +107,9 @@ func ErrGenesisServiceAccountNotPresent(format string, args ...interface{}) sdk.
 	return sdk.NewError(LongyCodeSpace, GenesisServiceAccountNotPresent, format, args...)
 }
 
-// ErrQRCodeDoesNotExist is the error for when a QR code does not exist in our keeper
-func ErrQRCodeDoesNotExist() sdk.Error {
-	return sdk.NewError(LongyCodeSpace, QRCodeDoesNotExist, "name does not exist")
+// ErrQRCodeInvalid occurs when a scan message has an invalid QR code, ie not a positive integer
+func ErrQRCodeInvalid(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, QRCodeInvalid, format, args...)
 }
 
 // ErrAttendeeUnclaimed indicates a attendee that is unclaimed
@@ -111,6 +125,22 @@ func ErrAttendeeAlreadyClaimed() sdk.Error {
 // ErrInvalidCommitmentReveal indicates that the reveal is incorrect for the commitment
 func ErrInvalidCommitmentReveal() sdk.Error {
 	return sdk.NewError(LongyCodeSpace, InvalidCommitmentReveal, "reveal to the commitment is incorrect")
+}
+
+//ErrScanAccountsSame occurs when a scan of with the same 1 account is attempted
+func ErrScanAccountsSame(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, ScanAccountsSame, format, args...)
+}
+
+//ErrAccountAddressEmpty occurs when an AccAddress is the empty address
+func ErrAccountAddressEmpty(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, AccountAddressEmpty, format, args...)
+}
+
+//ErrScanQRAlreadyOccurred occurs when the scan message has already been sent by the scanner or the scan
+//is complete for those two parties
+func ErrScanQRAlreadyOccurred(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, ScanQRAlreadyOccurred, format, args...)
 }
 
 //ErrDefault occurs when a random error occurs that we do not provide a unique code to

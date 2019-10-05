@@ -16,7 +16,7 @@ func init() {
 // RegisterCodec registers concrete types used by this module
 func RegisterCodec(cdc *codec.Codec) {
 	// register msgs
-	cdc.RegisterConcrete(&MsgQrScan{}, RouterKey+"/MsgQRScan", nil)
+	cdc.RegisterConcrete(&MsgScanQr{}, RouterKey+"/MsgQRScan", nil)
 	cdc.RegisterConcrete(&MsgShareInfo{}, RouterKey+"/MsgShareInfo", nil)
 	cdc.RegisterConcrete(&MsgRekey{}, RouterKey+"/MsgRekey", nil)
 	cdc.RegisterConcrete(&MsgClaimKey{}, RouterKey+"/MsgClaimKey", nil)
