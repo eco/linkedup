@@ -38,6 +38,10 @@ const (
 	AttendeeAlreadyClaimed
 	//InvalidCommitmentReveal is the code when
 	InvalidCommitmentReveal
+	//ScanAccountsSame is the code when a scan of with the same 1 account is attempted
+	ScanAccountsSame
+	//AccountAddressEmpty is the code when an AccAddress is the empty address
+	AccountAddressEmpty
 
 	//DefaultError is the code for when a random error occurs that we do not provide a unique code to
 	DefaultError
@@ -111,6 +115,16 @@ func ErrAttendeeAlreadyClaimed() sdk.Error {
 // ErrInvalidCommitmentReveal indicates that the reveal is incorrect for the commitment
 func ErrInvalidCommitmentReveal() sdk.Error {
 	return sdk.NewError(LongyCodeSpace, InvalidCommitmentReveal, "reveal to the commitment is incorrect")
+}
+
+//ErrScanAccountsSame occurs when a scan of with the same 1 account is attempted
+func ErrScanAccountsSame(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, ScanAccountsSame, format, args...)
+}
+
+//ErrAccountAddressEmpty occurs when an AccAddress is the empty address
+func ErrAccountAddressEmpty(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, AccountAddressEmpty, format, args...)
 }
 
 //ErrDefault occurs when a random error occurs that we do not provide a unique code to
