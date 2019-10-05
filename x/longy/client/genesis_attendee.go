@@ -8,7 +8,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/genaccounts"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	"github.com/eco/longy/x/longy"
-	"github.com/eco/longy/x/longy/errors"
 	"github.com/eco/longy/x/longy/internal/types"
 	"github.com/eco/longy/x/longy/utils"
 	"github.com/spf13/cobra"
@@ -90,7 +89,7 @@ func getServiceAcct(appState map[string]json.RawMessage, cdc *codec.Codec, args 
 	e sdk.Error) {
 	addr, err := sdk.AccAddressFromBech32(args[0])
 	if err != nil {
-		e = errors.ErrGenesisServiceAccountInvalid(err.Error())
+		e = types.ErrGenesisServiceAccountInvalid(err.Error())
 		return
 	}
 
@@ -101,7 +100,7 @@ func getServiceAcct(appState map[string]json.RawMessage, cdc *codec.Codec, args 
 			return
 		}
 	}
-	e = errors.ErrGenesisServiceAccountNotPresent("service account was not found in genesis accounts, " +
+	e = types.ErrGenesisServiceAccountNotPresent("service account was not found in genesis accounts, " +
 		"have you added by calling 'lyd add-genesis-account {acct} {coints...}'")
 	return
 }

@@ -3,7 +3,6 @@ package longy
 import (
 	"fmt"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/eco/longy/x/longy/errors"
 	"github.com/eco/longy/x/longy/internal/keeper"
 	"github.com/eco/longy/x/longy/internal/types"
 )
@@ -22,11 +21,11 @@ func DefaultGenesisState() GenesisState {
 //ValidateGenesis validates that the passed genesis state is valid
 func ValidateGenesis(data GenesisState) error {
 	if data.Service.Address.Empty() {
-		return errors.ErrGenesisServiceAddressEmpty("Re-Key Service address must be set")
+		return types.ErrGenesisServiceAddressEmpty("Re-Key Service address must be set")
 	}
 
 	if data.Attendees == nil {
-		return errors.ErrGenesisAttendeesEmpty("Genesis attendees cannot be empty")
+		return types.ErrGenesisAttendeesEmpty("Genesis attendees cannot be empty")
 	}
 
 	var seenIds = make(map[string]bool)
