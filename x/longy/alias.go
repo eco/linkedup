@@ -28,7 +28,7 @@ var (
 	NewAttendee = types.NewAttendee
 
 	// NewKeyMsg is the function alias for the RekeyMsg type
-	NewMsg = types.NewMsgKey
+	NewKeyMsg = types.NewMsgKey
 
 	// NewQuerier is the function alias for creating a new querier
 	NewQuerier = keeper.NewQuerier

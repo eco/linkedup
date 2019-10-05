@@ -63,7 +63,7 @@ var _ = Describe("Longy Handler Tests", func() {
 		Expect(res.Code).To(Equal(types.AttendeeNotFound))
 	})
 
-	It("checks that the intial public key is nil", func() {
+	It("checks that the initial public key is nil", func() {
 		accountKeeper := keeper.AccountKeeper()
 		account := accountKeeper.GetAccount(ctx, addr)
 		Expect(account).ToNot(BeNil())
