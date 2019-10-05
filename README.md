@@ -29,5 +29,5 @@ ENABLE_DB_TESTS=true
 ```
 eg:
 ```
-ENABLE_DB_TESTS=true ginkgo ./...
+ENABLE_DB_TESTS=true make test
 ```
