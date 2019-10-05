@@ -107,22 +107,22 @@ func ErrGenesisServiceAccountNotPresent(format string, args ...interface{}) sdk.
 }
 
 // ErrQRCodeDoesNotExist is the error for when a QR code does not exist in our keeper
-func ErrQRCodeDoesNotExist() sdk.Error {
+func ErrQRCodeDoesNotExist(format string, args ...interface{}) sdk.Error {
 	return sdk.NewError(LongyCodeSpace, QRCodeDoesNotExist, "name does not exist")
 }
 
 // ErrAttendeeClaimed indicates a attendee that is unclaimed
-func ErrAttendeeClaimed() sdk.Error {
+func ErrAttendeeClaimed(format string, args ...interface{}) sdk.Error {
 	return sdk.NewError(LongyCodeSpace, AttendeeClaimed, "attendee claimed")
 }
 
 // ErrAccountKeyed indicated the attendee has already keyed their account
-func ErrAccountKeyed() sdk.Error {
+func ErrAccountKeyed(format string, args ...interface{}) sdk.Error {
 	return sdk.NewError(LongyCodeSpace, AccountKeyed, "attendee also key'd their account")
 }
 
 // ErrInvalidCommitmentReveal indicates that the reveal is incorrect for the commitment
-func ErrInvalidCommitmentReveal() sdk.Error {
+func ErrInvalidCommitmentReveal(format string, args ...interface{}) sdk.Error {
 	return sdk.NewError(LongyCodeSpace, InvalidCommitmentReveal, "reveal to the commitment is incorrect")
 }
 
