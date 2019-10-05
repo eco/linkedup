@@ -60,7 +60,7 @@ func handleMsgRekey(ctx sdk.Context, k Keeper, msg types.MsgRekey) sdk.Result {
 	// update the attendee to unclaimed
 	attendee, ok := k.GetAttendee(ctx, msg.AttendeeAddress)
 	if !ok {
-		return types.ErrAttendeeDoesNotExist().Result()
+		return types.ErrAttendeeNotFound("cannot find the attendee").Result()
 	}
 	attendee.SetCommitment(msg.Commitment)
 	attendee.SetUnclaimed()
@@ -73,7 +73,7 @@ func handleMsgRekey(ctx sdk.Context, k Keeper, msg types.MsgRekey) sdk.Result {
 func handleMsgClaimKey(ctx sdk.Context, k Keeper, msg types.MsgClaimKey) sdk.Result {
 	attendee, ok := k.GetAttendee(ctx, msg.AttendeeAddress)
 	if !ok {
-		return types.ErrAttendeeDoesNotExist().Result()
+		return types.ErrAttendeeNotFound("cannot find the attendee").Result()
 	}
 
 	if attendee.IsClaimed() {

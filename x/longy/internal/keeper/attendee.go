@@ -16,19 +16,19 @@ func (k Keeper) GetAttendeeWithID(ctx sdk.Context, id string) (types.Attendee, b
 
 // GetAttendee will retrieve the attendee via `address`
 //nolint:gocritic
-func (k Keeper) GetAttendee(ctx sdk.Context, address sdk.AccAddress) (types.Attendee, bool) {
+func (k Keeper) GetAttendee(ctx sdk.Context, address sdk.AccAddress) (attendee types.Attendee, exists bool) {
 	key := types.AttendeeKey(address)
 	bz := k.Get(ctx, key)
 	if bz == nil {
-		return types.Attendee{}, false
+		return
 	}
 
-	var a types.Attendee
-	err := k.cdc.UnmarshalBinaryLengthPrefixed(bz, &a)
+	err := k.cdc.UnmarshalBinaryLengthPrefixed(bz, &attendee)
 	if err != nil {
 		panic(err)
 	}
-	return a, true
+	exists = true
+	return
 }
 
 // SetAttendee will set the attendee `a` to the store using it's address

@@ -77,6 +77,9 @@ var _ = Describe("Longy Handler Tests", func() {
 			NewAttendeePublicKey: newPub,
 			Commitment:           commitment,
 		}
+		a, ok := keeper.GetAttendee(ctx, addr)
+		Expect(ok).Should(BeTrue())
+		initialRep := a.Rep
 
 		res := handler(ctx, rekeyMsg)
 		Expect(res.IsOK()).Should(BeTrue())
@@ -90,7 +93,7 @@ var _ = Describe("Longy Handler Tests", func() {
 		}
 		res = handler(ctx, msg)
 		Expect(res.IsOK()).Should(BeFalse())
-		Expect(res.Code).To(Equal(types.AttendeeDoesNotExist))
+		Expect(res.Code).To(Equal(types.AttendeeNotFound))
 
 		// 1. invalid secret
 		msg = types.MsgClaimKey{
@@ -110,9 +113,10 @@ var _ = Describe("Longy Handler Tests", func() {
 		Expect(res.IsOK()).Should(BeTrue())
 
 		// Check that the attendee was updated accordingly
-		a, ok := keeper.GetAttendee(ctx, addr)
+		a, ok = keeper.GetAttendee(ctx, addr)
 		Expect(ok).Should(BeTrue())
 		Expect(a.IsClaimed()).Should(BeTrue())
+		Expect(a.Rep).To(Equal(initialRep))
 		Expect(a.CurrentCommitment()).Should(BeNil())
 
 		// 4. Cannot reclaim an attendee in a claimed state

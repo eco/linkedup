@@ -8,7 +8,7 @@ import (
 	app "github.com/eco/longy"
 	"github.com/eco/longy/x/longy"
 	"github.com/eco/longy/x/longy/client"
-	"github.com/eco/longy/x/longy/errors"
+	"github.com/eco/longy/x/longy/internal/types"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"testing"
@@ -31,7 +31,7 @@ var _ = Describe("Add Genesis Attendee Tests", func() {
 		appState := getAppState(cdc, fakeAddr, false)
 		_, err := client.BuildGenesisState(appState, cdc, []string{fakeAddr})
 		Expect(err).To(Not(BeNil()))
-		Expect(err.Code()).To(Equal(errors.GenesisServiceAccountInvalid))
+		Expect(err.Code()).To(Equal(types.GenesisServiceAccountInvalid))
 	})
 
 	It("should fail when service address is not in the accounts genesis", func() {
@@ -39,7 +39,7 @@ var _ = Describe("Add Genesis Attendee Tests", func() {
 		appState := getAppState(cdc, realAddr, false)
 		_, err := client.BuildGenesisState(appState, cdc, []string{realAddr})
 		Expect(err).To(Not(BeNil()))
-		Expect(err.Code()).To(Equal(errors.GenesisServiceAccountNotPresent))
+		Expect(err.Code()).To(Equal(types.GenesisServiceAccountNotPresent))
 	})
 
 	It("should succeed when service address is valid", func() {

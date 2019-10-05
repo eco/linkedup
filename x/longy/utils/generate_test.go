@@ -2,7 +2,7 @@ package utils_test
 
 import (
 	"fmt"
-	"github.com/eco/longy/x/longy/errors"
+	"github.com/eco/longy/x/longy/internal/types"
 	"github.com/eco/longy/x/longy/utils"
 	"os"
 
@@ -43,7 +43,7 @@ var _ = Describe("Claim Id Tests", func() {
 		Expect(errOS).To(BeNil())
 		_, err := utils.GetAttendees()
 		Expect(err).To(Not(BeNil()))
-		Expect(err.Code()).To(Equal(errors.NetworkResponseError))
+		Expect(err.Code()).To(Equal(types.NetworkResponseError))
 	})
 
 	It("should succeed to get all the attendees", func() {

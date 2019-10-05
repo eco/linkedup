@@ -5,7 +5,7 @@ import (
 	"fmt"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/eco/longy/x/longy"
-	"github.com/eco/longy/x/longy/errors"
+	"github.com/eco/longy/x/longy/internal/types"
 	"log"
 	"net/http"
 	"os"
@@ -38,7 +38,7 @@ type Pagination struct {
 func GetAttendees() (ga longy.GenesisAttendees, err sdk.Error) {
 	authKey, isSet := os.LookupEnv(EventbriteEnvKey)
 	if !isSet {
-		err = errors.ErrEventbriteEnvVariableNotSet("EVENTBRITE_AUTH must be set for generating the genesis file")
+		err = types.ErrEventbriteEnvVariableNotSet("EVENTBRITE_AUTH must be set for generating the genesis file")
 		return
 	}
 	ga, err = fetchAttendees(authKey)
@@ -75,7 +75,7 @@ func fetchAttendees(authKey string) (ga longy.GenesisAttendees, e sdk.Error) {
 
 	ga = mergeAttendees(aChan, ga)
 	if len(ga) != totalAttendees {
-		e = errors.ErrAttendeeCountMismatch(
+		e = types.ErrAttendeeCountMismatch(
 			"the total attendees should be %d, but we only got %d", totalAttendees, len(ga))
 	}
 	return ga, e
@@ -126,7 +126,7 @@ func processPage(client *http.Client, page int, headerAuth string) (data Eventbr
 func processResp(res *http.Response) (data EventbriteData, e sdk.Error) {
 	err := json.NewDecoder(res.Body).Decode(&data)
 	if err != nil {
-		e = errors.ErrDefault(err.Error())
+		e = types.ErrDefault(err.Error())
 		return
 	}
 	return
@@ -138,13 +138,13 @@ func getPage(client *http.Client, page int, headerAuth string) (res *http.Respon
 	req := pageURL(page, headerAuth)
 	res, err = client.Do(req)
 	if err != nil {
-		e = errors.ErrNetworkResponseError(
+		e = types.ErrNetworkResponseError(
 			fmt.Sprintf("eventbrite call failed : %s", err.Error()))
 		return
 	}
 
 	if res.StatusCode != http.StatusOK {
-		e = errors.ErrNetworkResponseError(
+		e = types.ErrNetworkResponseError(
 			fmt.Sprintf("eventbrite call returned with code : %d", res.StatusCode))
 		return
 	}
