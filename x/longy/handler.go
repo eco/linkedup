@@ -17,8 +17,8 @@ func NewHandler(keeper Keeper) sdk.Handler {
 			return handleMsgQrScan(ctx, keeper, msg)
 		case types.MsgShareInfo:
 			return handleMsgShareInfo(ctx, keeper, msg)
-		case types.MsgRekey:
-			return handleMsgRekey(ctx, keeper, msg)
+		case types.MsgKey:
+			return handleMsgKey(ctx, keeper, msg)
 		case types.MsgClaimKey:
 			return handleMsgClaimKey(ctx, keeper, msg)
 		default:
@@ -49,21 +49,34 @@ func handleMsgShareInfo(ctx sdk.Context, k Keeper, msg types.MsgShareInfo) sdk.R
 }
 
 //nolint: unparam, gocritic
-func handleMsgRekey(ctx sdk.Context, k Keeper, msg types.MsgRekey) sdk.Result {
+func handleMsgKey(ctx sdk.Context, k Keeper, msg types.MsgKey) sdk.Result {
+	/**
+	* For every attendee, there is a cosmos account. This assumption is ensured on `InitGenesis`
+	* The following code has checks against both the cosmos account and attendee
+	*
+	* i.e account == nil || !ok (attendee and the cosmos account exists)
+	 */
+
+	// retrieve account/attendee from the store
 	accountKeeper := k.AccountKeeper()
+	account := accountKeeper.GetAccount(ctx, msg.AttendeeAddress)
+	attendee, ok := k.GetAttendee(ctx, msg.AttendeeAddress)
+	if account == nil || !ok {
+		return types.ErrAttendeeNotFound("nonexistent attendee").Result()
+	}
+
+	// Check that a public key has not already been set. The rekey service should only be able to
+	// submit and alter the public key once
+	if len(account.GetPubKey().Bytes()) > 0 {
+		return types.ErrAccountKeyed().Result()
+	}
 
 	// authorization passed, we simply need to update the attendee's public key
-	acc := accountKeeper.GetAccount(ctx, msg.AttendeeAddress)
-	_ = acc.SetPubKey(msg.NewAttendeePublicKey)
-	accountKeeper.SetAccount(ctx, acc)
+	_ = account.SetPubKey(msg.NewAttendeePublicKey)
+	accountKeeper.SetAccount(ctx, account)
 
-	// update the attendee to unclaimed
-	attendee, ok := k.GetAttendee(ctx, msg.AttendeeAddress)
-	if !ok {
-		return types.ErrAttendeeNotFound("cannot find the attendee").Result()
-	}
+	// update the commitment so that the attendee must claim against
 	attendee.SetCommitment(msg.Commitment)
-	attendee.SetUnclaimed()
 	k.SetAttendee(ctx, attendee)
 
 	return sdk.Result{}
@@ -77,7 +90,7 @@ func handleMsgClaimKey(ctx sdk.Context, k Keeper, msg types.MsgClaimKey) sdk.Res
 	}
 
 	if attendee.IsClaimed() {
-		return types.ErrAttendeeAlreadyClaimed().Result()
+		return types.ErrAttendeeClaimed().Result()
 	}
 
 	if !attendee.CurrentCommitment().VerifyReveal(msg.Secret) {
@@ -87,11 +100,6 @@ func handleMsgClaimKey(ctx sdk.Context, k Keeper, msg types.MsgClaimKey) sdk.Res
 	// all checks passed. mark the attendee as claimed
 	attendee.ResetCommitment()
 	attendee.SetClaimed()
-	if !attendee.HasPreviouslyClaimed() {
-		// TODO: this probably will change
-		attendee.AddRep(uint(5))
-	}
-
 	k.SetAttendee(ctx, attendee)
 
 	return sdk.Result{}

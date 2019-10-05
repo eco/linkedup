@@ -5,16 +5,16 @@ import (
 	"github.com/eco/longy/util"
 )
 
-//GenesisAttendees is the full array of attendees to initialize
+// GenesisAttendees is the full array of attendees to initialize
 type GenesisAttendees []GenesisAttendee
 
-//GenesisAttendee is the attendee structure in the genesis file
+// GenesisAttendee is the attendee structure in the genesis file
 type GenesisAttendee struct {
 	ID string `json:"id"`
 	//Profile GenesisProfile `json:"profile"`   //gets the full info of the account
 }
 
-//GenesisProfile is the profile of the attendee from eventbrite
+// GenesisProfile is the profile of the attendee from eventbrite
 type GenesisProfile struct {
 	Name     string `json:"name"`
 	Company  string `json:"company"`
@@ -22,7 +22,7 @@ type GenesisProfile struct {
 	JobTitle string `json:"job_title"`
 }
 
-//GenesisService is the genesis type for the re-key service and its account address
+// GenesisService is the genesis type for the re-key service and its account address
 type GenesisService struct {
 	Address sdk.AccAddress `json:"address"`
 }
@@ -109,22 +109,10 @@ func (a Attendee) IsClaimed() bool {
 	return a.Claimed
 }
 
-// HasPreviouslyClaimed is an indicator for the first time an attendee
-// has been claimed
-//nolint:gocritic
-func (a Attendee) HasPreviouslyClaimed() bool {
-	return a.FirstTimeClaimed
-}
-
 // SetClaimed will mark this attendee as claimed
 func (a *Attendee) SetClaimed() {
 	a.Claimed = true
 	if !a.FirstTimeClaimed {
 		a.FirstTimeClaimed = true
 	}
-}
-
-// SetUnclaimed will mark this attendee as unclaimed
-func (a *Attendee) SetUnclaimed() {
-	a.Claimed = false
 }
