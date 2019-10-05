@@ -98,6 +98,8 @@ func handleMsgClaimKey(ctx sdk.Context, k Keeper, msg types.MsgClaimKey) sdk.Res
 		return types.ErrInvalidCommitmentReveal("incorrect commitment").Result()
 	}
 
+	// TODO: disperse reward for onboarding here
+
 	// mark the attendee as claimed
 	attendee.SetClaimed()
 	k.SetAttendee(ctx, attendee)

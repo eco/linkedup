@@ -7,18 +7,18 @@ import (
 	"github.com/eco/longy/x/longy/internal/types"
 )
 
-//GenesisState is the genesis struct for the longy module
+// GenesisState is the genesis struct for the longy module
 type GenesisState struct {
 	Service   GenesisService   `json:"service"`
 	Attendees GenesisAttendees `json:"attendees"`
 }
 
-//DefaultGenesisState returns the default genesis struct for the longy module
+// DefaultGenesisState returns the default genesis struct for the longy module
 func DefaultGenesisState() GenesisState {
 	return GenesisState{Service: GenesisService{}, Attendees: GenesisAttendees{}}
 }
 
-//ValidateGenesis validates that the passed genesis state is valid
+// ValidateGenesis validates that the passed genesis state is valid
 func ValidateGenesis(data GenesisState) error {
 	if data.Service.Address.Empty() {
 		return types.ErrGenesisServiceAddressEmpty("Re-Key Service address must be set")
