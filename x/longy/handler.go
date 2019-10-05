@@ -68,7 +68,7 @@ func handleMsgKey(ctx sdk.Context, k Keeper, msg types.MsgKey) sdk.Result {
 	// Check that a public key has not already been set. The rekey service should only be able to
 	// submit and alter the public key once
 	if len(account.GetPubKey().Bytes()) > 0 {
-		return types.ErrAccountKeyed().Result()
+		return types.ErrAccountKeyed("attendee already key'd their account").Result()
 	}
 
 	// authorization passed, we simply need to update the attendee's public key
@@ -84,21 +84,21 @@ func handleMsgKey(ctx sdk.Context, k Keeper, msg types.MsgKey) sdk.Result {
 
 //nolint: unparam, gocritic
 func handleMsgClaimKey(ctx sdk.Context, k Keeper, msg types.MsgClaimKey) sdk.Result {
+
+	// retrieve the attendee and make sure the attendee has not been claimed
 	attendee, ok := k.GetAttendee(ctx, msg.AttendeeAddress)
 	if !ok {
-		return types.ErrAttendeeNotFound("cannot find the attendee").Result()
+		return types.ErrAttendeeNotFound("nonexistent attendee").Result()
+	} else if attendee.IsClaimed() {
+		return types.ErrAttendeeClaimed("claimed attendee").Result()
 	}
 
-	if attendee.IsClaimed() {
-		return types.ErrAttendeeClaimed().Result()
-	}
-
+	// verify the commitment
 	if !attendee.CurrentCommitment().VerifyReveal(msg.Secret) {
-		return types.ErrInvalidCommitmentReveal().Result()
+		return types.ErrInvalidCommitmentReveal("incorrect commitment").Result()
 	}
 
-	// all checks passed. mark the attendee as claimed
-	attendee.ResetCommitment()
+	// mark the attendee as claimed
 	attendee.SetClaimed()
 	k.SetAttendee(ctx, attendee)
 
