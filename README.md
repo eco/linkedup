@@ -15,3 +15,19 @@ To lint and test:
 ```
 ./scripts/lint_and_test.sh
 ```
+
+## Running database tests
+The database tests depend on a local DynamoDB instance running on port 8000.
+To enable the tests, first launch the DynamoDB service:
+```
+docker run --rm -p 8000:8000 amazon/dynamodb-local
+```
+
+Then run the suite in an environment with:
+```
+ENABLE_DB_TESTS=true
+```
+eg:
+```
+ENABLE_DB_TESTS=true ginkgo ./...
+```
