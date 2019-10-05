@@ -9,7 +9,7 @@ import (
 //nolint:gocritic
 func (k Keeper) GetMasterPublicKey(ctx sdk.Context) sdk.AccAddress {
 	key := types.MasterKey()
-	bz := k.Get(ctx, key)
+	bz, _ := k.Get(ctx, key)
 
 	return sdk.AccAddress(bz)
 }
