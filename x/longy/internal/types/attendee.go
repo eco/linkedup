@@ -32,9 +32,8 @@ type Attendee struct {
 	ID      string
 	Address sdk.AccAddress
 
-	Commitment       util.Commitment
-	Claimed          bool
-	FirstTimeClaimed bool
+	Commitment util.Commitment
+	Claimed    bool
 
 	Rep uint
 }
@@ -48,9 +47,8 @@ func NewAttendee(id string) Attendee {
 		ID:      id,
 		Address: addr,
 
-		Commitment:       nil,
-		Claimed:          false,
-		FirstTimeClaimed: false,
+		Commitment: nil,
+		Claimed:    false,
 
 		Rep: 0,
 	}
@@ -112,7 +110,4 @@ func (a Attendee) IsClaimed() bool {
 // SetClaimed will mark this attendee as claimed
 func (a *Attendee) SetClaimed() {
 	a.Claimed = true
-	if !a.FirstTimeClaimed {
-		a.FirstTimeClaimed = true
-	}
 }

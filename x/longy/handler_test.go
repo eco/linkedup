@@ -16,7 +16,12 @@ var _ = Describe("Longy Handler Tests", func() {
 	var keeper longy.Keeper
 	var addr sdk.AccAddress
 	BeforeEach(func() {
+		/*
+		* Here we setup a test attendee & cosmos account that has a
+		* id of "1"
+		 */
 		BeforeTestRun()
+		addr = util.IDToAddress("1")
 
 		keeper = simApp.LongyKeeper
 		Expect(keeper).ToNot(BeNil())
@@ -24,29 +29,55 @@ var _ = Describe("Longy Handler Tests", func() {
 		handler = longy.NewHandler(keeper)
 		Expect(handler).ToNot(BeNil())
 
-		// setup the base attendee with a badge of 1
-		id := "1"
-		addr = util.IDToAddress(id)
-		acc := keeper.AccountKeeper().NewAccountWithAddress(ctx, addr)
-		attendee := types.NewAttendee(id)
+		genesis := longy.GenesisState{
+			Service: types.GenesisService{
+				Address: util.IDToAddress("master"),
+			},
+			Attendees: []types.GenesisAttendee{
+				types.GenesisAttendee{
+					ID: "1",
+				},
+			},
+		}
 
-		keeper.AccountKeeper().SetAccount(ctx, acc)
-		keeper.SetAttendee(ctx, attendee)
+		// Init from genesis state
+		longy.InitGenesis(ctx, keeper, genesis)
 	})
 
-	It("Tests against an invalid msg", func() {
+	It("rejects an invalid msg", func() {
 		res := handler(ctx, sdk.NewTestMsg())
 		Expect(res.IsOK()).Should(BeFalse())
 		Expect(strings.Contains(res.Log, "unrecognized longy msg type")).
 			Should(BeTrue())
 	})
 
-	It("Swaps public keys with the rekey message", func() {
+	It("rejets a non-existent attendee", func() {
+		addr = util.IDToAddress("2")
+		msg := types.MsgKey{
+			AttendeeAddress:      addr,
+			NewAttendeePublicKey: nil,
+			Commitment:           nil,
+		}
+		res := handler(ctx, msg)
+		Expect(res.IsOK()).Should(BeFalse())
+		Expect(res.Code).To(Equal(types.AttendeeNotFound))
+	})
+
+	It("checks that the intial public key is nil", func() {
+		accountKeeper := keeper.AccountKeeper()
+		account := accountKeeper.GetAccount(ctx, addr)
+		Expect(account).ToNot(BeNil())
+
+		pubKey := account.GetPubKey()
+		Expect(pubKey).To(BeNil())
+	})
+
+	It("changes public keys with the key message", func() {
 		_, commitment := util.CreateCommitment()
 		newPub := tmcrypto.GenPrivKey().PubKey()
 
-		/** setup a rekey against the account **/
-		msg := types.MsgRekey{
+		/** setup a key against the account **/
+		msg := types.MsgKey{
 			AttendeeAddress:      addr,
 			NewAttendeePublicKey: newPub,
 			Commitment:           commitment,
@@ -55,7 +86,7 @@ var _ = Describe("Longy Handler Tests", func() {
 		res := handler(ctx, msg)
 		Expect(res.IsOK()).Should(BeTrue())
 
-		// Account should swap keys
+		// Account should have swapped keys
 		acc := keeper.AccountKeeper().GetAccount(ctx, addr)
 		Expect(acc).ToNot(BeNil())
 		Expect(newPub.Address()).To(Equal(acc.GetPubKey().Address()))
@@ -67,61 +98,72 @@ var _ = Describe("Longy Handler Tests", func() {
 		Expect(commitment).To(Equal(a.CurrentCommitment()))
 	})
 
-	It("Can claim an Attendee after Rekeying", func() {
-		/** setup a rekey against the account **/
-		secret, commitment := util.CreateCommitment()
-		newPub := tmcrypto.GenPrivKey().PubKey()
+	var _ = Context("with an attendee that has keyed", func() {
+		var secret []byte
+		BeforeEach(func() {
+			s, commitment := util.CreateCommitment()
+			secret = s
+			newPub := tmcrypto.GenPrivKey().PubKey()
 
-		rekeyMsg := types.MsgRekey{
-			AttendeeAddress:      addr,
-			NewAttendeePublicKey: newPub,
-			Commitment:           commitment,
-		}
-		a, ok := keeper.GetAttendee(ctx, addr)
-		Expect(ok).Should(BeTrue())
-		initialRep := a.Rep
+			/** setup a key against the account **/
+			msg := types.MsgKey{
+				AttendeeAddress:      addr,
+				NewAttendeePublicKey: newPub,
+				Commitment:           commitment,
+			}
+			res := handler(ctx, msg)
+			Expect(res.IsOK()).Should(BeTrue())
+		})
 
-		res := handler(ctx, rekeyMsg)
-		Expect(res.IsOK()).Should(BeTrue())
+		It("cannot key again", func() {
+			msg := types.MsgKey{
+				AttendeeAddress:      addr,
+				NewAttendeePublicKey: nil,
+				Commitment:           nil,
+			}
+			res := handler(ctx, msg)
+			Expect(res.IsOK()).Should(BeFalse())
+			Expect(res.Code).Should(Equal(types.AttendeeKeyed))
+		})
 
-		/** claim the account **/
+		It("rejects an invalid commitment", func() {
+			msg := types.MsgClaimKey{
+				AttendeeAddress: addr,
+				Secret:          nil,
+			}
+			res := handler(ctx, msg)
+			Expect(res.IsOK()).Should(BeFalse())
+			Expect(res.Code).To(Equal(types.InvalidCommitmentReveal))
+		})
 
-		// 1. non-existent attendee
-		msg := types.MsgClaimKey{
-			AttendeeAddress: sdk.AccAddress(tmcrypto.GenPrivKey().PubKey().Address()),
-			Secret:          nil,
-		}
-		res = handler(ctx, msg)
-		Expect(res.IsOK()).Should(BeFalse())
-		Expect(res.Code).To(Equal(types.AttendeeNotFound))
+		It("can claim the account", func() {
+			msg := types.MsgClaimKey{
+				AttendeeAddress: addr,
+				Secret:          secret,
+			}
+			res := handler(ctx, msg)
+			Expect(res.IsOK()).Should(BeTrue())
 
-		// 1. invalid secret
-		msg = types.MsgClaimKey{
-			AttendeeAddress: addr,
-			Secret:          nil,
-		}
-		res = handler(ctx, msg)
-		Expect(res.IsOK()).Should(BeFalse())
-		Expect(res.Code).To(Equal(types.InvalidCommitmentReveal))
+			// Check that the attendee was updated accordingly
+			a, ok := keeper.GetAttendee(ctx, addr)
+			Expect(ok).Should(BeTrue())
+			Expect(a.IsClaimed()).Should(BeTrue())
 
-		// 3. valid claim
-		msg = types.MsgClaimKey{
-			AttendeeAddress: addr,
-			Secret:          secret,
-		}
-		res = handler(ctx, msg)
-		Expect(res.IsOK()).Should(BeTrue())
+			// TODO: check that rep was dispursed
+		})
 
-		// Check that the attendee was updated accordingly
-		a, ok = keeper.GetAttendee(ctx, addr)
-		Expect(ok).Should(BeTrue())
-		Expect(a.IsClaimed()).Should(BeTrue())
-		Expect(a.Rep).To(Equal(initialRep))
-		Expect(a.CurrentCommitment()).Should(BeNil())
+		It("cannot claim twice", func() {
+			msg := types.MsgClaimKey{
+				AttendeeAddress: addr,
+				Secret:          secret,
+			}
+			res := handler(ctx, msg)
+			Expect(res.IsOK()).Should(BeTrue())
 
-		// 4. Cannot reclaim an attendee in a claimed state
-		res = handler(ctx, msg)
-		Expect(res.IsOK()).Should(BeFalse())
-		Expect(res.Code).To(Equal(types.AttendeeAlreadyClaimed))
+			// try again
+			res = handler(ctx, msg)
+			Expect(res.IsOK()).Should(BeFalse())
+			Expect(res.Code).To(Equal(types.AttendeeClaimed))
+		})
 	})
 })

@@ -67,8 +67,8 @@ func handleMsgKey(ctx sdk.Context, k Keeper, msg types.MsgKey) sdk.Result {
 
 	// Check that a public key has not already been set. The rekey service should only be able to
 	// submit and alter the public key once
-	if len(account.GetPubKey().Bytes()) > 0 {
-		return types.ErrAccountKeyed("attendee already key'd their account").Result()
+	if account.GetPubKey() != nil {
+		return types.ErrAttendeeKeyed("attendee already key'd their account").Result()
 	}
 
 	// authorization passed, we simply need to update the attendee's public key

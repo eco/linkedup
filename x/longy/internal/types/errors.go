@@ -46,8 +46,8 @@ const (
 	// AttendeeClaimed is the code when
 	AttendeeClaimed
 
-	// AccountKeyed is the code when the account has already been key'd by the rekey service
-	AccountKeyed
+	// AttendeeKeyed is the code when the attendee has already been key'd by the rekey service
+	AttendeeKeyed
 
 	// InvalidCommitmentReveal is the code when
 	InvalidCommitmentReveal
@@ -108,22 +108,22 @@ func ErrGenesisServiceAccountNotPresent(format string, args ...interface{}) sdk.
 
 // ErrQRCodeDoesNotExist is the error for when a QR code does not exist in our keeper
 func ErrQRCodeDoesNotExist(format string, args ...interface{}) sdk.Error {
-	return sdk.NewError(LongyCodeSpace, QRCodeDoesNotExist, "name does not exist")
+	return sdk.NewError(LongyCodeSpace, QRCodeDoesNotExist, format, args)
 }
 
 // ErrAttendeeClaimed indicates a attendee that is unclaimed
 func ErrAttendeeClaimed(format string, args ...interface{}) sdk.Error {
-	return sdk.NewError(LongyCodeSpace, AttendeeClaimed, "attendee claimed")
+	return sdk.NewError(LongyCodeSpace, AttendeeClaimed, format, args)
 }
 
-// ErrAccountKeyed indicated the attendee has already keyed their account
-func ErrAccountKeyed(format string, args ...interface{}) sdk.Error {
-	return sdk.NewError(LongyCodeSpace, AccountKeyed, "attendee also key'd their account")
+// ErrAttendeeKeyed indicated the attendee has already keyed their account
+func ErrAttendeeKeyed(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, AttendeeKeyed, format, args)
 }
 
 // ErrInvalidCommitmentReveal indicates that the reveal is incorrect for the commitment
 func ErrInvalidCommitmentReveal(format string, args ...interface{}) sdk.Error {
-	return sdk.NewError(LongyCodeSpace, InvalidCommitmentReveal, "reveal to the commitment is incorrect")
+	return sdk.NewError(LongyCodeSpace, InvalidCommitmentReveal, format, args)
 }
 
 // ErrDefault occurs when a random error occurs that we do not provide a unique code to

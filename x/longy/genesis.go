@@ -44,9 +44,13 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, state GenesisState) {
 	// set the master public key
 	k.SetMasterPublicKey(ctx, state.Service.Address)
 
-	// create and set of all the attendees
+	// create and set of all the attendees and cosmos accounts
+	accountKeeper := k.AccountKeeper()
 	for _, a := range state.Attendees {
 		attendee := types.NewAttendeeFromGenesis(a)
 		k.SetAttendee(ctx, attendee)
+
+		account := accountKeeper.NewAccountWithAddress(ctx, attendee.GetAddress())
+		accountKeeper.SetAccount(ctx, account)
 	}
 }
