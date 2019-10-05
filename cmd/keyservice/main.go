@@ -24,7 +24,6 @@ func init() {
 	rootCmd.Flags().String("smtp-password", "2019longygame", "password of the email account")
 	rootCmd.Flags().String("eb-auth-token", "", "eventbrite authorization token")
 	rootCmd.Flags().Int("eb-event-id", 0, "id associated with the eventbrite event")
-	rootCmd.Flags().String("aws-endpoint", "", "alternative endpoint for mocking out AWS")
 }
 
 var rootCmd = &cobra.Command{
