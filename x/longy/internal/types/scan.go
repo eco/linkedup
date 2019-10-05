@@ -51,7 +51,7 @@ func GenID(s1, s2 sdk.AccAddress) (id []byte, err sdk.Error) {
 	} else {
 		id = append(s2, s1...)
 	}
-
+	//append the key so we dont have to do this everywhere
+	id = ScanKey(id)
 	return
-
 }

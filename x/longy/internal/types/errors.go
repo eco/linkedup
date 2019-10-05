@@ -12,6 +12,8 @@ const (
 	ItemNotFound sdk.CodeType = iota + 1
 	//AttendeeNotFound is the code for when the attendee cannot be found in the keeper
 	AttendeeNotFound
+	//ScanNotFound is the code when we cannot find a scan in the keeper with the given id
+	ScanNotFound
 	//InsufficientPrivileges is the code for when a transaction signer doesn't have the necessary privilege
 	InsufficientPrivileges
 	//GenesisServiceAddressEmpty is the code for when the service account address is not set in the genesis file
@@ -50,6 +52,11 @@ const (
 //ErrItemNotFound occurs when we cannot find an item in the default store
 func ErrItemNotFound(format string, args ...interface{}) sdk.Error {
 	return sdk.NewError(LongyCodeSpace, ItemNotFound, format, args...)
+}
+
+//ErrScanNotFound occurs when we cannot find a scan in the keeper with the given id
+func ErrScanNotFound(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, ScanNotFound, format, args...)
 }
 
 //ErrAttendeeNotFound occurs when we cannot find the attendee

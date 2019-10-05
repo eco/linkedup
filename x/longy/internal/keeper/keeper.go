@@ -4,6 +4,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/eco/longy/x/longy/internal/types"
 )
 
 // Keeper maintains the link to data storage
@@ -39,9 +40,16 @@ func (k Keeper) Set(ctx sdk.Context, key []byte, value []byte) {
 
 // Get returns the value for the provided key from the store
 //nolint:gocritic
-func (k Keeper) Get(ctx sdk.Context, key []byte) []byte {
+func (k Keeper) Get(ctx sdk.Context, key []byte) (v []byte, err sdk.Error) {
 	store := ctx.KVStore(k.contextStoreKey)
-	return store.Get(key)
+	//return store.Get(key)
+	v = store.Get(key)
+	if len(v) == 0 {
+		err = types.ErrItemNotFound("invalid key passed for item %s", key)
+		return
+	}
+
+	return
 }
 
 // Delete removes the provided key value pair from the store
