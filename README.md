@@ -13,7 +13,7 @@ make install
 
 To lint and test:
 ```
-./scripts/lint_and_test.sh
+make test
 ```
 
 ## Running database tests
