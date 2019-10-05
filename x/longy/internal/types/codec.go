@@ -5,15 +5,22 @@ import (
 )
 
 // ModuleCdc is the codec for the module
-var ModuleCdc = codec.New()
+var ModuleCdc *codec.Codec
 
 func init() {
+	ModuleCdc = codec.New()
+	codec.RegisterCrypto(ModuleCdc)
 	RegisterCodec(ModuleCdc)
 }
 
-// RegisterCodec registers concrete types on wire codec
+// RegisterCodec registers concrete types used by this module
 func RegisterCodec(cdc *codec.Codec) {
-	cdc.RegisterConcrete(MsgClaimID{}, RouterKey+"/claimId", nil)
-	cdc.RegisterConcrete(MsgQrScan{}, RouterKey+"/qrScan", nil)
-	cdc.RegisterConcrete(MsgShareInfo{}, RouterKey+"/shareInfo", nil)
+	// register msgs
+	cdc.RegisterConcrete(&MsgQrScan{}, RouterKey+"/MsgQRScan", nil)
+	cdc.RegisterConcrete(&MsgShareInfo{}, RouterKey+"/MsgShareInfo", nil)
+	cdc.RegisterConcrete(&MsgRekey{}, RouterKey+"/MsgRekey", nil)
+	cdc.RegisterConcrete(&MsgClaimKey{}, RouterKey+"/MsgClaimKey", nil)
+
+	// register types
+	cdc.RegisterConcrete(&Attendee{}, RouterKey+"/Attendee", nil)
 }

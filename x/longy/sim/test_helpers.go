@@ -3,7 +3,6 @@ package sim
 import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	app "github.com/eco/longy"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
@@ -16,7 +15,7 @@ func setup(isCheckTx bool) *LongyApp {
 	if !isCheckTx {
 		// init chain must be called to stop deliverState from being nil
 		genesisState := NewDefaultGenesisState()
-		stateBytes, err := codec.MarshalJSONIndent(app.MakeCodec(), genesisState)
+		stateBytes, err := codec.MarshalJSONIndent(MakeCodec(), genesisState)
 		if err != nil {
 			panic(err)
 		}
@@ -33,10 +32,30 @@ func setup(isCheckTx bool) *LongyApp {
 	return longyApp
 }
 
-//CreateTestApp sets up a new test app
+// CreateTestApp sets up a new test app
 func CreateTestApp(isCheckTx bool) (*LongyApp, sdk.Context) {
 	longyApp := setup(isCheckTx)
 	ctx := longyApp.BaseApp.NewContext(isCheckTx, abci.Header{})
 
 	return longyApp, ctx
 }
+
+/*
+
+// CreateContextAndKeepers will create a in-memory backed keepers and sdk.Context for
+// message handler testing
+func CreateContextAndKeepers() (sdk.Context, longy.Keeper, auth.accountKeeper) {
+	db := db.NewMemDB()
+	ms := cosmosStore.NewCommitMultiStore(db)
+
+	ctx := sdk.NewContext(ms, abci.Header{}, false, log.NopLogger())
+	keys := sdk.NewKVStoreKeys("longy", "auth")
+
+	authSubspace := params.NewSubspace(app.MakeCodec(), params.StoreKey, params.TStoreKey, params.DefaultCodespace)
+	accountKeeper := auth.NewAccountKeeper(auth.ModuleCdc, keys["auth"], authSupspace, auth.ProtoBaseAccount)
+	longyKeeper := longy.NewKeeper(longy.ModuleCdc, keys["longy"], accountKeeper)
+
+	return ctx, longyKeeper, accountKeeper
+
+}
+*/

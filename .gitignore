@@ -1,4 +1,7 @@
+.DS_Store
 .idea
-
 vendor
+
+cmd/lycli/lycli
+cmd/lyd/lyd
 

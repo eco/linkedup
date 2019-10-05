@@ -77,16 +77,17 @@ type LongyApp struct {
 	keys  map[string]*sdk.KVStoreKey
 	tkeys map[string]*sdk.TransientStoreKey
 
-	// Keepers
-	accountKeeper  auth.AccountKeeper
+	// Main Keepers
+	accountKeeper auth.AccountKeeper
+	longyKeeper   longy.Keeper
+
+	// Keepers relating to staking
 	bankKeeper     bank.Keeper
 	stakingKeeper  staking.Keeper
 	slashingKeeper slashing.Keeper
 	distrKeeper    distr.Keeper
 	supplyKeeper   supply.Keeper
 	paramsKeeper   params.Keeper
-
-	longyKeeper longy.Keeper
 
 	// Module Manager
 	mm *module.Manager
@@ -126,7 +127,7 @@ func NewLongyApp(
 	distrSubspace := app.paramsKeeper.Subspace(distr.DefaultParamspace)
 	slashingSubspace := app.paramsKeeper.Subspace(slashing.DefaultParamspace)
 
-	// The AccountKeeper handles address -> account lookups
+	// The accountKeeper handles address -> account lookups
 	app.accountKeeper = auth.NewAccountKeeper(
 		app.cdc,
 		keys[auth.StoreKey],
@@ -189,10 +190,9 @@ func NewLongyApp(
 	)
 
 	app.longyKeeper = longy.NewKeeper(
-		&app.accountKeeper,
-		&app.bankKeeper,
-		keys[longy.StoreKey],
 		app.cdc,
+		keys[longy.StoreKey],
+		app.accountKeeper,
 	)
 
 	app.mm = module.NewManager(
@@ -204,7 +204,7 @@ func NewLongyApp(
 		distr.NewAppModule(app.distrKeeper, app.supplyKeeper),
 		slashing.NewAppModule(app.slashingKeeper, app.stakingKeeper),
 		staking.NewAppModule(app.stakingKeeper, app.distrKeeper, app.accountKeeper, app.supplyKeeper),
-		longy.NewAppModule(app.accountKeeper, app.bankKeeper, app.longyKeeper),
+		longy.NewAppModule(app.longyKeeper),
 	)
 
 	app.mm.SetOrderBeginBlockers(distr.ModuleName, slashing.ModuleName)
