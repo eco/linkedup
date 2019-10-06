@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
+	"strings"
 )
 
 func init() {
@@ -27,8 +28,8 @@ func init() {
 	rootCmd.Flags().String("smtp-username", "testecolongy@gmail.com", "username of the email account")
 	rootCmd.Flags().String("smtp-password", "2019longygame", "password of the email account")
 
-	rootCmd.Flags().String("eb-auth-token", "", "eventbrite authorization token")
-	rootCmd.Flags().Int("eb-event-id", 0, "id associated with the eventbrite event")
+	rootCmd.Flags().String("eventbrite-auth", "", "eventbrite authorization token")
+	rootCmd.Flags().Int("eventbrite-event", 0, "id associated with the eventbrite event")
 }
 
 var rootCmd = &cobra.Command{
@@ -37,16 +38,22 @@ var rootCmd = &cobra.Command{
 	SilenceUsage: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		viper.BindPFlags(cmd.Flags()) //nolint
+		viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
+		viper.AutomaticEnv()
 
 		port := viper.GetInt("port")
-		authToken := viper.GetString("eb-auth-token")
-		eventID := viper.GetInt("eb-event-id")
+
+		authToken := viper.GetString("eventbrite-auth")
+		eventID := viper.GetInt("eventbrite-event")
+
 		smtpServer := viper.GetString("smtp-server")
 		smtpUsername := viper.GetString("smtp-username")
 		smtpPassword := viper.GetString("smtp-password")
+
 		longyChainID := viper.GetString("longy-chain-id")
 		longyFullNodeURL := viper.GetString("longy-fullnode")
 		longyRestURL := viper.GetString("longy-restservice")
+
 		key, err := mk.Secp256k1FromHex(viper.GetString("longy-masterkey"))
 		if err != nil {
 			return fmt.Errorf("masterkey: %s", err)
