@@ -130,17 +130,18 @@ func (mk *MasterKey) SendKeyTransaction(
 	// construct bytes and send to the full node
 	txBytes, err = mk.createTxBytes(attendeeID, commitment, newPublicKey)
 	if err == nil {
-		res, err = mk.longyCliCtx.BroadcastTxSync(txBytes)
+		res, err = mk.longyCliCtx.BroadcastTxCommit(txBytes)
 		if err != nil { // nolint
 			log.WithError(err).Info("failed transaction submission")
-		} else if res.Code != 0 {
-			log.WithField("raw_log", res.RawLog).
-				WithField("attendee_id", attendeeID).
-				Info("tx response")
-
-			err = fmt.Errorf("failed tx")
 		} else {
-			// success
+			if res.Code != 0 {
+				log.WithField("raw_log", res.RawLog).
+					WithField("attendee_id", attendeeID).
+					Info("tx response")
+
+				err = fmt.Errorf("failed tx")
+			}
+
 			mk.sequenceNum++
 		}
 	}
@@ -161,7 +162,7 @@ func (mk *MasterKey) createTxBytes(
 		longy.NewMsgKey(attendeeAddr, mk.address, newPublicKey, commitment),
 	}
 
-	nilFee := auth.NewStdFee(10000, sdk.NewCoins(sdk.NewInt64Coin("longy", 0)))
+	nilFee := auth.NewStdFee(50000, sdk.NewCoins(sdk.NewInt64Coin("longy", 0)))
 	signBytes := auth.StdSignBytes(mk.chainID, mk.accNum, mk.sequenceNum, nilFee, msgs, "")
 
 	// sign the message with the master private key

@@ -1,14 +1,15 @@
 package handler
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/eco/longy/key-service/eventbrite"
 	"github.com/eco/longy/key-service/mail"
 	"github.com/eco/longy/key-service/masterkey"
 	"github.com/eco/longy/util"
+	"github.com/eco/longy/x/longy"
 	"github.com/gorilla/mux"
-	"github.com/tendermint/tendermint/crypto/secp256k1"
+	tmcrypto "github.com/tendermint/tendermint/crypto"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -22,21 +23,25 @@ func registerKey(r *mux.Router, eb *eventbrite.Session, mk *masterkey.MasterKey,
 func key(eb *eventbrite.Session, mk *masterkey.MasterKey, mc *mail.Client) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		type reqBody struct {
-			AttendeeID string                    `json:"attendee_id"`
-			PubKey     secp256k1.PubKeySecp256k1 `json:"pubkey"`
+			AttendeeID string          `json:"attendee_id"`
+			PubKey     tmcrypto.PubKey `json:"pubkey"`
+		}
+		bz, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			http.Error(w, "could not read request body", http.StatusBadRequest)
+			return
 		}
 
+		cdc := longy.ModuleCdc
 		var body reqBody
-		jsonDecoder := json.NewDecoder(r.Body)
-		if err := jsonDecoder.Decode(&body); err != nil {
+		if err := cdc.UnmarshalJSON(bz, &body); err != nil {
 			errMsg := fmt.Sprintf("bad json request body: %s", err)
 			http.Error(w, errMsg, http.StatusBadRequest)
 			return
 		}
 
 		secret, commitment := util.CreateCommitment()
-		err := mk.SendKeyTransaction(body.AttendeeID, body.PubKey, commitment)
-		if err != nil {
+		if err := mk.SendKeyTransaction(body.AttendeeID, body.PubKey, commitment); err != nil {
 			http.Error(w, "internal error. try again", http.StatusInternalServerError)
 			return
 		}

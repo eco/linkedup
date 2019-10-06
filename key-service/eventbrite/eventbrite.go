@@ -29,6 +29,10 @@ type Session struct {
 // CreateSession to interact iwht the EventBrite Event APIs. The constructed
 // session has a default timeout of 10 seconds
 func CreateSession(authToken string, eventID int) Session {
+	log.WithField("auth", authToken).
+		WithField("event", eventID).
+		Info("eventbrite session created")
+
 	return Session{
 		authToken: authToken,
 		eventID:   eventID,
