@@ -43,3 +43,29 @@ func (k Keeper) SetAttendee(ctx sdk.Context, a types.Attendee) {
 	}
 	k.Set(ctx, key, bz)
 }
+
+//AwardScanPoints awards the points to each participant of the scan
+//nolint:gocritic
+func (k Keeper) AwardScanPoints(ctx sdk.Context, scan types.Scan) sdk.Error {
+	if !scan.Complete {
+		return types.ErrScanNotComplete("cannot reward points for a scan that is not complete")
+	}
+	a1, exists := k.GetAttendee(ctx, scan.S1)
+	if !exists {
+		return types.ErrAttendeeNotFound("attendee for points award was not found")
+	}
+	a2, exists := k.GetAttendee(ctx, scan.S2)
+	if !exists {
+		return types.ErrAttendeeNotFound("attendee for points award was not found")
+	}
+
+	points := types.ScanAttendeeAwardPoints
+	if a1.Sponsor || a2.Sponsor {
+		points = types.ScanSponsorAwardPoints
+	}
+	a1.Rep += points
+	a2.Rep += points
+	k.SetAttendee(ctx, a1)
+	k.SetAttendee(ctx, a2)
+	return nil
+}

@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	// LongyCodeSpace is the codespace  type for errors
+	//LongyCodeSpace is the codespace  type for errors
 	LongyCodeSpace sdk.CodespaceType = ModuleName
 
 	// ItemNotFound is the code for no item
@@ -16,7 +16,7 @@ const (
 
 	// ScanNotFound is the code when we cannot find a scan in the keeper with the given id
 	ScanNotFound
-  
+
 	// InsufficientPrivileges is the code for when a transaction signer doesn't have the necessary privilege
 	InsufficientPrivileges
 
@@ -52,18 +52,20 @@ const (
 	// AttendeeKeyed is the code when the attendee has already been key'd by the rekey service
 	AttendeeKeyed
 
-	// InvalidCommitmentReveal is the code when
+	//InvalidCommitmentReveal is the code when
 	InvalidCommitmentReveal
-  
+
 	// ScanAccountsSame is the code when a scan of with the same 1 account is attempted
 	ScanAccountsSame
-  
+
 	// AccountAddressEmpty is the code when an AccAddress is the empty address
 	AccountAddressEmpty
-  
+
 	// ScanQRAlreadyOccurred is the code for when the scan message has already been sent by the scanner or the scan
 	// is complete for those two parties
 	ScanQRAlreadyOccurred
+	//ScanNotComplete is the code for when a scan is not complete
+	ScanNotComplete
 
 	// DefaultError is the code for when a random error occurs that we do not provide a unique code to
 	DefaultError
@@ -160,7 +162,12 @@ func ErrScanQRAlreadyOccurred(format string, args ...interface{}) sdk.Error {
 	return sdk.NewError(LongyCodeSpace, ScanQRAlreadyOccurred, format, args...)
 }
 
-// ErrDefault occurs when a random error occurs that we do not provide a unique code to
+//ErrScanNotComplete occurs when a scan is not complete
+func ErrScanNotComplete(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, ScanNotComplete, format, args...)
+}
+
+//ErrDefault occurs when a random error occurs that we do not provide a unique code to
 func ErrDefault(format string, args ...interface{}) sdk.Error {
 	return sdk.NewError(LongyCodeSpace, DefaultError, format, args...)
 }

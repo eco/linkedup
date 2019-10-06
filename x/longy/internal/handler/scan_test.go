@@ -4,16 +4,13 @@ import (
 	"bytes"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/eco/longy/util"
-	"github.com/eco/longy/x/longy"
-	"github.com/eco/longy/x/longy/internal/keeper"
 	"github.com/eco/longy/x/longy/internal/types"
+	"github.com/eco/longy/x/longy/utils"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("Scan Handler Tests", func() {
-	var keeper keeper.Keeper
-	var handler sdk.Handler
 	var s1, s2 sdk.AccAddress
 	const (
 		qr1 = "1234"
@@ -21,8 +18,6 @@ var _ = Describe("Scan Handler Tests", func() {
 	)
 	BeforeEach(func() {
 		BeforeTestRun()
-		keeper = simApp.LongyKeeper
-		handler = longy.NewHandler(keeper)
 		//create public account addresses
 		s1 = util.IDToAddress(qr1)
 		s2 = util.IDToAddress(qr2)
@@ -36,7 +31,7 @@ var _ = Describe("Scan Handler Tests", func() {
 
 	It("should fail if the sender is trying to scan themselves", func() {
 		//add sender to keeper
-		addToKeeper(&keeper, qr1)
+		utils.AddAttendeeToKeeper(ctx, &keeper, qr1, false)
 
 		msg := types.NewMsgQrScan(s1, qr1)
 		result := handler(ctx, msg)
@@ -44,13 +39,13 @@ var _ = Describe("Scan Handler Tests", func() {
 	})
 
 	It("should succeed to create a new scan record on first scan", func() {
-		createScan(handler, &keeper, qr1, qr2, s1, s2)
+		createScan(qr1, qr2, s1, s2, false)
 	})
 
 	Context("when a partial scan already exists but hasn't been completed by other party", func() {
 		BeforeEach(func() {
 			//Add the partial scan to the keeper
-			createScan(handler, &keeper, qr1, qr2, s1, s2)
+			createScan(qr1, qr2, s1, s2, false)
 		})
 
 		It("should fail if the sender is trying to rescan the same person", func() {
@@ -60,21 +55,48 @@ var _ = Describe("Scan Handler Tests", func() {
 		})
 
 		It("should succeed if the scanned attendee post their tx in response", func() {
+			attendee, ok := keeper.GetAttendee(ctx, s1)
+			Expect(ok).To(BeTrue())
+			rep := attendee.Rep
+
 			msg := types.NewMsgQrScan(s2, qr1)
 			result := handler(ctx, msg)
 			Expect(result.Code).To(Equal(sdk.CodeOK))
 
-			inspectScan(&keeper, s1, s2, true)
+			inspectScan(s1, s2, true)
+
+			//check rep updated on completion
+			attendee, ok = keeper.GetAttendee(ctx, s1)
+			Expect(ok).To(BeTrue())
+			Expect(attendee.Rep).To(Equal(rep + types.ScanAttendeeAwardPoints))
 		})
 
-		Context("when a can has been completed by both parties", func() {
+		It("should succeed if the scanned attendee post their tx in response and one is a sponsor", func() {
+			utils.AddAttendeeToKeeper(ctx, &keeper, qr2, true)
+			attendee, ok := keeper.GetAttendee(ctx, s1)
+			Expect(ok).To(BeTrue())
+			rep := attendee.Rep
+
+			msg := types.NewMsgQrScan(s2, qr1)
+			result := handler(ctx, msg)
+			Expect(result.Code).To(Equal(sdk.CodeOK))
+
+			inspectScan(s1, s2, true)
+
+			//check rep updated on completion
+			attendee, ok = keeper.GetAttendee(ctx, s1)
+			Expect(ok).To(BeTrue())
+			Expect(attendee.Rep).To(Equal(rep + types.ScanSponsorAwardPoints))
+		})
+
+		Context("when a scan has been completed by both parties", func() {
 			BeforeEach(func() {
 				//complete the scan
 				msg := types.NewMsgQrScan(s2, qr1)
 				result := handler(ctx, msg)
 				Expect(result.Code).To(Equal(sdk.CodeOK))
 
-				inspectScan(&keeper, s1, s2, true)
+				inspectScan(s1, s2, true)
 			})
 
 			It("should fail if called again by the scanner", func() {
@@ -93,7 +115,7 @@ var _ = Describe("Scan Handler Tests", func() {
 	})
 })
 
-func inspectScan(keeper *keeper.Keeper, s1 sdk.AccAddress, s2 sdk.AccAddress, completed bool) {
+func inspectScan(s1 sdk.AccAddress, s2 sdk.AccAddress, completed bool) {
 	id, err := types.GenID(s2, s1) //invert for fun, order shouldn't matter
 	Expect(err).To(BeNil())
 	scan, err := keeper.GetScanByID(ctx, id)
@@ -109,20 +131,15 @@ func inspectScan(keeper *keeper.Keeper, s1 sdk.AccAddress, s2 sdk.AccAddress, co
 	}
 }
 
-func createScan(handler sdk.Handler, keeper *keeper.Keeper, qr1 string, qr2 string,
-	s1 sdk.AccAddress, s2 sdk.AccAddress) {
+func createScan(qr1 string, qr2 string,
+	s1 sdk.AccAddress, s2 sdk.AccAddress, sponsor bool) {
 	//add sender to keeper
-	addToKeeper(keeper, qr1)
+	utils.AddAttendeeToKeeper(ctx, &keeper, qr1, sponsor)
 	//add scanned to keeper
-	addToKeeper(keeper, qr2)
+	utils.AddAttendeeToKeeper(ctx, &keeper, qr2, false)
 
 	msg := types.NewMsgQrScan(s1, qr2)
 	result := handler(ctx, msg)
 	Expect(result.Code).To(Equal(sdk.CodeOK))
-	inspectScan(keeper, s1, s2, false)
-}
-
-func addToKeeper(keeper *keeper.Keeper, qrCode string) {
-	attendee := types.NewAttendee(qrCode)
-	keeper.SetAttendee(ctx, attendee)
+	inspectScan(s1, s2, false)
 }

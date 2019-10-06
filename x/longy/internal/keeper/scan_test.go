@@ -3,19 +3,15 @@ package keeper_test
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/eco/longy/util"
-	"github.com/eco/longy/x/longy"
 	"github.com/eco/longy/x/longy/internal/types"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("Scan Keeper Tests", func() {
-	var keeper longy.Keeper
 	var scan types.Scan
 	BeforeEach(func() {
 		BeforeTestRun()
-		keeper = simApp.LongyKeeper
-		Expect(keeper).ToNot(BeNil())
 
 		s1 := util.IDToAddress("1234")
 		s2 := util.IDToAddress("asdf")
