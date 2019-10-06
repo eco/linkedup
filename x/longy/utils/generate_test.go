@@ -17,18 +17,31 @@ func TestMonitor(t *testing.T) {
 }
 
 var _ = Describe("Generate Attendee Genesis Tests", func() {
-	var key string
+	var (
+		key string
+		event string
+		isEnvSet bool
+	)
+	
 	BeforeEach(func() {
-		key = os.Getenv(utils.EventbriteEnvKey)
-		err := os.Unsetenv(utils.EventbriteEnvKey)
-		Expect(err).To(BeNil())
+		key = os.Getenv(utils.EventbriteAuthEnvKey)
+		event = os.Getenv(utils.EventbriteEventEnvKey)
+
+		if event == "" || key == "" {
+			isEnvSet = false
+		} else {
+			isEnvSet = true
+		}
+
+		_ = os.Unsetenv(utils.EventbriteAuthEnvKey)
+		_ = os.Unsetenv(utils.EventbriteEventEnvKey)
 	})
 
 	AfterEach(func() {
 		if key != "" {
-			_ = os.Setenv(utils.EventbriteEnvKey, key)
+			_ = os.Setenv(utils.EventbriteAuthEnvKey, key)
 		} else {
-			err := os.Unsetenv(utils.EventbriteEnvKey)
+			err := os.Unsetenv(utils.EventbriteAuthEnvKey)
 			Expect(err).To(BeNil())
 		}
 	})
@@ -39,7 +52,11 @@ var _ = Describe("Generate Attendee Genesis Tests", func() {
 	})
 
 	It("should fail when auth header is invalid", func() {
-		errOS := os.Setenv(utils.EventbriteEnvKey, "afakekeyandstuff")
+		if !isEnvSet {
+			Skip("set EVENTBRITE_AUTH and EVENTBRITE_EVENT to run tests that access Eventbrite data")
+		}
+
+		errOS := os.Setenv(utils.EventbriteAuthEnvKey, "afakekeyandstuff")
 		Expect(errOS).To(BeNil())
 		_, err := utils.GetAttendees()
 		Expect(err).To(Not(BeNil()))
@@ -47,7 +64,10 @@ var _ = Describe("Generate Attendee Genesis Tests", func() {
 	})
 
 	It("should succeed to get all the attendees", func() {
-		sysErr := os.Setenv(utils.EventbriteEnvKey, key)
+		if !isEnvSet {
+			Skip("set EVENTBRITE_AUTH and EVENTBRITE_EVENT to run tests that access Eventbrite data")
+		}
+		sysErr := os.Setenv(utils.EventbriteAuthEnvKey, key)
 		Expect(sysErr).To(BeNil())
 
 		_, err := utils.GetAttendees()
@@ -55,7 +75,10 @@ var _ = Describe("Generate Attendee Genesis Tests", func() {
 	})
 
 	It("should have no duplicate attendees in the result on success", func() {
-		sysErr := os.Setenv(utils.EventbriteEnvKey, key)
+		if !isEnvSet {
+			Skip("set EVENTBRITE_AUTH and EVENTBRITE_EVENT to run tests that access Eventbrite data")
+		}
+		sysErr := os.Setenv(utils.EventbriteAuthEnvKey, key)
 		Expect(sysErr).To(BeNil())
 
 		ga, err := utils.GetAttendees()
