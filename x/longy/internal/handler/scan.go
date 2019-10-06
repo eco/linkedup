@@ -33,7 +33,10 @@ func HandleMsgQrScan(ctx sdk.Context, k keeper.Keeper, msg types.MsgScanQr) sdk.
 		//if the sender is that person. We can mark off this scan as complete
 		if scan.S2.Equals(msg.Sender) && !scan.Complete {
 			scan.Complete = true
-			//todo reward points?
+			err = k.AwardScanPoints(ctx, scan)
+			if err != nil {
+				return err.Result()
+			}
 		} else { //the original scanner must have rescanned the same badge
 			return types.ErrScanQRAlreadyOccurred("the scan already exists").Result()
 		}
