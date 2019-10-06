@@ -19,6 +19,9 @@ const (
 	EventbriteEventEnvKey = "EVENTBRITE_EVENT"
 	//EventbriteURL the eventbrite url for sfblock week
 	EventbriteURL = "https://www.eventbriteapi.com/v3/events/%s/attendees?page=%d"
+
+	// eventbrite events - test: 74857698391, prod: 64449323662
+
 	//HeaderPrefix the prefix to the value for auth with eventbrite
 	HeaderPrefix = "Bearer %s"
 )
