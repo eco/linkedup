@@ -11,7 +11,7 @@ import (
 
 func TestMonitor(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Keeper Test Suite")
+	RunSpecs(t, "Handler Test Suite")
 }
 
 var simApp *sim.LongyApp
