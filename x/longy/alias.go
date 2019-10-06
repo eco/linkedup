@@ -9,7 +9,7 @@ const (
 	// ModuleName is the name of the module
 	ModuleName = types.ModuleName
 	// StoreKey is the key used to access the store
-	StoreKey = ModuleName
+	StoreKey = types.StoreKey
 	// RouterKey is the key for routing messages to our handler
 	RouterKey = types.RouterKey
 )
@@ -40,9 +40,6 @@ type (
 
 	// Attendee is the type alias for Attendee
 	Attendee = types.Attendee
-
-	// MsgKey is the type alias for the Key Message
-	MsgKey = types.MsgKey
 
 	// GenesisAttendees is the array of attendees for the genesis file
 	GenesisAttendees = types.GenesisAttendees
