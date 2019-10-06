@@ -20,6 +20,29 @@ make test
 The key service runs alongside `lyd` and `lycli` to facilitate keying accounts and email onboarding. The key service hosts
 two http endpoints
 
+The usage for the key service is shown below
+```p
+key service for the longest chain game
+
+Usage:
+  ks [flags]
+
+Flags:
+      --port int                   port to bind the rekey service (default 1337)
+
+      --eb-auth-token string       eventbrite authorization token
+      --eb-event-id int            id associated with the eventbrite event
+
+      --longy-chain-id string      chain-id of the running longy game (default "longychain")
+      --longy-fullnode string      tcp://host:port the full node for tx submission (default "tcp://localhost:26657")
+      --longy-masterkey string     hex encoded master private key for the longy game (default "fc613b4dfd6736a7bd268c8a0e74ed0d1c04a959f59dd74ef2874983fd443fca")
+      --longy-restservice string   scheme://host:port of the full node rest client (default "http://localhost:1317")
+
+      --smtp-password string       password of the email account (default "2019longygame")
+      --smtp-server string         host:port of the smtp server (default "smtp.gmail.com:587")
+      --smtp-username string       username of the email account (default "testecolongy@gmail.com")
+      ```
+
 1. `/ping [GET]` is a health check. Simply writes a Status 200 along with "pong" in the request body
 2. `/key [POST]` is the entry point for keying an account.  
   Request Body:  
