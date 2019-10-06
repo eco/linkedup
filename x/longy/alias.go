@@ -27,8 +27,8 @@ var (
 	// NewAttendee is the function alias for creating a new attendee
 	NewAttendee = types.NewAttendee
 
-	// NewRekeyMsg is the function alias for the RekeyMsg type
-	NewRekeyMsg = types.NewMsgRekey
+	// NewKeyMsg is the function alias for the RekeyMsg type
+	NewKeyMsg = types.NewMsgKey
 
 	// NewQuerier is the function alias for creating a new querier
 	NewQuerier = keeper.NewQuerier
@@ -41,13 +41,15 @@ type (
 	// Attendee is the type alias for Attendee
 	Attendee = types.Attendee
 
-	// RekeyMsg is the type alias for the Rekey Message
-	RekeyMsg = types.MsgRekey
+	// MsgKey is the type alias for the Rekey Message
+	MsgKey = types.MsgKey
 
-	//GenesisAttendees is the array of attendees for the genesis file
+	// GenesisAttendees is the array of attendees for the genesis file
 	GenesisAttendees = types.GenesisAttendees
-	//GenesisAttendee is the attendee for the genesis file
+
+	// GenesisAttendee is the attendee for the genesis file
 	GenesisAttendee = types.GenesisAttendee
-	//GenesisService is the re-key service genesis type
+
+	// GenesisService is the re-key service genesis type
 	GenesisService = types.GenesisService
 )
