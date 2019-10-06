@@ -20,8 +20,8 @@ lycli keys add alice < $PWD_FILE
 lycli keys add bob < $PWD_FILE
 
 # Add 2 accounts, with coins to the genesis file
-lyd add-genesis-account $(lycli keys show alice -a) 1000gamecoin,100000000stake
-lyd add-genesis-account $(lycli keys show bob -a) 1000gamecoin,100000000stake
+lyd add-genesis-account $(lycli keys show alice -a) 1000longy,100000000stake
+lyd add-genesis-account $(lycli keys show bob -a) 1000longy,100000000stake
 
 # Generate the genesis attendees from the eventbrite api
 lyd add-genesis-attendees $(lycli keys show alice -a)

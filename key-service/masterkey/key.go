@@ -128,7 +128,7 @@ func (mk *Key) createTxBytes(
 	newPublicKey tmcrypto.PubKey,
 ) ([]byte, error) {
 	attendeeAddr := util.IDToAddress(attendeeID)
-	msgs := []sdk.Msg{longy.NewKeyMsg(attendeeAddr, mk.address, newPublicKey, commitment)}
+	msgs := []sdk.Msg{longy.NewMsgKey(attendeeAddr, mk.address, newPublicKey, commitment)}
 	signBytes := auth.StdSignBytes(
 		mk.chainID,
 		mk.accNum,
