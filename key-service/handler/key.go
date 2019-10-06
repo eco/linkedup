@@ -12,18 +12,18 @@ import (
 	"net/http"
 )
 
-func registerRekey(r *mux.Router, eb *eventbrite.Session, mk *masterkey.Key, mc *mail.Client) {
-	r.HandleFunc("/rekey", rekey(eb, mk, mc)).Methods("GET")
+func registerKey(r *mux.Router, eb *eventbrite.Session, mk *masterkey.MasterKey, mc *mail.Client) {
+	r.HandleFunc("/key", key(eb, mk, mc)).Methods("POST")
 }
 
 // All core logic is implemented here. If there are plans to expand this service,
 // logic (email retrieval, etc) can be lifted into http middleware to allow for better
 // composability
-func rekey(eb *eventbrite.Session, mk *masterkey.Key, mc *mail.Client) http.HandlerFunc {
+func key(eb *eventbrite.Session, mk *masterkey.MasterKey, mc *mail.Client) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		type reqBody struct {
-			AttendeeID string
-			PublicKey  secp256k1.PubKeySecp256k1
+			AttendeeID string                    `json:"attendee_id"`
+			PubKey     secp256k1.PubKeySecp256k1 `json:"pubkey"`
 		}
 
 		var body reqBody
@@ -35,7 +35,7 @@ func rekey(eb *eventbrite.Session, mk *masterkey.Key, mc *mail.Client) http.Hand
 		}
 
 		secret, commitment := util.CreateCommitment()
-		err := mk.SendRekeyTransaction(body.AttendeeID, body.PublicKey, commitment)
+		err := mk.SendKeyTransaction(body.AttendeeID, body.PubKey, commitment)
 		if err != nil {
 			http.Error(w, "internal error. try again", http.StatusInternalServerError)
 			return
@@ -50,7 +50,7 @@ func rekey(eb *eventbrite.Session, mk *masterkey.Key, mc *mail.Client) http.Hand
 			return
 		}
 
-		err = mc.SendRekeyEmail(email, secret)
+		err = mc.SendRedirectEmail(email, secret)
 		if err != nil {
 			http.Error(w, "email error. try again", http.StatusInternalServerError)
 			return

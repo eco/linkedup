@@ -35,23 +35,24 @@ func NewClient(host string, port int, username string, pwd string) (Client, erro
 	}, nil
 }
 
-// SendRekeyEmail will construct and send the email containing the redirect
-// uri with the given signature
-func (c Client) SendRekeyEmail(dest string, txBytes []byte) error {
-	hexStr := hex.EncodeToString(txBytes)
+// SendRedirectEmail will construct and send the email containing the redirect
+// uri with the given secret
+func (c Client) SendRedirectEmail(dest string, secret []byte) error {
+	hexStr := hex.EncodeToString(secret)
 
 	// construct message
 	m := gomail.NewMessage()
 	m.SetHeader("From", "testecolongy@gmail.com")
 	m.SetHeader("To", dest)
 	m.SetHeader("From", "alex@example.com")
-	m.SetHeader("Subject", "Reset keys and re-enter the longy game")
-	m.SetBody("text/html", fmt.Sprintf("<b>Hello!</b> TxBytes: %s", hexStr))
+	m.SetHeader("Subject", "Onboard to the the longy game")
+	m.SetBody("text/html", fmt.Sprintf("<b>Hello!</b> commitment secret: %s", hexStr))
 
 	err := gomail.Send(c.sender, m)
 	if err != nil {
 		log.WithError(err).Warnf("failed email delivery. email: %s", dest)
 	}
+
 	return err
 }
 

@@ -20,12 +20,12 @@ var log = logrus.WithField("module", "rekeyservice")
 // Service composes the required modules needed to manage the lifecycle
 type Service struct {
 	ebSession  *eventbrite.Session
-	masterKey  *masterkey.Key
+	masterKey  *masterkey.MasterKey
 	mailClient *mail.Client
 }
 
 // NewService is the creator the the rekey-service
-func NewService(ebSession *eventbrite.Session, key *masterkey.Key, mc *mail.Client) Service {
+func NewService(ebSession *eventbrite.Session, key *masterkey.MasterKey, mc *mail.Client) Service {
 	return Service{
 		ebSession:  ebSession,
 		masterKey:  key,
