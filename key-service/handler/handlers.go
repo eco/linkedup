@@ -10,7 +10,7 @@ import (
 )
 
 // Router returns the root http Handler
-func Router(eb eventbrite.Session, mk masterkey.Key, mc mail.Client) http.Handler {
+func Router(eb *eventbrite.Session, mk *masterkey.Key, mc *mail.Client) http.Handler {
 	r := mux.NewRouter()
 	registerPing(r)
 	registerRekey(r, eb, mk, mc)

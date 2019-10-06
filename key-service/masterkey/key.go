@@ -54,7 +54,7 @@ func NewMasterKey(privateKey tmcrypto.PrivKey, restURL, fullNodeURL string, chai
 
 	// retrieve details about the master account from the rest endpoint
 	reqURL := restURL + "/auth/accounts/{addr goes here}"
-	resp, err := http.Get(reqURL)
+	resp, _ := http.Get(reqURL) // #nosec
 	acc, err := parseAccountFromBody(resp.Body)
 	if err != nil {
 		return Key{}, fmt.Errorf("unable to request master account information from the full node")
@@ -72,7 +72,9 @@ func NewMasterKey(privateKey tmcrypto.PrivKey, restURL, fullNodeURL string, chai
 		longyCliCtx: cliCtx,
 	}
 
-	return k, nil
+	err = resp.Body.Close()
+
+	return k, err
 }
 
 // Secp256k1FromHex parses the hex-encoded `key` string
@@ -103,7 +105,7 @@ func Secp256k1FromHex(key string) (tmcrypto.PrivKey, error) {
 
 // SendRekeyTransaction generates a `RekeyMsg`, authorized by the master key. The transaction bytes
 // generated are created using the cosmos-sdk/x/auth module's StdSignDoc.
-func (mk Key) SendRekeyTransaction(attendeeID string, newPublicKey tmcrypto.PubKey, commitment util.Commitment) error {
+func (mk *Key) SendRekeyTransaction(attendeeID string, newPublicKey tmcrypto.PubKey, commitment util.Commitment) error {
 	var err error
 
 	/** Block until we submit the transaction **/
@@ -120,7 +122,11 @@ func (mk Key) SendRekeyTransaction(attendeeID string, newPublicKey tmcrypto.PubK
 	return err
 }
 
-func (mk Key) createTxBytes(attendeeID string, commitment util.Commitment, newPublicKey tmcrypto.PubKey) ([]byte, error) {
+func (mk *Key) createTxBytes(
+	attendeeID string,
+	commitment util.Commitment,
+	newPublicKey tmcrypto.PubKey,
+) ([]byte, error) {
 	attendeeAddr := util.IDToAddress(attendeeID)
 	msgs := []sdk.Msg{longy.NewRekeyMsg(attendeeAddr, mk.address, newPublicKey, commitment)}
 	signBytes := auth.StdSignBytes(
@@ -147,7 +153,6 @@ func (mk Key) createTxBytes(attendeeID string, commitment util.Commitment, newPu
 }
 
 func parseAccountFromBody(body io.ReadCloser) (auth.Account, error) {
-	defer body.Close()
 	decoder := json.NewDecoder(body)
 
 	var b map[string]json.RawMessage

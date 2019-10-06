@@ -12,14 +12,14 @@ import (
 	"net/http"
 )
 
-func registerRekey(r *mux.Router, eb eventbrite.Session, mk masterkey.Key, mc mail.Client) {
+func registerRekey(r *mux.Router, eb *eventbrite.Session, mk *masterkey.Key, mc *mail.Client) {
 	r.HandleFunc("/rekey", rekey(eb, mk, mc)).Methods("GET")
 }
 
 // All core logic is implemented here. If there are plans to expand this service,
 // logic (email retrieval, etc) can be lifted into http middleware to allow for better
 // composability
-func rekey(eb eventbrite.Session, mk masterkey.Key, mc mail.Client) http.HandlerFunc {
+func rekey(eb *eventbrite.Session, mk *masterkey.Key, mc *mail.Client) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		type reqBody struct {
 			AttendeeID string
