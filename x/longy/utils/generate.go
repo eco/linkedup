@@ -13,14 +13,15 @@ import (
 )
 
 const (
-	//EventbriteEnvKey the key name for auth
-	EventbriteEnvKey = "EVENTBRITE_AUTH"
+	//EventbriteAuthEnvKey the key name for auth
+	EventbriteAuthEnvKey = "EVENTBRITE_AUTH"
+	//EventbriteEventEnvKey the event to operate on
+	EventbriteEventEnvKey = "EVENTBRITE_EVENT"
 	//EventbriteURL the eventbrite url for sfblock week
-	//todo (dont forget to change the EVENTBRITE_AUTH token when switching these)
-	//EventbriteURL = "https://www.eventbriteapi.com/v3/events/64449323662/attendees?page=%d"
+	EventbriteURL = "https://www.eventbriteapi.com/v3/events/%s/attendees?page=%d"
 
-	//EventbriteURL for fake group
-	EventbriteURL = "https://www.eventbriteapi.com/v3/events/74857698391/attendees?page=%d"
+	// eventbrite events - test: 74857698391, prod: 64449323662
+
 	//HeaderPrefix the prefix to the value for auth with eventbrite
 	HeaderPrefix = "Bearer %s"
 )
@@ -40,22 +41,25 @@ type Pagination struct {
 
 //GetAttendees gets the attendee list from eventbrite while using the auth key found in an environmental var
 func GetAttendees() (ga longy.GenesisAttendees, err sdk.Error) {
-	authKey, isSet := os.LookupEnv(EventbriteEnvKey)
-	if !isSet {
-		err = types.ErrEventbriteEnvVariableNotSet("EVENTBRITE_AUTH must be set for generating the genesis file")
+	authKey, isAuthSet := os.LookupEnv(EventbriteAuthEnvKey)
+	eventID, isEventSet := os.LookupEnv(EventbriteEventEnvKey)
+	if !isAuthSet || !isEventSet {
+		err = types.ErrEventbriteEnvVariableNotSet(
+			"EVENTBRITE_AUTH and EVENTBRITE_EVENT must be set for generating the genesis file",
+		)
 		return
 	}
-	ga, err = fetchAttendees(authKey)
+	ga, err = fetchAttendees(eventID, authKey)
 	return
 }
 
 //fetchAttendees async gets and process the index of attendees from the paginated endpoint
-func fetchAttendees(authKey string) (ga longy.GenesisAttendees, e sdk.Error) {
+func fetchAttendees(eventID string, authKey string) (ga longy.GenesisAttendees, e sdk.Error) {
 	client := http.Client{}
 
 	headerAuth := fmt.Sprintf(HeaderPrefix, authKey)
 
-	data, e := processPage(&client, 1, headerAuth)
+	data, e := processPage(&client, eventID, 1, headerAuth)
 	if e != nil {
 		return
 	}
@@ -68,7 +72,7 @@ func fetchAttendees(authKey string) (ga longy.GenesisAttendees, e sdk.Error) {
 
 	for i := 2; i <= data.PaginationInfo.PageCount; i++ {
 		wg.Add(1)
-		go asyncGet(i, &wg, &client, headerAuth, aChan, eChan)
+		go asyncGet(eventID, i, &wg, &client, headerAuth, aChan, eChan)
 	}
 	wg.Wait()
 
@@ -100,10 +104,16 @@ func mergeAttendees(ac chan longy.GenesisAttendee, ga longy.GenesisAttendees) lo
 
 //asyncGet gets and writes the attendees from a request into the data channel from a go routine
 //nolint: gocritic
-func asyncGet(i int, wg *sync.WaitGroup, client *http.Client, headerAuth string, aChan chan longy.GenesisAttendee,
+func asyncGet(
+	eventID string,
+	i int,
+	wg *sync.WaitGroup,
+	client *http.Client,
+	headerAuth string,
+	aChan chan longy.GenesisAttendee,
 	eChan chan<- sdk.Error) {
 	defer wg.Done()
-	da, err := processPage(client, i, headerAuth)
+	da, err := processPage(client, eventID, i, headerAuth)
 
 	if err != nil {
 		eChan <- err
@@ -116,9 +126,14 @@ func asyncGet(i int, wg *sync.WaitGroup, client *http.Client, headerAuth string,
 }
 
 //processPage gets and processes a single page returning its data
-func processPage(client *http.Client, page int, headerAuth string) (data EventbriteData, e sdk.Error) {
+func processPage(
+	client *http.Client,
+	eventID string,
+	page int,
+	headerAuth string,
+) (data EventbriteData, e sdk.Error) {
 	var res *http.Response
-	res, e = getPage(client, page, headerAuth)
+	res, e = getPage(client, eventID, page, headerAuth)
 	if e != nil {
 		return
 	}
@@ -137,9 +152,14 @@ func processResp(res *http.Response) (data EventbriteData, e sdk.Error) {
 }
 
 //getPage gets the a paginated result off attendees
-func getPage(client *http.Client, page int, headerAuth string) (res *http.Response, e sdk.Error) {
+func getPage(
+	client *http.Client,
+	eventID string,
+	page int,
+	headerAuth string,
+) (res *http.Response, e sdk.Error) {
 	var err error
-	req := pageURL(page, headerAuth)
+	req := pageURL(eventID, page, headerAuth)
 	res, err = client.Do(req)
 	if err != nil {
 		e = types.ErrNetworkResponseError(
@@ -156,8 +176,8 @@ func getPage(client *http.Client, page int, headerAuth string) (res *http.Respon
 }
 
 //pageURL creates an authorized request for a paginated call to get attendees
-func pageURL(page int, header string) *http.Request {
-	url := fmt.Sprintf(EventbriteURL, page)
+func pageURL(eventID string, page int, header string) *http.Request {
+	url := fmt.Sprintf(EventbriteURL, eventID, page)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		log.Fatalln(err)

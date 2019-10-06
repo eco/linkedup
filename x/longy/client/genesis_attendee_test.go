@@ -9,9 +9,11 @@ import (
 	"github.com/eco/longy/x/longy"
 	"github.com/eco/longy/x/longy/client"
 	"github.com/eco/longy/x/longy/internal/types"
+	"github.com/eco/longy/x/longy/utils"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"testing"
+	"os"
 )
 
 func TestMonitor(t *testing.T) {
@@ -20,10 +22,20 @@ func TestMonitor(t *testing.T) {
 }
 
 var _ = Describe("Add Genesis Attendee Tests", func() {
-	var cdc *codec.Codec
+	var (
+		cdc *codec.Codec
+		key string
+		event string
+		isEnvSet bool
+	)
 
 	BeforeEach(func() {
 		cdc = app.MakeCodec()
+
+		key = os.Getenv(utils.EventbriteAuthEnvKey)
+		event = os.Getenv(utils.EventbriteEventEnvKey)
+
+		isEnvSet = event != "" && key != ""
 	})
 
 	It("should fail when service address is invalid account Bech32", func() {
@@ -43,6 +55,10 @@ var _ = Describe("Add Genesis Attendee Tests", func() {
 	})
 
 	It("should succeed when service address is valid", func() {
+		if !isEnvSet {
+			Skip("set EVENTBRITE_AUTH and EVENTBRITE_EVENT to run tests that access Eventbrite data")
+		}
+
 		realAddr := "cosmos13xkwux707n3j4pcq7249rwf88g7jd8ntzpdz9w"
 		appState := getAppState(cdc, realAddr, true)
 		_, err := client.BuildGenesisState(appState, cdc, []string{realAddr})

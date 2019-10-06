@@ -11,6 +11,17 @@ To build the project:
 make install
 ```
 
+Before you can run the tests you'll need to set up the runtime environment so
+the system can connect with Eventbrite. To do that, export the environment
+variable `EVENTBRITE_AUTH` containing your Eventbrite access token. In addition,
+the system needs to know which Eventbrite event to work with. Set that in
+`EVENTBRITE_EVENT`.
+
+```
+export EVENTBRITE_EVENT="3414213431"
+export EVENTBRITE_AUTH="ewifkjaweklfheaklj"
+```
+
 To lint and test:
 ```
 make test
