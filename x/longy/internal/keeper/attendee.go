@@ -63,8 +63,8 @@ func (k Keeper) AwardScanPoints(ctx sdk.Context, scan types.Scan) sdk.Error {
 	if a1.Sponsor || a2.Sponsor {
 		points = types.ScanSponsorAwardPoints
 	}
-	a1.Rep += points
-	a2.Rep += points
+	a1.AddRep(points)
+	a2.AddRep(points)
 	k.SetAttendee(ctx, a1)
 	k.SetAttendee(ctx, a2)
 	return nil

@@ -36,7 +36,7 @@ var _ = Describe("Scan Tests", func() {
 	It("should fail when both addresses are the same", func() {
 		_, err := types.NewScan(s2, s2)
 		Expect(err).To(Not(BeNil()))
-		Expect(err.Code()).To(Equal(types.ScanAccountsSame))
+		Expect(err.Code()).To(Equal(types.AccountsSame))
 	})
 
 	It("should return the same id regardless of account params order", func() {

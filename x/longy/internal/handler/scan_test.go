@@ -35,7 +35,7 @@ var _ = Describe("Scan Handler Tests", func() {
 
 		msg := types.NewMsgQrScan(s1, qr1)
 		result := handler(ctx, msg)
-		Expect(result.Code).To(Equal(types.ScanAccountsSame))
+		Expect(result.Code).To(Equal(types.AccountsSame))
 	})
 
 	It("should succeed to create a new scan record on first scan", func() {
@@ -116,7 +116,7 @@ var _ = Describe("Scan Handler Tests", func() {
 })
 
 func inspectScan(s1 sdk.AccAddress, s2 sdk.AccAddress, completed bool) {
-	id, err := types.GenID(s2, s1) //invert for fun, order shouldn't matter
+	id, err := types.GenScanID(s2, s1) //invert for fun, order shouldn't matter
 	Expect(err).To(BeNil())
 	scan, err := keeper.GetScanByID(ctx, id)
 	Expect(err).To(BeNil())

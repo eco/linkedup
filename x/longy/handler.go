@@ -16,8 +16,8 @@ func NewHandler(keeper Keeper) sdk.Handler {
 
 		case types.MsgScanQr:
 			return handler.HandleMsgQrScan(ctx, keeper, msg)
-		case types.MsgShareInfo:
-			return handleMsgShareInfo(ctx, keeper, msg)
+		case types.MsgInfo:
+			return handler.HandleMsgInfo(ctx, keeper, msg)
 		case types.MsgKey:
 			return handleMsgKey(ctx, keeper, msg)
 		case types.MsgClaimKey:
@@ -27,14 +27,6 @@ func NewHandler(keeper Keeper) sdk.Handler {
 			return sdk.ErrUnknownRequest(errMsg).Result()
 		}
 	}
-}
-
-//nolint: unparam, gocritic
-func handleMsgShareInfo(ctx sdk.Context, k Keeper, msg types.MsgShareInfo) sdk.Result {
-
-	//update scan state
-
-	return sdk.Result{}
 }
 
 //nolint: unparam, gocritic

@@ -35,6 +35,8 @@ type Attendee struct {
 	Commitment util.Commitment
 	Claimed    bool
 	Sponsor    bool
+	EncryptKey string
+	InfoIDs    []string
 
 	Rep uint
 }

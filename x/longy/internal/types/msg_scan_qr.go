@@ -12,7 +12,6 @@ type MsgScanQr struct {
 	ScannedQR string         `json:"scannedQR"` //the string representation of the other attendee's QR badge
 	//// some interaction to prevent social media posts
 	//ScanCode  string         `json:"scanCode"`  //the scan code from the QR account, used to validate
-
 }
 
 // NewMsgQrScan is the constructor function for MsgScanQr

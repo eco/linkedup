@@ -185,7 +185,6 @@ linters:
     - gosec
     - interfacer
     - unconvert
-    - dupl
     - goconst
     - gocyclo
     - gocritic

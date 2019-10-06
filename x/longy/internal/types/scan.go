@@ -19,7 +19,7 @@ type Scan struct {
 
 //NewScan creates a new scan and sets its id
 func NewScan(s1 sdk.AccAddress, s2 sdk.AccAddress) (Scan, sdk.Error) {
-	id, err := GenID(s1, s2)
+	id, err := GenScanID(s1, s2)
 	if err != nil {
 		return Scan{}, err
 	}
@@ -31,15 +31,10 @@ func NewScan(s1 sdk.AccAddress, s2 sdk.AccAddress) (Scan, sdk.Error) {
 	}, nil
 }
 
-//GenID creates the unique id between a scan pair, regardless of the order of the account addresses passed into it
-func GenID(s1, s2 sdk.AccAddress) (id []byte, err sdk.Error) {
-	if s1.Empty() || s2.Empty() {
-		err = ErrAccountAddressEmpty("cannot create a scan where an address is empty")
-		return
-	}
-
-	if s1.Equals(s2) {
-		err = ErrScanAccountsSame("cannot create a scan where addresses are the same")
+//GenScanID creates the unique id between a scan pair, regardless of the order of the account addresses passed into it
+func GenScanID(s1, s2 sdk.AccAddress) (id []byte, err sdk.Error) {
+	err = CheckSameness(s1, s2)
+	if err != nil {
 		return
 	}
 

@@ -8,23 +8,17 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"testing"
 )
-
-func TestMonitor(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "Utils Test Suite")
-}
 
 var _ = Describe("Generate Attendee Genesis Tests", func() {
 	var (
-		key string
-		event string
+		key      string
+		event    string
 		isEnvSet bool
 	)
 
 	BeforeSuite(func() {
-			key = os.Getenv(utils.EventbriteAuthEnvKey)
+		key = os.Getenv(utils.EventbriteAuthEnvKey)
 		event = os.Getenv(utils.EventbriteEventEnvKey)
 
 		isEnvSet = event != "" && key != ""

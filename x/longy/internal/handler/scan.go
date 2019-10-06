@@ -8,7 +8,7 @@ import (
 )
 
 // HandleMsgQrScan processes MsgScanQr message
-//nolint: unparam, gocritic
+//nolint:gocritic
 func HandleMsgQrScan(ctx sdk.Context, k keeper.Keeper, msg types.MsgScanQr) sdk.Result {
 	//get the address for the scanned qr code
 	attendee, ok := k.GetAttendeeWithID(ctx, msg.ScannedQR)
@@ -16,7 +16,7 @@ func HandleMsgQrScan(ctx sdk.Context, k keeper.Keeper, msg types.MsgScanQr) sdk.
 		return types.ErrAttendeeNotFound("cannot find the attendee").Result()
 	}
 	//get the id for the scan event
-	id, err := types.GenID(msg.Sender, attendee.Address)
+	id, err := types.GenScanID(msg.Sender, attendee.Address)
 	if err != nil {
 		return err.Result()
 	}
