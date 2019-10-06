@@ -70,6 +70,10 @@ var _ = Describe("Longy Handler Tests", func() {
 
 		pubKey := account.GetPubKey()
 		Expect(pubKey).To(BeNil())
+
+		attendee, ok := keeper.GetAttendee(ctx, addr)
+		Expect(ok).Should(BeTrue())
+		Expect(attendee.IsClaimed()).Should(BeFalse())
 	})
 
 	It("changes public keys with the key message", func() {
@@ -149,7 +153,7 @@ var _ = Describe("Longy Handler Tests", func() {
 			Expect(ok).Should(BeTrue())
 			Expect(a.IsClaimed()).Should(BeTrue())
 
-			// TODO: check that rep was dispursed
+			Expect(a.GetRep()).To(Equal(uint(5)))
 		})
 
 		It("cannot claim twice", func() {

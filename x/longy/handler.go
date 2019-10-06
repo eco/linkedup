@@ -88,6 +88,7 @@ func handleMsgClaimKey(ctx sdk.Context, k Keeper, msg types.MsgClaimKey) sdk.Res
 	}
 
 	// TODO: disperse reward for onboarding here
+	attendee.AddRep(5)
 
 	// mark the attendee as claimed
 	attendee.SetClaimed()
