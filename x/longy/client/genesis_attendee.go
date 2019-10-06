@@ -21,7 +21,7 @@ func AddGenesisAttendeesCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Comman
 		Short: "Add genesis attendees to genesis.json",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(_ *cobra.Command, args []string) error {
-			return AddGenesisAttendees(args, ctx, cdc)
+			return addGenesisAttendees(args, ctx, cdc)
 		},
 	}
 
@@ -29,7 +29,7 @@ func AddGenesisAttendeesCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Comman
 }
 
 // AddGenesisAttendees adds the attendees and the service account to the genesis file under the longy key
-func AddGenesisAttendees(args []string, ctx *server.Context, cdc *codec.Codec) error {
+func addGenesisAttendees(args []string, ctx *server.Context, cdc *codec.Codec) error {
 	config := ctx.Config
 	config.SetRoot(viper.GetString(cli.HomeFlag))
 
@@ -40,7 +40,7 @@ func AddGenesisAttendees(args []string, ctx *server.Context, cdc *codec.Codec) e
 		return err
 	}
 
-	genesisState, err := BuildGenesisState(appState, cdc, args)
+	genesisState, err := buildGenesisState(appState, cdc, args)
 	if err != nil {
 		return err
 	}
@@ -60,7 +60,7 @@ func AddGenesisAttendees(args []string, ctx *server.Context, cdc *codec.Codec) e
 }
 
 // BuildGenesisState builds the genesis state for the longy module
-func BuildGenesisState(appState map[string]json.RawMessage, cdc *codec.Codec,
+func buildGenesisState(appState map[string]json.RawMessage, cdc *codec.Codec,
 	args []string) (genesisState longy.GenesisState, err sdk.Error) {
 	// add genesis attendees to the app state
 	cdc.MustUnmarshalJSON(appState[longy.ModuleName], &genesisState)
