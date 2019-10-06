@@ -1,4 +1,4 @@
-package rekeyservice
+package keyservice
 
 import (
 	"context"
@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-var log = logrus.WithField("module", "rekeyservice")
+var log = logrus.WithField("module", "keyservice")
 
 // Service composes the required modules needed to manage the lifecycle
 type Service struct {
@@ -34,22 +34,22 @@ func NewService(ebSession *eventbrite.Session, key *masterkey.Key, mc *mail.Clie
 }
 
 // StartHTTP will block and start the http service binded on `port`
-func (srv *Service) StartHTTP(port int) {
+func (svc *Service) StartHTTP(port int) {
 	s := &http.Server{
 		Addr:    fmt.Sprintf(":%d", port),
-		Handler: handler.Router(srv.ebSession, srv.masterKey, srv.mailClient),
+		Handler: handler.Router(svc),
 	}
 
 	// will block
 	startServer(s)
 
 	// server closed
-	srv.Close()
+	svc.Close()
 }
 
 // Close will release the resources used by the server
-func (srv *Service) Close() {
-	srv.mailClient.Close() //nolint
+func (svc *Service) Close() {
+	svc.mailClient.Close() //nolint
 	log.Info("done")
 }
 
@@ -72,4 +72,21 @@ func startServer(s *http.Server) {
 	defer cancel()
 
 	s.Shutdown(ctx) //nolint
+}
+
+// MailClient provides a resource handle for interacting with the mail system
+func (svc *Service) MailClient() *mail.Client {
+	return svc.mailClient
+}
+
+
+// Eventbrite provides a resource handle for interacting with the Eventbrite API
+func (svc *Service) Eventbrite() *eventbrite.Session {
+	return svc.ebSession
+}
+
+// MasterKey refers to the signing key used for accessing the chain
+// administrative functions
+func (svc *Service) MasterKey() *masterkey.Key {
+	return svc.masterKey
 }

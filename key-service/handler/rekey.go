@@ -3,23 +3,21 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/eco/longy/key-service/eventbrite"
-	"github.com/eco/longy/key-service/mail"
-	"github.com/eco/longy/key-service/masterkey"
+	"github.com/eco/longy/key-service/types"
 	"github.com/eco/longy/util"
 	"github.com/gorilla/mux"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
 	"net/http"
 )
 
-func registerRekey(r *mux.Router, eb *eventbrite.Session, mk *masterkey.Key, mc *mail.Client) {
-	r.HandleFunc("/rekey", rekey(eb, mk, mc)).Methods("GET")
+func registerRekey(r *mux.Router, svc types.Service) {
+	r.HandleFunc("/rekey", rekey(svc)).Methods("GET")
 }
 
 // All core logic is implemented here. If there are plans to expand this service,
 // logic (email retrieval, etc) can be lifted into http middleware to allow for better
 // composability
-func rekey(eb *eventbrite.Session, mk *masterkey.Key, mc *mail.Client) http.HandlerFunc {
+func rekey(svc types.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		type reqBody struct {
 			AttendeeID string
@@ -35,13 +33,13 @@ func rekey(eb *eventbrite.Session, mk *masterkey.Key, mc *mail.Client) http.Hand
 		}
 
 		secret, commitment := util.CreateCommitment()
-		err := mk.SendRekeyTransaction(body.AttendeeID, body.PublicKey, commitment)
+		err := svc.MasterKey().SendRekeyTransaction(body.AttendeeID, body.PublicKey, commitment)
 		if err != nil {
 			http.Error(w, "internal error. try again", http.StatusInternalServerError)
 			return
 		}
 
-		email, err := eb.EmailFromAttendeeID(body.AttendeeID)
+		email, err := svc.Eventbrite().EmailFromAttendeeID(body.AttendeeID)
 		if err != nil {
 			http.Error(w, "internal error. try again", http.StatusInternalServerError)
 			return
@@ -50,7 +48,7 @@ func rekey(eb *eventbrite.Session, mk *masterkey.Key, mc *mail.Client) http.Hand
 			return
 		}
 
-		err = mc.SendRekeyEmail(email, secret)
+		err = svc.MailClient().SendRekeyEmail(email, secret)
 		if err != nil {
 			http.Error(w, "email error. try again", http.StatusInternalServerError)
 			return
