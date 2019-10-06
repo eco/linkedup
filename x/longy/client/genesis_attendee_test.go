@@ -35,11 +35,7 @@ var _ = Describe("Add Genesis Attendee Tests", func() {
 		key = os.Getenv(utils.EventbriteAuthEnvKey)
 		event = os.Getenv(utils.EventbriteEventEnvKey)
 
-		if event == "" || key == "" {
-			isEnvSet = false
-		} else {
-			isEnvSet = true
-		}
+		isEnvSet = event != "" && key != ""
 	})
 
 	It("should fail when service address is invalid account Bech32", func() {

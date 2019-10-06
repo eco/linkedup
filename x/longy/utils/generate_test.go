@@ -22,24 +22,18 @@ var _ = Describe("Generate Attendee Genesis Tests", func() {
 		event string
 		isEnvSet bool
 	)
-	
-	BeforeEach(func() {
-		key = os.Getenv(utils.EventbriteAuthEnvKey)
+
+	BeforeSuite(func() {
+			key = os.Getenv(utils.EventbriteAuthEnvKey)
 		event = os.Getenv(utils.EventbriteEventEnvKey)
 
-		if event == "" || key == "" {
-			isEnvSet = false
-		} else {
-			isEnvSet = true
-		}
-
-		_ = os.Unsetenv(utils.EventbriteAuthEnvKey)
-		_ = os.Unsetenv(utils.EventbriteEventEnvKey)
+		isEnvSet = event != "" && key != ""
 	})
 
 	AfterEach(func() {
-		if key != "" {
+		if isEnvSet {
 			_ = os.Setenv(utils.EventbriteAuthEnvKey, key)
+			_ = os.Setenv(utils.EventbriteEventEnvKey, event)
 		} else {
 			err := os.Unsetenv(utils.EventbriteAuthEnvKey)
 			Expect(err).To(BeNil())
@@ -47,6 +41,7 @@ var _ = Describe("Generate Attendee Genesis Tests", func() {
 	})
 
 	It("should fail when environment variable for auth not set", func() {
+		_ = os.Unsetenv(utils.EventbriteAuthEnvKey)
 		_, err := utils.GetAttendees()
 		Expect(err).To(Not(BeNil()))
 	})
