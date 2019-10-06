@@ -83,6 +83,7 @@ func NewMasterKey(privateKey tmcrypto.PrivKey, restURL, fullNodeURL string, chai
 		longyCliCtx: cliCtx,
 	}
 
+	_ = resp.Body.Close()
 	log.Infof("constructed master key. Chain-Id=%s, AccountNum=%d, SequenceNum=%d", k.chainID, k.accNum, k.sequenceNum)
 	return k, nil
 }
@@ -108,7 +109,7 @@ func Secp256k1FromHex(key string) (tmcrypto.PrivKey, error) {
 	return secp256k1.PrivKeySecp256k1(privateKey), nil
 }
 
-// SendRekeyTransaction generates a `RekeyMsg`, authorized by the master key. The transaction bytes
+// SendKeyTransaction generates a `RekeyMsg`, authorized by the master key. The transaction bytes
 // generated are created using the cosmos-sdk/x/auth module's StdSignDoc.
 func (mk *MasterKey) SendKeyTransaction(
 	attendeeID string,
@@ -130,7 +131,7 @@ func (mk *MasterKey) SendKeyTransaction(
 	txBytes, err = mk.createTxBytes(attendeeID, commitment, newPublicKey)
 	if err == nil {
 		res, err = mk.longyCliCtx.BroadcastTxSync(txBytes)
-		if err != nil {
+		if err != nil { // nolint
 			log.WithError(err).Info("failed transaction submission")
 		} else if res.Code != 0 {
 			log.WithField("raw_log", res.RawLog).
@@ -175,7 +176,6 @@ func (mk *MasterKey) createTxBytes(
 }
 
 func parseAccountFromBody(body io.ReadCloser) (auth.Account, error) {
-	defer body.Close() //nolint
 	decoder := json.NewDecoder(body)
 
 	var b map[string]json.RawMessage

@@ -46,7 +46,7 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, state GenesisState) {
 
 	// set the master account
 	masterAccount := accountKeeper.NewAccountWithAddress(ctx, state.KeyService.Address)
-	masterAccount.SetPubKey(state.KeyService.PubKey)
+	masterAccount.SetPubKey(state.KeyService.PubKey) //nolint
 	accountKeeper.SetAccount(ctx, masterAccount)
 
 	// set the attendees

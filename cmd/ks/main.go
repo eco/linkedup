@@ -13,18 +13,20 @@ import (
 )
 
 func init() {
-	// TODO: remote these defaults before making the repo public
 	rootCmd.Flags().Int("port", 1337, "port to bind the rekey service")
+
 	rootCmd.Flags().String("longy-chain-id", "longychain", "chain-id of the running longy game")
 	rootCmd.Flags().String("longy-restservice", "http://localhost:1317", "scheme://host:port of the full node rest client")
 	rootCmd.Flags().String("longy-fullnode", "tcp://localhost:26657", "tcp://host:port the full node for tx submission")
 
 	// using "master" as the seed
-	rootCmd.Flags().String("longy-masterkey", "fc613b4dfd6736a7bd268c8a0e74ed0d1c04a959f59dd74ef2874983fd443fca", "hex encoded master private key for the longy game")
+	rootCmd.Flags().String("longy-masterkey",
+		"fc613b4dfd6736a7bd268c8a0e74ed0d1c04a959f59dd74ef2874983fd443fca", "hex encoded master private key")
 
 	rootCmd.Flags().String("smtp-server", "smtp.gmail.com:587", "host:port of the smtp server")
 	rootCmd.Flags().String("smtp-username", "testecolongy@gmail.com", "username of the email account")
 	rootCmd.Flags().String("smtp-password", "2019longygame", "password of the email account")
+
 	rootCmd.Flags().String("eb-auth-token", "", "eventbrite authorization token")
 	rootCmd.Flags().Int("eb-event-id", 0, "id associated with the eventbrite event")
 }

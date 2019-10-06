@@ -5,10 +5,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/server"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/genaccounts"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	"github.com/eco/longy/x/longy"
-	"github.com/eco/longy/x/longy/internal/types"
 	"github.com/eco/longy/x/longy/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -73,27 +71,5 @@ func BuildGenesisState(appState map[string]json.RawMessage, cdc *codec.Codec,
 		return
 	}
 
-	return
-}
-
-//getServiceAcct gets the service account from the cmd args and checks that the same account exists in
-//the genesis accounts
-func getServiceAcct(appState map[string]json.RawMessage, cdc *codec.Codec, args []string) (addr sdk.AccAddress,
-	e sdk.Error) {
-	addr, err := sdk.AccAddressFromBech32(args[0])
-	if err != nil {
-		e = types.ErrGenesisKeyServiceAccountInvalid(err.Error())
-		return
-	}
-
-	var accountGenesisState genaccounts.GenesisState
-	cdc.MustUnmarshalJSON(appState[genaccounts.ModuleName], &accountGenesisState)
-	for i := range accountGenesisState {
-		if accountGenesisState[i].Address.Equals(addr) {
-			return
-		}
-	}
-	e = types.ErrGenesisKeyServiceAccountNotPresent("service account was not found in genesis accounts, " +
-		"have you added by calling 'lyd add-genesis-account {acct} {coints...}'")
 	return
 }

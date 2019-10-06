@@ -9,11 +9,11 @@ var _ sdk.Msg = MsgClaimKey{}
 // MsgClaimKey is used to claim a prior rekey message
 type MsgClaimKey struct {
 	AttendeeAddress sdk.AccAddress
-	Secret          []byte
+	Secret          string
 }
 
 // NewMsgClaimKey in the constructor for `MsgClaimKey`
-func NewMsgClaimKey(address sdk.AccAddress, secret []byte) MsgClaimKey {
+func NewMsgClaimKey(address sdk.AccAddress, secret string) MsgClaimKey {
 	return MsgClaimKey{
 		AttendeeAddress: address,
 		Secret:          secret,
