@@ -47,6 +47,8 @@ const (
 	//ScanQRAlreadyOccurred is the code for when the scan message has already been sent by the scanner or the scan
 	//is complete for those two parties
 	ScanQRAlreadyOccurred
+	//ScanNotComplete is the code for when a scan is not complete
+	ScanNotComplete
 
 	//DefaultError is the code for when a random error occurs that we do not provide a unique code to
 	DefaultError
@@ -141,6 +143,11 @@ func ErrAccountAddressEmpty(format string, args ...interface{}) sdk.Error {
 //is complete for those two parties
 func ErrScanQRAlreadyOccurred(format string, args ...interface{}) sdk.Error {
 	return sdk.NewError(LongyCodeSpace, ScanQRAlreadyOccurred, format, args...)
+}
+
+//ErrScanNotComplete occurs when a scan is not complete
+func ErrScanNotComplete(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, ScanNotComplete, format, args...)
 }
 
 //ErrDefault occurs when a random error occurs that we do not provide a unique code to
