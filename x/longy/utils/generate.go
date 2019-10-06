@@ -16,7 +16,11 @@ const (
 	//EventbriteEnvKey the key name for auth
 	EventbriteEnvKey = "EVENTBRITE_AUTH"
 	//EventbriteURL the eventbrite url for sfblock week
-	EventbriteURL = "https://www.eventbriteapi.com/v3/events/64449323662/attendees?page=%d"
+	//todo (dont forget to change the EVENTBRITE_AUTH token when switching these)
+	//EventbriteURL = "https://www.eventbriteapi.com/v3/events/64449323662/attendees?page=%d"
+
+	//EventbriteURL for fake group
+	EventbriteURL = "https://www.eventbriteapi.com/v3/events/74857698391/attendees?page=%d"
 	//HeaderPrefix the prefix to the value for auth with eventbrite
 	HeaderPrefix = "Bearer %s"
 )
