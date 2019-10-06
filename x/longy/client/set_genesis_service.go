@@ -37,7 +37,8 @@ func setGenesisService(ctx *server.Context, cdc *codec.Codec) error {
 	}
 
 	var genState longy.GenesisState
-	if err := cdc.UnmarshalJSON(appState[longy.ModuleName], &genState); err != nil {
+	err = cdc.UnmarshalJSON(appState[longy.ModuleName], &genState)
+	if err != nil {
 		return err
 	}
 

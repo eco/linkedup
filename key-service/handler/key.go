@@ -34,14 +34,16 @@ func key(eb *eventbrite.Session, mk *masterkey.MasterKey, mc *mail.Client) http.
 
 		cdc := longy.ModuleCdc
 		var body reqBody
-		if err := cdc.UnmarshalJSON(bz, &body); err != nil {
+		err = cdc.UnmarshalJSON(bz, &body)
+		if err != nil {
 			errMsg := fmt.Sprintf("bad json request body: %s", err)
 			http.Error(w, errMsg, http.StatusBadRequest)
 			return
 		}
 
 		secret, commitment := util.CreateCommitment()
-		if err := mk.SendKeyTransaction(body.AttendeeID, body.PubKey, commitment); err != nil {
+		err = mk.SendKeyTransaction(body.AttendeeID, body.PubKey, commitment)
+		if err != nil {
 			http.Error(w, "internal error. try again", http.StatusInternalServerError)
 			return
 		}

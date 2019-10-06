@@ -20,7 +20,7 @@ func AddGenesisAttendeesCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Comman
 		Use:   "add-genesis-attendees",
 		Short: "Add genesis attendees to genesis.json",
 		RunE: func(_ *cobra.Command, args []string) error {
-			return addGenesisAttendees(args, ctx, cdc)
+			return addGenesisAttendees(ctx, cdc)
 		},
 	}
 
@@ -28,7 +28,7 @@ func AddGenesisAttendeesCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Comman
 }
 
 // AddGenesisAttendees adds the attendees and the service account to the genesis file under the longy key
-func addGenesisAttendees(args []string, ctx *server.Context, cdc *codec.Codec) error {
+func addGenesisAttendees(ctx *server.Context, cdc *codec.Codec) error {
 	config := ctx.Config
 	config.SetRoot(viper.GetString(cli.HomeFlag))
 
@@ -39,7 +39,7 @@ func addGenesisAttendees(args []string, ctx *server.Context, cdc *codec.Codec) e
 		return err
 	}
 
-	genesisState, err := buildGenesisState(appState, cdc, args)
+	genesisState, err := buildGenesisState(appState, cdc)
 	if err != nil {
 		return err
 	}
@@ -59,16 +59,20 @@ func addGenesisAttendees(args []string, ctx *server.Context, cdc *codec.Codec) e
 }
 
 // BuildGenesisState builds the genesis state for the longy module
-func buildGenesisState(appState map[string]json.RawMessage, cdc *codec.Codec,
-	args []string) (genesisState longy.GenesisState, err sdk.Error) {
+func buildGenesisState(appState map[string]json.RawMessage, cdc *codec.Codec) (longy.GenesisState, sdk.Error) {
+	var (
+		genesisState longy.GenesisState
+		err          sdk.Error
+	)
+
 	// add genesis attendees to the app state
 	cdc.MustUnmarshalJSON(appState[longy.ModuleName], &genesisState)
 
 	//get the attendees from eventbrite
 	genesisState.Attendees, err = utils.GetAttendees()
 	if err != nil {
-		return
+		return genesisState, err
 	}
 
-	return
+	return genesisState, err
 }
