@@ -19,7 +19,6 @@ func AddGenesisAttendeesCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Comman
 	cmd := &cobra.Command{
 		Use:   "add-genesis-attendees",
 		Short: "Add genesis attendees to genesis.json",
-		Args:  cobra.ExactArgs(1),
 		RunE: func(_ *cobra.Command, args []string) error {
 			return addGenesisAttendees(args, ctx, cdc)
 		},
