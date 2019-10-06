@@ -2,6 +2,7 @@ package types
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/tendermint/tendermint/crypto"
 )
 
 // GenesisAttendee is the attendee structure in the genesis file
@@ -21,7 +22,8 @@ type GenesisProfile struct {
 	JobTitle string `json:"job_title"`
 }
 
-// GenesisService is the genesis type for the re-key service and its account address
-type GenesisService struct {
-	Address sdk.AccAddress `json:"address"`
+// GenesisKeyService is the genesis type for the re-key service
+type GenesisKeyService struct {
+	Address       sdk.AccAddress `json:"address"`
+	crypto.PubKey `json:"pubkey"`
 }

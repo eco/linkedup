@@ -27,7 +27,7 @@ func (msg MsgClaimKey) Route() string {
 
 // Type is the message type
 func (msg MsgClaimKey) Type() string {
-	return "claimkey"
+	return "claim_key"
 }
 
 // ValidateBasic performs sanity checks on the message

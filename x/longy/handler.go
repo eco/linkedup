@@ -12,8 +12,7 @@ import (
 //nolint:gocritic
 func NewHandler(keeper Keeper) sdk.Handler {
 	return func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
-		switch msg := msg.(type) { //cast message
-
+		switch msg := msg.(type) {
 		case types.MsgScanQr:
 			return handler.HandleMsgQrScan(ctx, keeper, msg)
 		case types.MsgShareInfo:
@@ -23,7 +22,7 @@ func NewHandler(keeper Keeper) sdk.Handler {
 		case types.MsgClaimKey:
 			return handleMsgClaimKey(ctx, keeper, msg)
 		default:
-			errMsg := fmt.Sprintf("unrecognized longy msg type: %v", msg.Type())
+			errMsg := fmt.Sprintf("unrecognized %s msg type: %v", RouterKey, msg.Type())
 			return sdk.ErrUnknownRequest(errMsg).Result()
 		}
 	}

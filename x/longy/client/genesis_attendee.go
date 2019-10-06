@@ -19,8 +19,8 @@ import (
 // to the chain by their eventbrite id
 func AddGenesisAttendeesCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "add-genesis-attendees [serviceAddr]",
-		Short: "Add genesis attendees and the service address to genesis.json",
+		Use:   "add-genesis-attendees",
+		Short: "Add genesis attendees to genesis.json",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(_ *cobra.Command, args []string) error {
 			return AddGenesisAttendees(args, ctx, cdc)
@@ -30,7 +30,7 @@ func AddGenesisAttendeesCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Comman
 	return cmd
 }
 
-//AddGenesisAttendees adds the attendees and the service account to the genesis file under the longy key
+// AddGenesisAttendees adds the attendees and the service account to the genesis file under the longy key
 func AddGenesisAttendees(args []string, ctx *server.Context, cdc *codec.Codec) error {
 	config := ctx.Config
 	config.SetRoot(viper.GetString(cli.HomeFlag))
@@ -61,18 +61,11 @@ func AddGenesisAttendees(args []string, ctx *server.Context, cdc *codec.Codec) e
 	return genutil.ExportGenesisFile(genDoc, genFile)
 }
 
-//BuildGenesisState builds the genesis state for the longy module
+// BuildGenesisState builds the genesis state for the longy module
 func BuildGenesisState(appState map[string]json.RawMessage, cdc *codec.Codec,
 	args []string) (genesisState longy.GenesisState, err sdk.Error) {
 	// add genesis attendees to the app state
 	cdc.MustUnmarshalJSON(appState[longy.ModuleName], &genesisState)
-
-	//get the service account from the args
-	addr, err := getServiceAcct(appState, cdc, args)
-	if err != nil {
-		return
-	}
-	genesisState.Service = types.GenesisService{Address: addr}
 
 	//get the attendees from eventbrite
 	genesisState.Attendees, err = utils.GetAttendees()
@@ -89,7 +82,7 @@ func getServiceAcct(appState map[string]json.RawMessage, cdc *codec.Codec, args 
 	e sdk.Error) {
 	addr, err := sdk.AccAddressFromBech32(args[0])
 	if err != nil {
-		e = types.ErrGenesisServiceAccountInvalid(err.Error())
+		e = types.ErrGenesisKeyServiceAccountInvalid(err.Error())
 		return
 	}
 
@@ -100,7 +93,7 @@ func getServiceAcct(appState map[string]json.RawMessage, cdc *codec.Codec, args 
 			return
 		}
 	}
-	e = types.ErrGenesisServiceAccountNotPresent("service account was not found in genesis accounts, " +
+	e = types.ErrGenesisKeyServiceAccountNotPresent("service account was not found in genesis accounts, " +
 		"have you added by calling 'lyd add-genesis-account {acct} {coints...}'")
 	return
 }

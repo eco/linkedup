@@ -31,7 +31,7 @@ var _ = Describe("Add Genesis Attendee Tests", func() {
 		appState := getAppState(cdc, fakeAddr, false)
 		_, err := client.BuildGenesisState(appState, cdc, []string{fakeAddr})
 		Expect(err).To(Not(BeNil()))
-		Expect(err.Code()).To(Equal(types.GenesisServiceAccountInvalid))
+		Expect(err.Code()).To(Equal(types.GenesisKeyServiceAccountInvalid))
 	})
 
 	It("should fail when service address is not in the accounts genesis", func() {
@@ -39,7 +39,7 @@ var _ = Describe("Add Genesis Attendee Tests", func() {
 		appState := getAppState(cdc, realAddr, false)
 		_, err := client.BuildGenesisState(appState, cdc, []string{realAddr})
 		Expect(err).To(Not(BeNil()))
-		Expect(err.Code()).To(Equal(types.GenesisServiceAccountNotPresent))
+		Expect(err.Code()).To(Equal(types.GenesisKeyServiceAccountNotPresent))
 	})
 
 	It("should succeed when service address is valid", func() {

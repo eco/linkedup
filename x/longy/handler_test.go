@@ -30,7 +30,7 @@ var _ = Describe("Longy Handler Tests", func() {
 		Expect(handler).ToNot(BeNil())
 
 		genesis := longy.GenesisState{
-			Service: types.GenesisService{
+			Service: types.GenesisKeyService{
 				Address: util.IDToAddress("master"),
 			},
 			Attendees: []types.GenesisAttendee{
