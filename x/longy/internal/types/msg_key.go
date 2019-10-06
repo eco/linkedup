@@ -6,10 +6,10 @@ import (
 	tmcrypto "github.com/tendermint/tendermint/crypto"
 )
 
-var _ sdk.Msg = MsgRekey{}
+var _ sdk.Msg = MsgKey{}
 
-// MsgRekey implements the `sdk.Msg` interface
-type MsgRekey struct {
+// MsgKey implements the `sdk.Msg` interface
+type MsgKey struct {
 	AttendeeAddress      sdk.AccAddress
 	NewAttendeePublicKey tmcrypto.PubKey
 
@@ -20,11 +20,11 @@ type MsgRekey struct {
 	Commitment util.Commitment
 }
 
-// NewMsgRekey is the creator for `RekeyMsg`
-func NewMsgRekey(attendeeAddress, masterAddress sdk.AccAddress,
-	newPublicKey tmcrypto.PubKey, commit util.Commitment) MsgRekey {
+// NewMsgKey is the creator for `RekeyMsg`
+func NewMsgKey(attendeeAddress, masterAddress sdk.AccAddress,
+	newPublicKey tmcrypto.PubKey, commit util.Commitment) MsgKey {
 
-	return MsgRekey{
+	return MsgKey{
 		AttendeeAddress:      attendeeAddress,
 		NewAttendeePublicKey: newPublicKey,
 
@@ -36,19 +36,19 @@ func NewMsgRekey(attendeeAddress, masterAddress sdk.AccAddress,
 
 // Route defines the route for this message
 //nolint:gocritic
-func (msg MsgRekey) Route() string {
+func (msg MsgKey) Route() string {
 	return RouterKey
 }
 
 // Type is the message type
 //nolint:gocritic
-func (msg MsgRekey) Type() string {
+func (msg MsgKey) Type() string {
 	return "rekey"
 }
 
 // ValidateBasic peforms sanity checks on the message
 //nolint:gocritic
-func (msg MsgRekey) ValidateBasic() sdk.Error {
+func (msg MsgKey) ValidateBasic() sdk.Error {
 	if msg.AttendeeAddress.Empty() {
 		return sdk.ErrInvalidAddress("attendee address is empty")
 	} else if len(msg.NewAttendeePublicKey.Bytes()) == 0 {
@@ -64,13 +64,13 @@ func (msg MsgRekey) ValidateBasic() sdk.Error {
 
 // GetSignBytes returns the byte array that is signed over
 //nolint:gocritic
-func (msg MsgRekey) GetSignBytes() []byte {
+func (msg MsgKey) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }
 
 // GetSigners returns the the master public key expected to sign this message
 //nolint:gocritic
-func (msg MsgRekey) GetSigners() []sdk.AccAddress {
+func (msg MsgKey) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.MasterAddress}
 }

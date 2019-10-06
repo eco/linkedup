@@ -7,18 +7,18 @@ import (
 	"github.com/eco/longy/x/longy/internal/types"
 )
 
-//GenesisState is the genesis struct for the longy module
+// GenesisState is the genesis struct for the longy module
 type GenesisState struct {
 	Service   GenesisService   `json:"service"`
 	Attendees GenesisAttendees `json:"attendees"`
 }
 
-//DefaultGenesisState returns the default genesis struct for the longy module
+// DefaultGenesisState returns the default genesis struct for the longy module
 func DefaultGenesisState() GenesisState {
 	return GenesisState{Service: GenesisService{}, Attendees: GenesisAttendees{}}
 }
 
-//ValidateGenesis validates that the passed genesis state is valid
+// ValidateGenesis validates that the passed genesis state is valid
 func ValidateGenesis(data GenesisState) error {
 	if data.Service.Address.Empty() {
 		return types.ErrGenesisServiceAddressEmpty("Re-Key Service address must be set")
@@ -44,9 +44,13 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, state GenesisState) {
 	// set the master public key
 	k.SetMasterPublicKey(ctx, state.Service.Address)
 
-	// create and set of all the attendees
+	// create and set of all the attendees and cosmos accounts
+	accountKeeper := k.AccountKeeper()
 	for _, a := range state.Attendees {
 		attendee := types.NewAttendeeFromGenesis(a)
 		k.SetAttendee(ctx, attendee)
+
+		account := accountKeeper.NewAccountWithAddress(ctx, attendee.GetAddress())
+		accountKeeper.SetAccount(ctx, account)
 	}
 }
