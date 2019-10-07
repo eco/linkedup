@@ -24,7 +24,7 @@ var _ = Describe("Scan Handler Tests", func() {
 	})
 
 	It("should fail when attendee for qr code does not exist", func() {
-		msg := types.NewMsgQrScan(s1, qr2)
+		msg := types.NewMsgQrScan(s1, qr2, nil)
 		result := handler(ctx, msg)
 		Expect(result.Code).To(Equal(types.AttendeeNotFound))
 	})
@@ -33,89 +33,60 @@ var _ = Describe("Scan Handler Tests", func() {
 		//add sender to keeper
 		utils.AddAttendeeToKeeper(ctx, &keeper, qr1, false)
 
-		msg := types.NewMsgQrScan(s1, qr1)
+		msg := types.NewMsgQrScan(s1, qr1, nil)
 		result := handler(ctx, msg)
 		Expect(result.Code).To(Equal(types.AccountsSame))
 	})
 
-	It("should succeed to create a new scan record on first scan", func() {
-		createScan(qr1, qr2, s1, s2, false)
+	It("should succeed to create a new scan record without data", func() {
+		createScan(qr1, qr2, s1, s2, nil, false)
 	})
 
-	Context("when a partial scan already exists but hasn't been completed by other party", func() {
+	It("should succeed to create a new scan record with data", func() {
+		data := []byte("asdfasdfa")
+		createScan(qr1, qr2, s1, s2, data, false)
+	})
+
+	Context("when a partial scan already exists but doesn't have shared info from both parties", func() {
+		var data []byte
 		BeforeEach(func() {
 			//Add the partial scan to the keeper
-			createScan(qr1, qr2, s1, s2, false)
+			createScan(qr1, qr2, s1, s2, nil, false)
+			data = []byte("asdfasdfa")
 		})
 
-		It("should fail if the sender is trying to rescan the same person", func() {
-			msg := types.NewMsgQrScan(s1, qr2)
-			result := handler(ctx, msg)
-			Expect(result.Code).To(Equal(types.ScanQRAlreadyOccurred))
-		})
-
-		It("should succeed if the scanned attendee post their tx in response", func() {
-			attendee, ok := keeper.GetAttendee(ctx, s1)
-			Expect(ok).To(BeTrue())
-			rep := attendee.Rep
-
-			msg := types.NewMsgQrScan(s2, qr1)
+		It("should add info and increment points", func() {
+			//Add the partial scan to the keeper
+			msg := types.NewMsgQrScan(s1, qr2, data)
 			result := handler(ctx, msg)
 			Expect(result.Code).To(Equal(sdk.CodeOK))
+			inspectScan(s1, s2, len(data) != 0)
 
-			inspectScan(s1, s2, true)
-
-			//check rep updated on completion
-			attendee, ok = keeper.GetAttendee(ctx, s1)
-			Expect(ok).To(BeTrue())
-			Expect(attendee.Rep).To(Equal(rep + types.ScanAttendeeAwardPoints))
-		})
-
-		It("should succeed if the scanned attendee post their tx in response and one is a sponsor", func() {
-			utils.AddAttendeeToKeeper(ctx, &keeper, qr2, true)
-			attendee, ok := keeper.GetAttendee(ctx, s1)
-			Expect(ok).To(BeTrue())
-			rep := attendee.Rep
-
-			msg := types.NewMsgQrScan(s2, qr1)
-			result := handler(ctx, msg)
-			Expect(result.Code).To(Equal(sdk.CodeOK))
-
-			inspectScan(s1, s2, true)
-
-			//check rep updated on completion
-			attendee, ok = keeper.GetAttendee(ctx, s1)
-			Expect(ok).To(BeTrue())
-			Expect(attendee.Rep).To(Equal(rep + types.ScanSponsorAwardPoints))
-		})
-
-		Context("when a scan has been completed by both parties", func() {
-			BeforeEach(func() {
-				//complete the scan
-				msg := types.NewMsgQrScan(s2, qr1)
-				result := handler(ctx, msg)
+			for i := 0; i < 2; i++ {
+				msg = types.NewMsgQrScan(s2, qr1, data)
+				result = handler(ctx, msg)
 				Expect(result.Code).To(Equal(sdk.CodeOK))
+			}
 
-				inspectScan(s1, s2, true)
-			})
+			//get attendees
+			a, ok := keeper.GetAttendee(ctx, s1)
+			Expect(ok).To(BeTrue())
+			b, ok := keeper.GetAttendee(ctx, s2)
+			Expect(ok).To(BeTrue())
+			//Check share ids
+			Expect(len(a.ScanIDs)).To(Equal(1))
+			Expect(len(b.ScanIDs)).To(Equal(1))
 
-			It("should fail if called again by the scanner", func() {
-				msg := types.NewMsgQrScan(s1, qr2)
-				result := handler(ctx, msg)
-				Expect(result.Code).To(Equal(types.ScanQRAlreadyOccurred))
-			})
-
-			It("should fail if called again by the person scanned", func() {
-				msg := types.NewMsgQrScan(s2, qr1)
-				result := handler(ctx, msg)
-				Expect(result.Code).To(Equal(types.ScanQRAlreadyOccurred))
-			})
+			Expect(a.Rep).To(Equal(types.ScanAttendeeAwardPoints + types.ShareAttendeeAwardPoints))
+			Expect(b.Rep).To(Equal(types.ScanAttendeeAwardPoints + types.ShareAttendeeAwardPoints))
 		})
 
+		It("should not allow us to reset data and earn more points", func() {
+		})
 	})
 })
 
-func inspectScan(s1 sdk.AccAddress, s2 sdk.AccAddress, completed bool) {
+func inspectScan(s1 sdk.AccAddress, s2 sdk.AccAddress, dataShared bool) {
 	id, err := types.GenScanID(s2, s1) //invert for fun, order shouldn't matter
 	Expect(err).To(BeNil())
 	scan, err := keeper.GetScanByID(ctx, id)
@@ -124,22 +95,41 @@ func inspectScan(s1 sdk.AccAddress, s2 sdk.AccAddress, completed bool) {
 	Expect(scan.S1.Equals(s1)).To(BeTrue())
 	Expect(scan.S2.Equals(s2)).To(BeTrue())
 	Expect(bytes.Compare(scan.ID, id)).To(Equal(0))
-	if completed {
-		Expect(scan.Complete).To(BeTrue())
-	} else {
-		Expect(scan.Complete).To(BeFalse())
+
+	//get attendees
+	a, ok := keeper.GetAttendee(ctx, s1)
+	Expect(ok).To(BeTrue())
+	b, ok := keeper.GetAttendee(ctx, s2)
+	Expect(ok).To(BeTrue())
+
+	//Check rewards
+	var point uint
+	if dataShared {
+		point += types.ShareAttendeeAwardPoints
 	}
+	Expect(a.Rep).To(Equal(types.ScanAttendeeAwardPoints + point))
+	Expect(b.Rep).To(Equal(types.ScanAttendeeAwardPoints))
+
+	//Check share ids
+	Expect(len(a.ScanIDs)).To(Equal(1))
+	Expect(len(b.ScanIDs)).To(Equal(1))
+	//check actual id
+	Expect(a.ScanIDs[0]).To(Equal(b.ScanIDs[0]))
+	id, err = types.GenScanID(a.Address, b.Address)
+	Expect(err).To(BeNil())
+	Expect(bytes.Compare(id, []byte(a.ScanIDs[0]))).To(Equal(0))
 }
 
+//nolint:unparam
 func createScan(qr1 string, qr2 string,
-	s1 sdk.AccAddress, s2 sdk.AccAddress, sponsor bool) {
+	s1 sdk.AccAddress, s2 sdk.AccAddress, data []byte, sponsor bool) {
 	//add sender to keeper
 	utils.AddAttendeeToKeeper(ctx, &keeper, qr1, sponsor)
 	//add scanned to keeper
 	utils.AddAttendeeToKeeper(ctx, &keeper, qr2, false)
 
-	msg := types.NewMsgQrScan(s1, qr2)
+	msg := types.NewMsgQrScan(s1, qr2, data)
 	result := handler(ctx, msg)
 	Expect(result.Code).To(Equal(sdk.CodeOK))
-	inspectScan(s1, s2, false)
+	inspectScan(s1, s2, len(data) != 0)
 }

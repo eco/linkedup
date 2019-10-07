@@ -24,52 +24,63 @@ func HandleMsgQrScan(ctx sdk.Context, k keeper.Keeper, msg types.MsgScanQr) sdk.
 	//get the scan event
 	scan, err := k.GetScanByID(ctx, id)
 	if err != nil { //if new scan, create it
-		err = handleNewScan(ctx, k, msg, attendee)
+		scan, err = handleNewScan(ctx, k, msg, attendee)
 		if err != nil {
 			return err.Result()
 		}
 	}
 
-	if len(msg.Data) > 0 && scan.{
-		err := k.AwardShareInfoPoints(ctx, msg.Sender, attendee.Address)
-		if err != nil {
-			return err
-		}
-
-		err = k.AddSharedInfo(ctx, msg.Sender, attendee.Address, msg.Data)
-		if err != nil {
-			return err
-		}
-	}
-
-	//check who is in what position
-	var oldData []byte
-	if scan.S1.Equals(msg.Sender) {
-		oldData = scan.D1
-	} else {
-		oldData = scan.D2
-	}
-	if len(oldData) == 0 && len(msg.Data) > 0 {
-		err = k.AwardShareInfoPoints(ctx, scan, msg.Sender)
-		if err != nil {
-			return err
-		}
+	err = handleShareInfo(ctx, k, scan, msg.Sender, attendee, msg.Data)
+	if err != nil {
+		return err.Result()
 	}
 
 	return sdk.Result{}
 }
 
-func handleNewScan(ctx sdk.Context, k keeper.Keeper, msg types.MsgScanQr, attendee types.Attendee) sdk.Error {
-	scan, err := types.NewScan(msg.Sender, attendee.Address, msg.Data, nil)
-
+//nolint:gocritic
+func handleShareInfo(ctx sdk.Context, k keeper.Keeper, scan types.Scan, sender sdk.AccAddress,
+	attendee types.Attendee, data []byte) sdk.Error {
+	//add share ids, skips if the ids are already added
+	err := k.AddSharedID(ctx, sender, attendee.Address, scan.ID)
 	if err != nil {
 		return err
+	}
+
+	//check who is in what position
+	var oldData *[]byte
+	if scan.S1.Equals(sender) {
+		oldData = &scan.D1
+	} else {
+		oldData = &scan.D2
+	}
+
+	if len(*oldData) == 0 && len(data) > 0 {
+		err := k.AwardShareInfoPoints(ctx, sender, attendee.Address)
+		if err != nil {
+			return err
+		}
+
+		//set new data into scan and save scan
+		*oldData = data
+		k.SetScan(ctx, &scan)
+	}
+	return nil
+}
+
+//nolint:gocritic
+func handleNewScan(ctx sdk.Context, k keeper.Keeper, msg types.MsgScanQr,
+	attendee types.Attendee) (scan types.Scan, err sdk.Error) {
+	scan, err = types.NewScan(msg.Sender, attendee.Address, nil, nil) //dont pass data here
+
+	if err != nil {
+		return
 	}
 	err = k.AwardScanPoints(ctx, scan)
 	if err != nil {
-		return err
+		return
 	}
 
 	k.SetScan(ctx, &scan)
-	return nil
+	return
 }

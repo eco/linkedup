@@ -25,5 +25,5 @@ func (k Keeper) GetScanByID(ctx sdk.Context, id []byte) (scan types.Scan, err sd
 //SetScan puts the scan into the store with its id as key
 //nolint:gocritic
 func (k Keeper) SetScan(ctx sdk.Context, scan *types.Scan) {
-	k.Set(ctx, scan.ID, k.cdc.MustMarshalBinaryBare(&scan))
+	k.Set(ctx, scan.ID, k.cdc.MustMarshalBinaryBare(*scan))
 }

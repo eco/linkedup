@@ -5,8 +5,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-type ShareInfo [2][]byte
-
 //Scan represents an unique scan between two parties, can only be one scan between the same parties
 type Scan struct {
 	//ID is the key we use to store this struct in the keyStore, it is unique per S1-S2 pair

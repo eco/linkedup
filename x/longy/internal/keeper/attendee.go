@@ -63,20 +63,31 @@ func (k Keeper) AwardScanPoints(ctx sdk.Context, scan types.Scan) sdk.Error {
 	return nil
 }
 
-func (k Keeper) AddSharedInfo(ctx sdk.Context, senderAddr sdk.AccAddress, receiverAddr sdk.AccAddress) sdk.Error {
-	sender, receiver, err := k.getAttendees(ctx, senderAddr, receiverAddr)
+//AddSharedID adds the scan id to the scan ids array of both the sender and receiver is they don't contain it yet
+//nolint:gocritic
+func (k Keeper) AddSharedID(ctx sdk.Context, senderAddr sdk.AccAddress, receiverAddr sdk.AccAddress,
+	scanID []byte) sdk.Error {
+	sender, receiver, err := k.GetAttendees(ctx, senderAddr, receiverAddr)
 	if err != nil {
 		return err
 	}
-	receiver.InfoIDs = append(receiver.InfoIDs, string(info.ID))
+	if sender.AddScanID(scanID) {
+		k.SetAttendee(ctx, sender)
+	}
+	if receiver.AddScanID(scanID) {
+		k.SetAttendee(ctx, receiver)
+	}
+	return nil
 }
-func (k Keeper) AwardShareInfoPoints(ctx sdk.Context, senderAddr sdk.AccAddress, receiverAddr sdk.AccAddress) sdk.Error {
-	sender, receiver, err := k.getAttendees(ctx, senderAddr, receiverAddr)
+
+//AwardShareInfoPoints adds points to the sender of the shared info based on if the receiver is a sponsor or not
+//nolint:gocritic
+func (k Keeper) AwardShareInfoPoints(ctx sdk.Context, senderAddr sdk.AccAddress,
+	receiverAddr sdk.AccAddress) sdk.Error {
+	sender, receiver, err := k.GetAttendees(ctx, senderAddr, receiverAddr)
 	if err != nil {
 		return err
 	}
-	//add info to receiver attendee struct
-	//receiver.InfoIDs = append(receiver.InfoIDs, string(info.ID))
 	//give sender points for sharing, check if receiver is a sponsor
 	val := types.ShareAttendeeAwardPoints
 	if receiver.Sponsor {
@@ -84,11 +95,13 @@ func (k Keeper) AwardShareInfoPoints(ctx sdk.Context, senderAddr sdk.AccAddress,
 	}
 	sender.AddRep(val)
 	k.SetAttendee(ctx, sender)
-	//k.SetAttendee(ctx, receiver)
 	return nil
 }
 
-func (k Keeper) getAttendees(ctx sdk.Context, acc1 sdk.AccAddress, acc2 sdk.AccAddress) (a1 types.Attendee, a2 types.Attendee, err sdk.Error) {
+//GetAttendees returns the attendees for the give account addresses
+//nolint:gocritic
+func (k Keeper) GetAttendees(ctx sdk.Context, acc1 sdk.AccAddress,
+	acc2 sdk.AccAddress) (a1 types.Attendee, a2 types.Attendee, err sdk.Error) {
 	var exists bool
 	a1, exists = k.GetAttendee(ctx, acc1)
 	if !exists {
@@ -103,6 +116,9 @@ func (k Keeper) getAttendees(ctx sdk.Context, acc1 sdk.AccAddress, acc2 sdk.AccA
 	return
 }
 
-func (k Keeper) getAttendeesByScan(ctx sdk.Context, scan types.Scan) (a1 types.Attendee, a2 types.Attendee, err sdk.Error) {
-	return k.getAttendees(ctx, scan.S1, scan.S2)
+//getAttendeesByScan returns  the attendees for the give scan
+//nolint:gocritic
+func (k Keeper) getAttendeesByScan(ctx sdk.Context, scan types.Scan) (a1 types.Attendee,
+	a2 types.Attendee, err sdk.Error) {
+	return k.GetAttendees(ctx, scan.S1, scan.S2)
 }
