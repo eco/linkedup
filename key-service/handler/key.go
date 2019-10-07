@@ -101,7 +101,9 @@ func keyGetter(db *models.DatabaseContext) http.HandlerFunc {
 		key := db.GetKey(email)
 		if len(key) == 0 {
 			w.WriteHeader(http.StatusNotFound)
-			w.Write([]byte("non-existment email"))
+
+			errMsg := fmt.Sprintf("non-existent email: %s\n", email)
+			w.Write([]byte(errMsg))
 			return
 		}
 
