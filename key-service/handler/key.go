@@ -47,6 +47,12 @@ func key(eb *eventbrite.Session,
 			return
 		}
 
+		/** Store the private key **/
+		ok := db.StoreKey(email, body.PrivateKey)
+		if !ok {
+			http.Error(w, "key storage service down", http.StatusServiceUnavailable)
+		}
+
 		/** Attendee information + their their new private key **/
 		privKey, err := util.Secp256k1FromHex(body.PrivateKey)
 		if err != nil {
@@ -74,16 +80,14 @@ func key(eb *eventbrite.Session,
 			return
 		}
 
-		/** Store the private key **/
-		ok := db.StoreKey(email, body.PrivateKey)
-		if !ok {
-			log.Error("could not store private key in the db")
-		}
-
 		/** Send the redirect **/
 		err = mc.SendRedirectEmail(email, secret)
 		if err != nil {
-			http.Error(w, "email error. try again", http.StatusInternalServerError)
+			if err == masterkey.ErrAlreadyKeyed {
+				http.Error(w, "id has already been keyed", http.StatusUnauthorized)
+			} else {
+				http.Error(w, "email error. try again", http.StatusInternalServerError)
+			}
 			return
 		}
 
@@ -103,7 +107,7 @@ func keyGetter(db *models.DatabaseContext) http.HandlerFunc {
 			w.WriteHeader(http.StatusNotFound)
 
 			errMsg := fmt.Sprintf("non-existent email: %s\n", email)
-			w.Write([]byte(errMsg))
+			w.Write([]byte(errMsg)) //nolint
 			return
 		}
 

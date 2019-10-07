@@ -61,5 +61,10 @@ func setStoredKey(db *DatabaseContext, key *storedKey) bool {
 		Item:      item,
 	})
 
-	return err == nil
+	if err != nil {
+		log.WithError(err).Error("failed storage")
+		return false
+	}
+
+	return true
 }

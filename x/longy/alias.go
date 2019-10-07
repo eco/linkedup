@@ -12,6 +12,11 @@ const (
 	StoreKey = types.StoreKey
 	// RouterKey is the key for routing messages to our handler
 	RouterKey = types.RouterKey
+
+	/** ErrCodes **/
+
+	// CodeAttendeeKeyed is the alias for AttendeeKeyed
+	CodeAttendeeKeyed = types.AttendeeKeyed
 )
 
 var (

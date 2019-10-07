@@ -2,6 +2,7 @@ package masterkey
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -19,6 +20,11 @@ import (
 )
 
 var log = logrus.WithField("module", "masterkey")
+
+var (
+	// ErrAlreadyKeyed denotes that this address has already been key'd
+	ErrAlreadyKeyed = errors.New("account already key'ed")
+)
 
 // MasterKey encapslates the master key for the longy game
 type MasterKey struct {
@@ -108,8 +114,12 @@ func (mk *MasterKey) SendKeyTransaction(
 			log.WithError(err).Info("failed transaction submission")
 		} else {
 			if res.Code != 0 {
-				log.WithField("raw_log", res.RawLog).Info("failed tx response")
-				err = fmt.Errorf("failed tx")
+				if res.Code == uint32(longy.CodeAttendeeKeyed) {
+					err = ErrAlreadyKeyed
+				} else {
+					log.WithField("raw_log", res.RawLog).Info("failed tx response")
+					err = fmt.Errorf("failed tx")
+				}
 			}
 
 			mk.sequenceNum++
