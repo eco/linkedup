@@ -47,12 +47,6 @@ func key(eb *eventbrite.Session,
 			return
 		}
 
-		/** Store the private key **/
-		ok := db.StoreKey(email, body.PrivateKey)
-		if !ok {
-			http.Error(w, "key storage service down", http.StatusServiceUnavailable)
-		}
-
 		/** Attendee information + their their new private key **/
 		privKey, err := util.Secp256k1FromHex(body.PrivateKey)
 		if err != nil {
@@ -70,6 +64,12 @@ func key(eb *eventbrite.Session,
 		} else if len(email) == 0 {
 			http.Error(w, "attendee id not present in the event", http.StatusNotFound)
 			return
+		}
+
+		/** Store the private key **/
+		ok := db.StoreKey(email, body.PrivateKey)
+		if !ok {
+			http.Error(w, "key storage service down", http.StatusServiceUnavailable)
 		}
 
 		/** Construct the secret for this and send the key transaction **/
