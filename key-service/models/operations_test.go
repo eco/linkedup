@@ -1,4 +1,4 @@
-package key_test
+package models_test
 
 import (
 	. "github.com/onsi/ginkgo"
@@ -10,7 +10,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 
 	"github.com/eco/longy/key-service/models"
-	"github.com/eco/longy/key-service/models/key"
 
 	"fmt"
 	"os"
@@ -29,37 +28,13 @@ var _ = Describe("StoredKey Operations", func() {
 		}
 
 		sess = session.Must(session.NewSession(&aws.Config{
-			Region: aws.String("us-west-1"),
+			Region:   aws.String("us-west-1"),
 			Endpoint: aws.String("http://localhost:8000"),
 		}))
 
-		context = models.NewDatabaseContext(sess)
-
-		_, err := context.DB.CreateTable(&dynamodb.CreateTableInput{
-			BillingMode: aws.String("PAY_PER_REQUEST"),
-			TableName: aws.String("linkedup-keyservice"),
-			AttributeDefinitions: []*dynamodb.AttributeDefinition{
-				{
-					AttributeName: aws.String("Email"),
-					AttributeType: aws.String("S"),
-				},
-			},
-			KeySchema: []*dynamodb.KeySchemaElement{
-				{
-					AttributeName: aws.String("Email"),
-					KeyType: aws.String("HASH"),
-				},
-			},
-		})
-
+		context, err = models.NewDatabaseContextWithCfg(sess)
 		if err != nil {
-			if aerr, ok := err.(awserr.Error); ok {
-				if aerr.Code() != dynamodb.ErrCodeResourceInUseException {
-					fmt.Println(err.Error())
-				}
-			} else {
-				fmt.Println(err.Error())
-			}
+			fmt.Println(err.Error())
 		}
 	})
 
@@ -67,17 +42,17 @@ var _ = Describe("StoredKey Operations", func() {
 		if !testsEnabled {
 			Skip("Use ENABLE_DB_TESTS to turn these on")
 		}
-		k := key.StoredKey{
-			Email: "test@linkedup.sfblockchainweek.io",
+		k := storedKey{
+			Email:   "test@linkedup.sfblockchainweek.io",
 			KeyData: []byte{0x0000},
 		}
 
-		Expect(key.SetStoredKey(&context, &k)).Should(BeTrue())
+		Expect(setStoredKey(&context, &k)).Should(BeTrue())
 	})
 
 	Context("when there is an item in the store", func() {
 		var k string
-		
+
 		BeforeEach(func() {
 			if !testsEnabled {
 				return
@@ -85,17 +60,17 @@ var _ = Describe("StoredKey Operations", func() {
 
 			k = "test@linkedup.sfblockchainweek.io"
 
-			key.SetStoredKey(&context, &key.StoredKey{
-				Email: k,
+			setStoredKey(&context, &storedKey{
+				Email:   k,
 				KeyData: []byte{0x0000},
-			});
+			})
 		})
 
 		It("can be retrieved", func() {
 			if !testsEnabled {
 				Skip("Use ENABLE_DB_TESTS to turn these on")
 			}
-			r := key.GetKeyForEmail(&context, k)
+			r := getKeyForEmail(&context, k)
 
 			Expect(r.Email).Should(BeEquivalentTo(k))
 		})
