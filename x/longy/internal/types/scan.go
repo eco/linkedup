@@ -5,6 +5,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+type ShareInfo [2][]byte
+
 //Scan represents an unique scan between two parties, can only be one scan between the same parties
 type Scan struct {
 	//ID is the key we use to store this struct in the keyStore, it is unique per S1-S2 pair
@@ -13,12 +15,16 @@ type Scan struct {
 	S1 sdk.AccAddress
 	//S2 is the person who's QR code is scanned
 	S2 sdk.AccAddress
+	//D1 is the encrypted data shared by S1 with S2
+	D1 []byte
+	//D2 is the encrypted data shared by S2 with S1
+	D2 []byte
 	//Complete is true when both S1 and S2 have posted this scan interaction on-chain
 	Complete bool
 }
 
 //NewScan creates a new scan and sets its id
-func NewScan(s1 sdk.AccAddress, s2 sdk.AccAddress) (Scan, sdk.Error) {
+func NewScan(s1 sdk.AccAddress, s2 sdk.AccAddress, d1 []byte, d2 []byte) (Scan, sdk.Error) {
 	id, err := GenScanID(s1, s2)
 	if err != nil {
 		return Scan{}, err
@@ -27,6 +33,8 @@ func NewScan(s1 sdk.AccAddress, s2 sdk.AccAddress) (Scan, sdk.Error) {
 		ID:       id,
 		S1:       s1,
 		S2:       s2,
+		D1:       d1,
+		D2:       d2,
 		Complete: false,
 	}, nil
 }

@@ -24,25 +24,52 @@ func HandleMsgQrScan(ctx sdk.Context, k keeper.Keeper, msg types.MsgScanQr) sdk.
 	//get the scan event
 	scan, err := k.GetScanByID(ctx, id)
 	if err != nil { //if new scan, create it
-		scan, err = types.NewScan(msg.Sender, attendee.Address)
+		err = handleNewScan(ctx, k, msg, attendee)
 		if err != nil {
 			return err.Result()
 		}
-	} else { //scan already existed
-		//since S2 is always the person who's badge was scanned, then both players have scanned
-		//if the sender is that person. We can mark off this scan as complete
-		if scan.S2.Equals(msg.Sender) && !scan.Complete {
-			scan.Complete = true
-			err = k.AwardScanPoints(ctx, scan)
-			if err != nil {
-				return err.Result()
-			}
-		} else { //the original scanner must have rescanned the same badge
-			return types.ErrScanQRAlreadyOccurred("the scan already exists").Result()
+	}
+
+	if len(msg.Data) > 0 && scan.{
+		err := k.AwardShareInfoPoints(ctx, msg.Sender, attendee.Address)
+		if err != nil {
+			return err
+		}
+
+		err = k.AddSharedInfo(ctx, msg.Sender, attendee.Address, msg.Data)
+		if err != nil {
+			return err
 		}
 	}
 
-	k.SetScan(ctx, &scan)
+	//check who is in what position
+	var oldData []byte
+	if scan.S1.Equals(msg.Sender) {
+		oldData = scan.D1
+	} else {
+		oldData = scan.D2
+	}
+	if len(oldData) == 0 && len(msg.Data) > 0 {
+		err = k.AwardShareInfoPoints(ctx, scan, msg.Sender)
+		if err != nil {
+			return err
+		}
+	}
 
 	return sdk.Result{}
+}
+
+func handleNewScan(ctx sdk.Context, k keeper.Keeper, msg types.MsgScanQr, attendee types.Attendee) sdk.Error {
+	scan, err := types.NewScan(msg.Sender, attendee.Address, msg.Data, nil)
+
+	if err != nil {
+		return err
+	}
+	err = k.AwardScanPoints(ctx, scan)
+	if err != nil {
+		return err
+	}
+
+	k.SetScan(ctx, &scan)
+	return nil
 }
