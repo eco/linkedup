@@ -76,19 +76,18 @@ func key(eb *eventbrite.Session,
 		secret, commitment := util.CreateCommitment()
 		err = mk.SendKeyTransaction(attendeeAddress, privKey.PubKey(), commitment)
 		if err != nil {
-			http.Error(w, "internal error. try again", http.StatusInternalServerError)
+			if err == masterkey.ErrAlreadyKeyed {
+				http.Error(w, "id has already been keyed", http.StatusUnauthorized)
+			} else {
+				http.Error(w, "internal error. try again", http.StatusInternalServerError)
+			}
 			return
 		}
 
 		/** Send the redirect **/
 		err = mc.SendRedirectEmail(email, secret)
 		if err != nil {
-			if err == masterkey.ErrAlreadyKeyed {
-				http.Error(w, "id has already been keyed", http.StatusUnauthorized)
-			} else {
-				http.Error(w, "email error. try again", http.StatusInternalServerError)
-			}
-			return
+			http.Error(w, "email error. try again", http.StatusInternalServerError)
 		}
 
 		w.WriteHeader(http.StatusOK)
