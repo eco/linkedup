@@ -5,4 +5,5 @@ vendor
 cmd/lycli/lycli
 cmd/lyd/lyd
 cmd/ks/ks
+bin
 
