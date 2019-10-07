@@ -74,17 +74,18 @@ var _ = Describe("Info Handler Tests", func() {
 			})
 
 			Context("when scan between sender and receiver is complete", func() {
-				var senderRep uint
+				var senderRep, receiverRep uint
 				var recIdsLen int
 				BeforeEach(func() {
 					//store the init rep
-					s, errAtt := keeper.GetAttendee(ctx, sender)
-					Expect(errAtt).To(BeNil())
+					s, ok := keeper.GetAttendee(ctx, sender)
+					Expect(ok).To(BeTrue())
 					senderRep = s.Rep
 
 					//store the init ids array length
-					s, errAtt = keeper.GetAttendee(ctx, receiver)
-					Expect(errAtt).To(BeNil())
+					s, ok = keeper.GetAttendee(ctx, receiver)
+					Expect(ok).To(BeTrue())
+					receiverRep = s.Rep
 					recIdsLen = len(s.InfoIDs)
 
 					scan, err := types.NewScan(sender, receiver)
@@ -92,19 +93,51 @@ var _ = Describe("Info Handler Tests", func() {
 					scan.Complete = true
 					keeper.SetScan(ctx, &scan)
 				})
-				FIt("should succeed when participants are both regular attendees", func() {
+
+				It("should succeed when participants are both regular attendees", func() {
 					msg := types.NewMsgInfo(sender, receiver, data)
 					result := handler(ctx, msg)
 					Expect(result.Code).To(Equal(sdk.CodeOK))
 
 					//receiver should have info id
-					s2, err := keeper.GetAttendee(ctx, receiver)
-					Expect(err).To(BeNil())
+					s2, ok := keeper.GetAttendee(ctx, receiver)
+					Expect(ok).To(BeTrue())
 					Expect(len(s2.InfoIDs)).To(Equal(recIdsLen + 1))
-					Expect(Contains(s2.InfoIDs))
+					id, e := types.GenInfoID(sender, receiver)
+					Expect(e).To(BeNil())
+					Expect(Contains(s2.InfoIDs, string(id))).To(BeTrue())
+
+					s, ok := keeper.GetAttendee(ctx, sender)
+					Expect(ok).To(BeTrue())
+					Expect(s.Rep).To(Equal(senderRep + types.ShareAttendeeAwardPoints))
+
+					p, ok := keeper.GetAttendee(ctx, receiver)
+					Expect(ok).To(BeTrue())
+					Expect(p.Rep).To(Equal(receiverRep)) //shouldn't change
 				})
 
 				It("should succeed when one participant is a sponsor attendee", func() {
+					utils.AddAttendeeToKeeper(ctx, &keeper, qr2, true)
+
+					msg := types.NewMsgInfo(sender, receiver, data)
+					result := handler(ctx, msg)
+					Expect(result.Code).To(Equal(sdk.CodeOK))
+
+					//receiver should have info id
+					s2, ok := keeper.GetAttendee(ctx, receiver)
+					Expect(ok).To(BeTrue())
+					Expect(len(s2.InfoIDs)).To(Equal(recIdsLen + 1))
+					id, e := types.GenInfoID(sender, receiver)
+					Expect(e).To(BeNil())
+					Expect(Contains(s2.InfoIDs, string(id))).To(BeTrue())
+
+					s, ok := keeper.GetAttendee(ctx, sender)
+					Expect(ok).To(BeTrue())
+					Expect(s.Rep).To(Equal(senderRep + types.ShareSponsorAwardPoints))
+
+					p, ok := keeper.GetAttendee(ctx, receiver)
+					Expect(ok).To(BeTrue())
+					Expect(p.Rep).To(Equal(receiverRep)) //shouldn't change
 				})
 			})
 
@@ -112,6 +145,7 @@ var _ = Describe("Info Handler Tests", func() {
 	})
 })
 
+//Contains checks to see if a value is in the array
 func Contains(vals []string, v string) (contains bool) {
 	for _, a := range vals {
 		if a == v {

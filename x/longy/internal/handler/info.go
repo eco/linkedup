@@ -20,21 +20,21 @@ func HandleMsgInfo(ctx sdk.Context, k keeper.Keeper, msg types.MsgInfo) sdk.Resu
 	}
 
 	//check that there is no existing info by this sender
-	infoId, err := types.GenInfoID(msg.Sender, msg.Receiver)
+	infoID, err := types.GenInfoID(msg.Sender, msg.Receiver)
 	if err != nil {
 		return err.Result()
 	}
-	storedInfo, _ := k.GetInfoByID(ctx, infoId)
+	storedInfo, _ := k.GetInfoByID(ctx, infoID)
 	if storedInfo != nil {
 		return types.ErrInfoAlreadyExists("sender has already shared info with the receiver").Result()
 	}
 
 	//check that there is a complete scan event before accepting the share info
-	scanId, err := types.GenScanID(msg.Sender, msg.Receiver)
+	scanID, err := types.GenScanID(msg.Sender, msg.Receiver)
 	if err != nil {
 		return err.Result()
 	}
-	scan, err := k.GetScanByID(ctx, scanId)
+	scan, err := k.GetScanByID(ctx, scanID)
 	if err != nil {
 		return err.Result()
 	}
