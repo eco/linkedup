@@ -29,6 +29,8 @@ func NewDatabaseContextWithCfg(cfg client.ConfigProvider) (DatabaseContext, erro
 	context := DatabaseContext{}
 	context.DB = dynamodb.New(cfg)
 
+	log.Info("etablishing session with dynamo")
+
 	// create the tables
 	_, err := context.DB.CreateTable(&dynamodb.CreateTableInput{
 		BillingMode: aws.String("PAY_PER_REQUEST"),
@@ -50,7 +52,8 @@ func NewDatabaseContextWithCfg(cfg client.ConfigProvider) (DatabaseContext, erro
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
 			if aerr.Code() != dynamodb.ErrCodeResourceInUseException {
-				return context, err
+				log.Info("dynamo table already created")
+				return context, nil
 			}
 		} else {
 			return context, err

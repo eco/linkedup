@@ -26,8 +26,13 @@ func registerKey(
 // All core logic is implemented here. If there are plans to expand this service,
 // logic (email retrieval, etc) can be lifted into http middleware to allow for better
 // composability
-func key(eb *eventbrite.Session, mk *masterkey.MasterKey, db *models.DatabaseContext, mc *mail.Client) http.HandlerFunc {
+func key(eb *eventbrite.Session,
+	mk *masterkey.MasterKey,
+	db *models.DatabaseContext,
+	mc *mail.Client) http.HandlerFunc {
+
 	return func(w http.ResponseWriter, r *http.Request) {
+
 		/** Read the request body **/
 		type reqBody struct {
 			AttendeeID string `json:"attendee_id"`
@@ -51,14 +56,6 @@ func key(eb *eventbrite.Session, mk *masterkey.MasterKey, db *models.DatabaseCon
 		}
 		attendeeAddress := util.IDToAddress(body.AttendeeID)
 
-		/** Construct the secret for this and send the key transaction **/
-		secret, commitment := util.CreateCommitment()
-		err = mk.SendKeyTransaction(attendeeAddress, privKey.PubKey(), commitment)
-		if err != nil {
-			http.Error(w, "internal error. try again", http.StatusInternalServerError)
-			return
-		}
-
 		/** Get the Attendee's email **/
 		email, err := eb.EmailFromAttendeeID(body.AttendeeID)
 		if err != nil {
@@ -66,6 +63,14 @@ func key(eb *eventbrite.Session, mk *masterkey.MasterKey, db *models.DatabaseCon
 			return
 		} else if len(email) == 0 {
 			http.Error(w, "attendee id not present in the event", http.StatusNotFound)
+			return
+		}
+
+		/** Construct the secret for this and send the key transaction **/
+		secret, commitment := util.CreateCommitment()
+		err = mk.SendKeyTransaction(attendeeAddress, privKey.PubKey(), commitment)
+		if err != nil {
+			http.Error(w, "internal error. try again", http.StatusInternalServerError)
 			return
 		}
 
@@ -94,7 +99,13 @@ func keyGetter(db *models.DatabaseContext) http.HandlerFunc {
 		}
 
 		key := db.GetKey(email)
+		if len(key) == 0 {
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte("non-existment email"))
+			return
+		}
+
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(key))
+		w.Write([]byte(key)) //nolint
 	}
 }

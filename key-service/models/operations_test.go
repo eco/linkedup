@@ -5,9 +5,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/dynamodb"
 
 	"github.com/eco/longy/key-service/models"
 
@@ -32,6 +30,7 @@ var _ = Describe("StoredKey Operations", func() {
 			Endpoint: aws.String("http://localhost:8000"),
 		}))
 
+		var err error
 		context, err = models.NewDatabaseContextWithCfg(sess)
 		if err != nil {
 			fmt.Println(err.Error())
@@ -42,37 +41,30 @@ var _ = Describe("StoredKey Operations", func() {
 		if !testsEnabled {
 			Skip("Use ENABLE_DB_TESTS to turn these on")
 		}
-		k := storedKey{
-			Email:   "test@linkedup.sfblockchainweek.io",
-			KeyData: []byte{0x0000},
-		}
 
-		Expect(setStoredKey(&context, &k)).Should(BeTrue())
+		Expect(context.StoreKey("howdy", "hi")).Should(BeTrue())
 	})
 
 	Context("when there is an item in the store", func() {
-		var k string
+		var email string
+		var data = "hi"
 
 		BeforeEach(func() {
 			if !testsEnabled {
 				return
 			}
 
-			k = "test@linkedup.sfblockchainweek.io"
-
-			setStoredKey(&context, &storedKey{
-				Email:   k,
-				KeyData: []byte{0x0000},
-			})
+			email = "test@linkedup.sfblockchainweek.io"
+			context.StoreKey(email, "hi")
 		})
 
 		It("can be retrieved", func() {
 			if !testsEnabled {
 				Skip("Use ENABLE_DB_TESTS to turn these on")
 			}
-			r := getKeyForEmail(&context, k)
+			res := context.GetKey(email)
 
-			Expect(r.Email).Should(BeEquivalentTo(k))
+			Expect(res).Should(BeEquivalentTo(data))
 		})
 	})
 })
