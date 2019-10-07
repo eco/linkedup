@@ -55,15 +55,13 @@ Flags:
       ```
 
 1. `/ping [GET]` is a health check. Simply writes a Status 200 along with "pong" in the request body
+3. `/key/<id> [GET]` will retrieve the hex-encoded private key associated with the badge id
 2. `/key [POST]` is the entry point for keying an account.  
   Request Body:  
   ```
   {
     "attendee_id": "<id>",
-    "pubkey": {
-      "type":"tendermint/PubKeySecp256k1",
-      "value":"Aq4PU4ws0ozmtkAmKv8y9Fs5FLbXnoJPDJRBHnimin62"
-      }
+    "private_key": "hex-encoded private key"
   }
   ```  
   Status 200: Key transaction was successfully submitted and the email containing the redirect uri was sent

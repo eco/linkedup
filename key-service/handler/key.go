@@ -20,7 +20,7 @@ func registerKey(
 	mc *mail.Client) {
 
 	r.HandleFunc("/key", key(eb, mk, db, mc)).Methods("POST")
-	r.HandleFunc("/key/{email}", nil).Methods("GET")
+	r.HandleFunc("/key/{email}", keyGetter(db)).Methods("GET")
 }
 
 // All core logic is implemented here. If there are plans to expand this service,
@@ -83,5 +83,18 @@ func key(eb *eventbrite.Session, mk *masterkey.MasterKey, db *models.DatabaseCon
 		}
 
 		w.WriteHeader(http.StatusOK)
+	}
+}
+
+func keyGetter(db *models.DatabaseContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		email, ok := mux.Vars(r)["email"]
+		if !ok {
+			http.Error(w, "email parameter required", http.StatusBadRequest)
+		}
+
+		key := db.GetKey(email)
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(key))
 	}
 }
