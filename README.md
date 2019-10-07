@@ -32,7 +32,7 @@ The key service runs alongside `lyd` and `lycli` to facilitate keying accounts a
 two http endpoints
 
 The usage for the key service is shown below
-```p
+```
 key service for the longest chain game
 
 Usage:
@@ -41,12 +41,15 @@ Usage:
 Flags:
       --port int                   port to bind the rekey service (default 1337)
 
-      --eb-auth-token string       eventbrite authorization token
-      --eb-event-id int            id associated with the eventbrite event
+      --aws-dynamo-url string      dynamodb url (default "http://localhost:8000")
+      --aws-region string          aws region for dynamodb (default "us-west-1")
+
+      --eventbrite-auth string     eventbrite authorization token
+      --eventbrite-event int       id associated with the eventbrite event
 
       --longy-chain-id string      chain-id of the running longy game (default "longychain")
       --longy-fullnode string      tcp://host:port the full node for tx submission (default "tcp://localhost:26657")
-      --longy-masterkey string     hex encoded master private key for the longy game (default "fc613b4dfd6736a7bd268c8a0e74ed0d1c04a959f59dd74ef2874983fd443fca")
+      --longy-masterkey string     hex encoded master private key (default "fc613b4dfd6736a7bd268c8a0e74ed0d1c04a959f59dd74ef2874983fd443fca")
       --longy-restservice string   scheme://host:port of the full node rest client (default "http://localhost:1317")
 
       --smtp-password string       password of the email account (default "2019longygame")
@@ -54,8 +57,12 @@ Flags:
       --smtp-username string       username of the email account (default "testecolongy@gmail.com")
       ```
 
+The configruation can also be set through environment variables. the `-` characters replaced by `_` and all uppercase.  
+   i.e `STMP_SERVER` or `EVENTBRITE_AUTH`
+
+
 1. `/ping [GET]` is a health check. Simply writes a Status 200 along with "pong" in the request body
-3. `/key/<id> [GET]` will retrieve the hex-encoded private key associated with the badge id
+3. `/key/<email> [GET]` will retrieve the hex-encoded private key associated with the badge id
 2. `/key [POST]` is the entry point for keying an account.  
   Request Body:  
   ```
