@@ -7,6 +7,7 @@ import (
 	"github.com/eco/longy/key-service/handler"
 	"github.com/eco/longy/key-service/mail"
 	"github.com/eco/longy/key-service/masterkey"
+	"github.com/eco/longy/key-service/models"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"os"
@@ -21,14 +22,20 @@ var log = logrus.WithField("module", "rekeyservice")
 type Service struct {
 	ebSession  *eventbrite.Session
 	masterKey  *masterkey.MasterKey
+	db         *models.DatabaseContext
 	mailClient *mail.Client
 }
 
 // NewService is the creator the the rekey-service
-func NewService(ebSession *eventbrite.Session, key *masterkey.MasterKey, mc *mail.Client) Service {
+func NewService(
+	ebSession *eventbrite.Session,
+	key *masterkey.MasterKey,
+	db *models.DatabaseContext,
+	mc *mail.Client) Service {
 	return Service{
 		ebSession:  ebSession,
 		masterKey:  key,
+		db:         db,
 		mailClient: mc,
 	}
 }
@@ -37,7 +44,7 @@ func NewService(ebSession *eventbrite.Session, key *masterkey.MasterKey, mc *mai
 func (srv *Service) StartHTTP(port int) {
 	s := &http.Server{
 		Addr:    fmt.Sprintf(":%d", port),
-		Handler: handler.Router(srv.ebSession, srv.masterKey, srv.mailClient),
+		Handler: handler.Router(srv.ebSession, srv.masterKey, srv.db, srv.mailClient),
 	}
 
 	// will block

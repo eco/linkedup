@@ -1,53 +1,65 @@
 package handler
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/eco/longy/key-service/eventbrite"
 	"github.com/eco/longy/key-service/mail"
 	"github.com/eco/longy/key-service/masterkey"
+	"github.com/eco/longy/key-service/models"
 	"github.com/eco/longy/util"
-	"github.com/eco/longy/x/longy"
 	"github.com/gorilla/mux"
-	tmcrypto "github.com/tendermint/tendermint/crypto"
-	"io/ioutil"
 	"net/http"
 )
 
-func registerKey(r *mux.Router, eb *eventbrite.Session, mk *masterkey.MasterKey, mc *mail.Client) {
-	r.HandleFunc("/key", key(eb, mk, mc)).Methods("POST")
+func registerKey(
+	r *mux.Router,
+	eb *eventbrite.Session,
+	mk *masterkey.MasterKey,
+	db *models.DatabaseContext,
+	mc *mail.Client) {
+
+	r.HandleFunc("/key", key(eb, mk, db, mc)).Methods("POST")
+	r.HandleFunc("/key/{email}", nil).Methods("GET")
 }
 
 // All core logic is implemented here. If there are plans to expand this service,
 // logic (email retrieval, etc) can be lifted into http middleware to allow for better
 // composability
-func key(eb *eventbrite.Session, mk *masterkey.MasterKey, mc *mail.Client) http.HandlerFunc {
+func key(eb *eventbrite.Session, mk *masterkey.MasterKey, db *models.DatabaseContext, mc *mail.Client) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		/** Read the request body **/
 		type reqBody struct {
-			AttendeeID string          `json:"attendee_id"`
-			PubKey     tmcrypto.PubKey `json:"pubkey"`
+			AttendeeID string `json:"attendee_id"`
+			PrivateKey string `json:"pubkey"` // hex-encoded private key
 		}
-		bz, err := ioutil.ReadAll(r.Body)
-		if err != nil {
-			http.Error(w, "could not read request body", http.StatusBadRequest)
-			return
-		}
-
-		cdc := longy.ModuleCdc
 		var body reqBody
-		err = cdc.UnmarshalJSON(bz, &body)
+		jsonDecoder := json.NewDecoder(r.Body)
+		err := jsonDecoder.Decode(&body)
 		if err != nil {
 			errMsg := fmt.Sprintf("bad json request body: %s", err)
 			http.Error(w, errMsg, http.StatusBadRequest)
 			return
 		}
 
+		/** Attendee information + their their new private key **/
+		privKey, err := util.Secp256k1FromHex(body.PrivateKey)
+		if err != nil {
+			errMsg := fmt.Sprintf("bad private key: %s", err)
+			http.Error(w, errMsg, http.StatusBadRequest)
+			return
+		}
+		attendeeAddress := util.IDToAddress(body.AttendeeID)
+
+		/** Construct the secret for this and send the key transaction **/
 		secret, commitment := util.CreateCommitment()
-		err = mk.SendKeyTransaction(body.AttendeeID, body.PubKey, commitment)
+		err = mk.SendKeyTransaction(attendeeAddress, privKey.PubKey(), commitment)
 		if err != nil {
 			http.Error(w, "internal error. try again", http.StatusInternalServerError)
 			return
 		}
 
+		/** Get the Attendee's email **/
 		email, err := eb.EmailFromAttendeeID(body.AttendeeID)
 		if err != nil {
 			http.Error(w, "internal error. try again", http.StatusInternalServerError)
@@ -57,6 +69,13 @@ func key(eb *eventbrite.Session, mk *masterkey.MasterKey, mc *mail.Client) http.
 			return
 		}
 
+		/** Store the private key **/
+		ok := db.StoreKey(email, body.PrivateKey)
+		if !ok {
+			log.Error("could not store private key in the db")
+		}
+
+		/** Send the redirect **/
 		err = mc.SendRedirectEmail(email, secret)
 		if err != nil {
 			http.Error(w, "email error. try again", http.StatusInternalServerError)

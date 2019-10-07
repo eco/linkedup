@@ -1,7 +1,6 @@
 package masterkey
 
 import (
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"github.com/cosmos/cosmos-sdk/client/context"
@@ -13,15 +12,10 @@ import (
 	"github.com/eco/longy/x/longy"
 	"github.com/sirupsen/logrus"
 	tmcrypto "github.com/tendermint/tendermint/crypto"
-	"github.com/tendermint/tendermint/crypto/secp256k1"
 	"io"
 	"net/http"
 	"sync"
 	"time"
-)
-
-const (
-	secp256k1PrivKeyLen = 32
 )
 
 var log = logrus.WithField("module", "masterkey")
@@ -88,31 +82,10 @@ func NewMasterKey(privateKey tmcrypto.PrivKey, restURL, fullNodeURL string, chai
 	return k, nil
 }
 
-// Secp256k1FromHex parses the hex-encoded `key` string
-func Secp256k1FromHex(key string) (tmcrypto.PrivKey, error) {
-	bytes, err := hex.DecodeString(util.TrimHex(key))
-	if err != nil {
-		return nil, fmt.Errorf("hex decoding: %s", err)
-	} else if len(bytes) != secp256k1PrivKeyLen {
-		return nil, fmt.Errorf("invalid key byte length. expected: %d, got: %d",
-			secp256k1PrivKeyLen, len(bytes))
-	}
-
-	var privateKey [secp256k1PrivKeyLen]byte
-	copied := copy(privateKey[:], bytes)
-	if copied != secp256k1PrivKeyLen {
-		errMsg := fmt.Sprintf("expected to copy over %d bytes into the secp256k1 private key",
-			secp256k1PrivKeyLen)
-		panic(errMsg)
-	}
-
-	return secp256k1.PrivKeySecp256k1(privateKey), nil
-}
-
 // SendKeyTransaction generates a `RekeyMsg`, authorized by the master key. The transaction bytes
 // generated are created using the cosmos-sdk/x/auth module's StdSignDoc.
 func (mk *MasterKey) SendKeyTransaction(
-	attendeeID string,
+	attendeeAddr sdk.AccAddress,
 	newPublicKey tmcrypto.PubKey,
 	commitment util.Commitment,
 ) error {
@@ -128,17 +101,14 @@ func (mk *MasterKey) SendKeyTransaction(
 	mk.seqLock.Lock()
 
 	// construct bytes and send to the full node
-	txBytes, err = mk.createTxBytes(attendeeID, commitment, newPublicKey)
+	txBytes, err = mk.createTxBytes(attendeeAddr, commitment, newPublicKey)
 	if err == nil {
 		res, err = mk.longyCliCtx.BroadcastTxCommit(txBytes)
 		if err != nil { // nolint
 			log.WithError(err).Info("failed transaction submission")
 		} else {
 			if res.Code != 0 {
-				log.WithField("raw_log", res.RawLog).
-					WithField("attendee_id", attendeeID).
-					Info("tx response")
-
+				log.WithField("raw_log", res.RawLog).Info("failed tx response")
 				err = fmt.Errorf("failed tx")
 			}
 
@@ -152,12 +122,10 @@ func (mk *MasterKey) SendKeyTransaction(
 }
 
 func (mk *MasterKey) createTxBytes(
-	attendeeID string,
+	attendeeAddr sdk.AccAddress,
 	commitment util.Commitment,
 	newPublicKey tmcrypto.PubKey,
 ) ([]byte, error) {
-
-	attendeeAddr := util.IDToAddress(attendeeID)
 	msgs := []sdk.Msg{
 		longy.NewMsgKey(attendeeAddr, mk.address, newPublicKey, commitment),
 	}
