@@ -61,9 +61,11 @@ The configruation can also be set through environment variables. the `-` charact
    i.e `STMP_SERVER` or `EVENTBRITE_AUTH`
 
 
-1. `/ping [GET]` is a health check. Simply writes a Status 200 along with "pong" in the request body
-3. `/key/<email> [GET]` will retrieve the hex-encoded private key associated with the badge id
-2. `/key [POST]` is the entry point for keying an account.  
+1. `/ping [GET]` is a health check. Simply writes a Status 200 along with "pong" in the request body  
+2. `/key/<email> [GET]` will retrieve the hex-encoded private key associated with the badge id  
+  Status 200: The body will contain the hex-encoded private key
+  Status 404: The email was not found in the database  
+3. `/key [POST]` is the entry point for keying an account.  
   Request Body:  
   ```
   {
