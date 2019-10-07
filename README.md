@@ -95,3 +95,13 @@ eg:
 ENABLE_DB_TESTS=true
 make test
 ```
+
+## Email Functionality
+Email sending functionality depends on AWS API keys. When run deployed in AWS
+these will be provided by the instance role. For development purposes you'll
+need to provide your own. See the
+[linkedup-content](https://github.com/eco/linkedup-content) repository for the
+email templates - they can be installed using:
+```
+aws ses create-template --template "`cat path/to/rekey.json`" --region us-west-2
+```

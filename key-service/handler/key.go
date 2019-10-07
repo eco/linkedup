@@ -85,7 +85,7 @@ func key(eb *eventbrite.Session,
 		}
 
 		/** Send the redirect **/
-		err = mc.SendRedirectEmail(email, attendeeAddress, secret)
+		err = mc.SendOnboardingEmail(email, attendeeAddress, secret)
 		if err != nil {
 			http.Error(w, "email error. try again", http.StatusInternalServerError)
 		}

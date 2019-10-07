@@ -10,6 +10,8 @@ import (
 	"github.com/eco/longy/util"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"os"
 	"strings"
 )
@@ -32,7 +34,7 @@ func init() {
 	rootCmd.Flags().String("eventbrite-auth", "", "eventbrite authorization token")
 	rootCmd.Flags().Int("eventbrite-event", 0, "id associated with the eventbrite event")
 
-	rootCmd.Flags().String("aws-region", "us-west-1", "aws region for dynamodb")
+	rootCmd.Flags().String("aws-region", "us-west-2", "aws region for dynamodb")
 	rootCmd.Flags().String("aws-dynamo-url", "http://localhost:8000", "dynamodb url")
 }
 
@@ -50,10 +52,6 @@ var rootCmd = &cobra.Command{
 		authToken := viper.GetString("eventbrite-auth")
 		eventID := viper.GetInt("eventbrite-event")
 
-		smtpServer := viper.GetString("smtp-server")
-		smtpUsername := viper.GetString("smtp-username")
-		smtpPassword := viper.GetString("smtp-password")
-
 		awsRegion := viper.GetString("aws-region")
 		dynamoURL := viper.GetString("aws-dynamo-url")
 
@@ -66,15 +64,11 @@ var rootCmd = &cobra.Command{
 			return fmt.Errorf("masterkey: %s", err)
 		}
 
-		/** SMTP connection **/
-		smtpHost, smtpPort, err := util.HostAndPort(smtpServer)
-		if err != nil {
-			return fmt.Errorf("smtp server: %s", err)
-		}
-
 		/** Eventbrite session **/
 		ebSession := eb.CreateSession(authToken, eventID)
-		mClient, err := mail.NewClient(smtpHost, smtpPort, smtpUsername, smtpPassword)
+		mClient, err := mail.NewClient(session.Must(session.NewSession(&aws.Config{
+			Region: aws.String(awsRegion),
+		})))
 		if err != nil {
 			return fmt.Errorf("mail client: %s", err)
 		}

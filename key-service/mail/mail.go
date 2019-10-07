@@ -1,63 +1,83 @@
 package mail
 
 import (
-	"crypto/tls"
 	"fmt"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	gomail "github.com/go-mail/mail"
 	"github.com/sirupsen/logrus"
+
+	"github.com/aws/aws-sdk-go/aws/client"
+	"github.com/aws/aws-sdk-go/service/ses"
 )
 
-var log = logrus.WithField("module", "mail")
+var (
+	log = logrus.WithField("module", "mail")
+
+	gmEmail = "LinkedUp Game <gm@linkedup.sfblockchainweek.io>"
+)
 
 // Client used to send emails
 type Client struct {
-	sender gomail.SendCloser
+	ses *ses.SES
 }
 
-// NewClient constructs `Client` with the corresponding credentials
-func NewClient(host string, port int, username string, pwd string) (Client, error) {
-	log.Infof("establishing connection with smtp server. %s:%d", host, port)
-	d := gomail.NewDialer(host, port, username, pwd)
-	d.TLSConfig = &tls.Config{
-		ServerName: host,
+// NewClient creates a new email client session wrapper
+func NewClient(cfg client.ConfigProvider) (client Client, err error) {
+	client = Client{
+		ses: ses.New(cfg),
 	}
-	d.StartTLSPolicy = gomail.MandatoryStartTLS
-
-	// try and dial
-	sender, err := d.Dial()
-	if err != nil {
-		return Client{}, fmt.Errorf("smtp conn: %s", err)
-	}
-
-	return Client{
-		sender: sender,
-	}, nil
+	return
 }
 
-// SendRedirectEmail will construct and send the email containing the redirect
-// uri with the given secret
-func (c Client) SendRedirectEmail(dest string, attendeeAddr sdk.AccAddress, secret string) error {
-	redirectURI := fmt.Sprintf("http://longygame.com/claim?attendee=%s&secret=%s", attendeeAddr, secret)
+// SendOnboardingEmail will construct and send the email containing the initial
+// onboarding message and URL with the given secret
+func (c Client) SendOnboardingEmail(dest string, attendeeAddr sdk.AccAddress, secret string) error {
+	redirectURI := fmt.Sprintf("https://linkedup.sfblockchainweek.io/claim?attendee=%s&secret=%s", attendeeAddr, secret)
 
-	// construct message
-	m := gomail.NewMessage()
-	m.SetHeader("From", "testecolongy@gmail.com")
-	m.SetHeader("To", dest)
-	m.SetHeader("From", "alex@example.com")
-	m.SetHeader("Subject", "Onboard to the the longy game")
-	m.SetBody("text/html", fmt.Sprintf("<b>Hello!</b> enter the game -> %s", redirectURI))
+	log.Tracef("sending onboarding email to: %s", dest)
 
-	err := gomail.Send(c.sender, m)
+	err := c.sendEmailWithURL(dest, redirectURI, "linkedup-onboarding")
+
 	if err != nil {
-		log.WithError(err).Warnf("failed email delivery. email: %s", dest)
+		log.Errorf(
+			"unable to send onboarding email to %s: %s",
+			dest,
+			err.Error(),
+		)
 	}
 
 	return err
 }
 
-// Close will terminate the connnection with the smtp server
-func (c Client) Close() error {
-	log.Info("terminating connection with smtp server")
-	return c.sender.Close()
+// SendRecoveryEmail will construct and send the email containing the account
+// recovery message and URL with the given secret
+func (c Client) SendRecoveryEmail(dest string, attendeeAddr sdk.AccAddress, secret string) error {
+	redirectURI := fmt.Sprintf("https://linkedup.sfblockchainweek.io/claim?attendee=%s&secret=%s", attendeeAddr, secret)
+
+	log.Tracef("sending recovery email to: %s", dest)
+
+	err := c.sendEmailWithURL(dest, redirectURI, "linkedup-rekey")
+
+	if err != nil {
+		log.Errorf(
+			"unable to send recovery email to %s: %s",
+			dest,
+			err.Error(),
+		)
+	}
+
+	return err
+}
+
+func (c Client) sendEmailWithURL(dest string, url string, template string) (err error) {
+	templateData := fmt.Sprintf("{\"url\":\"%s\"}", url)
+
+	_, err = c.ses.SendTemplatedEmail(&ses.SendTemplatedEmailInput{
+		Destination: &ses.Destination{
+			ToAddresses: []*string{&dest},
+		},
+		Source: &gmEmail,
+		Template: &template,
+		TemplateData: &templateData,
+	})
+	return
 }

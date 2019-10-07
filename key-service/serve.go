@@ -56,7 +56,6 @@ func (srv *Service) StartHTTP(port int) {
 
 // Close will release the resources used by the server
 func (srv *Service) Close() {
-	srv.mailClient.Close() //nolint
 	log.Info("done")
 }
 
