@@ -36,7 +36,7 @@ func key(eb *eventbrite.Session,
 		/** Read the request body **/
 		type reqBody struct {
 			AttendeeID string `json:"attendee_id"`
-			PrivateKey string `json:"pubkey"` // hex-encoded private key
+			PrivateKey string `json:"private_key"` // hex-encoded private key
 		}
 		var body reqBody
 		jsonDecoder := json.NewDecoder(r.Body)

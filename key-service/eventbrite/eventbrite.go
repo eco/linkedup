@@ -53,8 +53,8 @@ func (s Session) WithTimeout(time time.Duration) Session {
 
 // EmailFromAttendeeID retrieves the email associated with the eventbrite account for `id`
 func (s Session) EmailFromAttendeeID(id string) (string, error) {
-	host := "https://eventbrite.com"
-	path := fmt.Sprintf("/v3/%d/attendees/%s/", s.eventID, id)
+	host := "https://www.eventbriteapi.com"
+	path := fmt.Sprintf("/v3/events/%d/attendees/%s/", s.eventID, id)
 	auth := fmt.Sprintf("Bearer %s", s.authToken)
 
 	url, err := url.Parse(host + path)
