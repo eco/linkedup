@@ -72,6 +72,7 @@ The configruation can also be set through environment variables. the `-` charact
   }
   ```  
   Status 200: Key transaction was successfully submitted and the email containing the redirect uri was sent
+  Status 401: The attendee has already keyed their account
   Status 403: The attendee id was not found in the eventbrite event
   Status 500: Something internal went wrong. (Communicating with eventbrite, sending an email, the transaction failed to sent).  
     - The logs will contain information about what went wrong
