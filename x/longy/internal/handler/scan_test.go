@@ -10,7 +10,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("Scan Handler Tests", func() {
+var _ = FDescribe("Scan Handler Tests", func() {
 	var s1, s2 sdk.AccAddress
 	const (
 		qr1 = "1234"
@@ -81,7 +81,19 @@ var _ = Describe("Scan Handler Tests", func() {
 			Expect(b.Rep).To(Equal(types.ScanAttendeeAwardPoints + types.ShareAttendeeAwardPoints))
 		})
 
-		It("should not allow us to reset data and earn more points", func() {
+		FIt("should not allow us to reset data and earn more points", func() {
+			a, ok := keeper.GetAttendee(ctx, s1)
+			Expect(ok).To(BeTrue())
+			//Add the partial scan to the keeper
+			msg := types.NewMsgQrScan(s1, qr2, nil)
+			result := handler(ctx, msg)
+			Expect(result.Code).To(Equal(sdk.CodeOK))
+			Expect(a.Rep).To(Equal(types.ScanAttendeeAwardPoints))
+
+			msg = types.NewMsgQrScan(s1, qr2, data)
+			result = handler(ctx, msg)
+			Expect(result.Code).To(Equal(sdk.CodeOK))
+			Expect(a.Rep).To(Equal(types.ScanAttendeeAwardPoints))
 		})
 	})
 })
