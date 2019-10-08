@@ -19,6 +19,13 @@ var ctx sdk.Context
 var keeper longy.Keeper
 var handler sdk.Handler
 
+const (
+	qr1 = "1234"
+	qr2 = "asdf"
+)
+
+var sender, receiver sdk.AccAddress
+
 // BeforeTestRun sets up common data needed by all handler tests.
 func BeforeTestRun() {
 	simApp, ctx = sim.CreateTestApp(true)

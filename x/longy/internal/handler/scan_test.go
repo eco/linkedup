@@ -10,21 +10,17 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = FDescribe("Scan Handler Tests", func() {
-	var s1, s2 sdk.AccAddress
-	const (
-		qr1 = "1234"
-		qr2 = "asdf"
-	)
+var _ = Describe("Scan Handler Tests", func() {
+
 	BeforeEach(func() {
 		BeforeTestRun()
 		//create public account addresses
-		s1 = util.IDToAddress(qr1)
-		s2 = util.IDToAddress(qr2)
+		sender = util.IDToAddress(qr1)
+		receiver = util.IDToAddress(qr2)
 	})
 
 	It("should fail when attendee for qr code does not exist", func() {
-		msg := types.NewMsgQrScan(s1, qr2, nil)
+		msg := types.NewMsgQrScan(sender, qr2, nil)
 		result := handler(ctx, msg)
 		Expect(result.Code).To(Equal(types.AttendeeNotFound))
 	})
@@ -33,45 +29,45 @@ var _ = FDescribe("Scan Handler Tests", func() {
 		//add sender to keeper
 		utils.AddAttendeeToKeeper(ctx, &keeper, qr1, false)
 
-		msg := types.NewMsgQrScan(s1, qr1, nil)
+		msg := types.NewMsgQrScan(sender, qr1, nil)
 		result := handler(ctx, msg)
 		Expect(result.Code).To(Equal(types.AccountsSame))
 	})
 
 	It("should succeed to create a new scan record without data", func() {
-		createScan(qr1, qr2, s1, s2, nil, false)
+		createScan(qr1, qr2, sender, receiver, nil, false)
 	})
 
 	It("should succeed to create a new scan record with data", func() {
 		data := []byte("asdfasdfa")
-		createScan(qr1, qr2, s1, s2, data, false)
+		createScan(qr1, qr2, sender, receiver, data, false)
 	})
 
 	Context("when a partial scan already exists but doesn't have shared info from both parties", func() {
 		var data []byte
 		BeforeEach(func() {
 			//Add the partial scan to the keeper
-			createScan(qr1, qr2, s1, s2, nil, false)
+			createScan(qr1, qr2, sender, receiver, nil, false)
 			data = []byte("asdfasdfa")
 		})
 
 		It("should add info and increment points", func() {
 			//Add the partial scan to the keeper
-			msg := types.NewMsgQrScan(s1, qr2, data)
+			msg := types.NewMsgQrScan(sender, qr2, data)
 			result := handler(ctx, msg)
 			Expect(result.Code).To(Equal(sdk.CodeOK))
-			inspectScan(s1, s2, len(data) != 0)
+			inspectScan(sender, receiver, len(data) != 0)
 
 			for i := 0; i < 2; i++ {
-				msg = types.NewMsgQrScan(s2, qr1, data)
+				msg = types.NewMsgQrScan(receiver, qr1, data)
 				result = handler(ctx, msg)
 				Expect(result.Code).To(Equal(sdk.CodeOK))
 			}
 
 			//get attendees
-			a, ok := keeper.GetAttendee(ctx, s1)
+			a, ok := keeper.GetAttendee(ctx, sender)
 			Expect(ok).To(BeTrue())
-			b, ok := keeper.GetAttendee(ctx, s2)
+			b, ok := keeper.GetAttendee(ctx, receiver)
 			Expect(ok).To(BeTrue())
 			//Check share ids
 			Expect(len(a.ScanIDs)).To(Equal(1))
@@ -81,16 +77,16 @@ var _ = FDescribe("Scan Handler Tests", func() {
 			Expect(b.Rep).To(Equal(types.ScanAttendeeAwardPoints + types.ShareAttendeeAwardPoints))
 		})
 
-		FIt("should not allow us to reset data and earn more points", func() {
-			a, ok := keeper.GetAttendee(ctx, s1)
+		It("should not allow us to reset data and earn more points", func() {
+			a, ok := keeper.GetAttendee(ctx, sender)
 			Expect(ok).To(BeTrue())
 			//Add the partial scan to the keeper
-			msg := types.NewMsgQrScan(s1, qr2, nil)
+			msg := types.NewMsgQrScan(sender, qr2, nil)
 			result := handler(ctx, msg)
 			Expect(result.Code).To(Equal(sdk.CodeOK))
 			Expect(a.Rep).To(Equal(types.ScanAttendeeAwardPoints))
 
-			msg = types.NewMsgQrScan(s1, qr2, data)
+			msg = types.NewMsgQrScan(sender, qr2, data)
 			result = handler(ctx, msg)
 			Expect(result.Code).To(Equal(sdk.CodeOK))
 			Expect(a.Rep).To(Equal(types.ScanAttendeeAwardPoints))

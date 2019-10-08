@@ -15,7 +15,7 @@ func HandleMsgInfo(ctx sdk.Context, k keeper.Keeper, msg types.MsgInfo) sdk.Resu
 		return err.Result()
 	}
 
-	//check that there is no existing scan between these participants
+	//check that there is an existing scan between these participants
 	scanID, err := types.GenScanID(msg.Sender, msg.Receiver)
 	if err != nil {
 		return err.Result()
