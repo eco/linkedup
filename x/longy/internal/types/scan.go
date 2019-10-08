@@ -13,13 +13,17 @@ type Scan struct {
 	S1 sdk.AccAddress
 	//S2 is the person who's QR code is scanned
 	S2 sdk.AccAddress
+	//D1 is the encrypted data shared by S1 with S2
+	D1 []byte
+	//D2 is the encrypted data shared by S2 with S1
+	D2 []byte
 	//Complete is true when both S1 and S2 have posted this scan interaction on-chain
 	Complete bool
 }
 
 //NewScan creates a new scan and sets its id
-func NewScan(s1 sdk.AccAddress, s2 sdk.AccAddress) (Scan, sdk.Error) {
-	id, err := GenID(s1, s2)
+func NewScan(s1 sdk.AccAddress, s2 sdk.AccAddress, d1 []byte, d2 []byte) (Scan, sdk.Error) {
+	id, err := GenScanID(s1, s2)
 	if err != nil {
 		return Scan{}, err
 	}
@@ -27,19 +31,16 @@ func NewScan(s1 sdk.AccAddress, s2 sdk.AccAddress) (Scan, sdk.Error) {
 		ID:       id,
 		S1:       s1,
 		S2:       s2,
+		D1:       d1,
+		D2:       d2,
 		Complete: false,
 	}, nil
 }
 
-//GenID creates the unique id between a scan pair, regardless of the order of the account addresses passed into it
-func GenID(s1, s2 sdk.AccAddress) (id []byte, err sdk.Error) {
-	if s1.Empty() || s2.Empty() {
-		err = ErrAccountAddressEmpty("cannot create a scan where an address is empty")
-		return
-	}
-
-	if s1.Equals(s2) {
-		err = ErrScanAccountsSame("cannot create a scan where addresses are the same")
+//GenScanID creates the unique id between a scan pair, regardless of the order of the account addresses passed into it
+func GenScanID(s1, s2 sdk.AccAddress) (id []byte, err sdk.Error) {
+	err = CheckSameness(s1, s2)
+	if err != nil {
 		return
 	}
 

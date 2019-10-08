@@ -17,6 +17,9 @@ const (
 	// ScanNotFound is the code when we cannot find a scan in the keeper with the given id
 	ScanNotFound
 
+	//InfoNotFound is the code when we cannot find an info in the keeper with the given id
+	InfoNotFound
+
 	// InsufficientPrivileges is the code for when a transaction signer doesn't have the necessary privilege
 	InsufficientPrivileges
 
@@ -55,8 +58,8 @@ const (
 	//InvalidCommitmentReveal is the code when
 	InvalidCommitmentReveal
 
-	// ScanAccountsSame is the code when a scan of with the same 1 account is attempted
-	ScanAccountsSame
+	// AccountsSame is the code when a scan of with the same 1 account is attempted
+	AccountsSame
 
 	// AccountAddressEmpty is the code when an AccAddress is the empty address
 	AccountAddressEmpty
@@ -66,6 +69,16 @@ const (
 	ScanQRAlreadyOccurred
 	//ScanNotComplete is the code for when a scan is not complete
 	ScanNotComplete
+	//DataCannotBeEmpty is the code for when the info data in a message is empty
+	DataCannotBeEmpty
+	//DataSizeOverLimit is the code for when the info data is above the size limit
+	DataSizeOverLimit
+	//CantShareWithSelf is the code for when an attendee tries to share info with themselves
+	CantShareWithSelf
+	//InfoAlreadyExists is the code for when someone tries to share info with a person more than once
+	InfoAlreadyExists
+	//InvalidShareForScan is the code for when someone tries to share info when the corresponding scan is not complete
+	InvalidShareForScan
 
 	// DefaultError is the code for when a random error occurs that we do not provide a unique code to
 	DefaultError
@@ -79,6 +92,11 @@ func ErrItemNotFound(format string, args ...interface{}) sdk.Error {
 // ErrScanNotFound occurs when we cannot find a scan in the keeper with the given id
 func ErrScanNotFound(format string, args ...interface{}) sdk.Error {
 	return sdk.NewError(LongyCodeSpace, ScanNotFound, format, args...)
+}
+
+// ErrInfoNotFound occurs when we cannot find an info in the keeper with the given id
+func ErrInfoNotFound(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, InfoNotFound, format, args...)
 }
 
 // ErrAttendeeNotFound occurs when we cannot find the attendee
@@ -146,9 +164,9 @@ func ErrInvalidCommitmentReveal(format string, args ...interface{}) sdk.Error {
 	return sdk.NewError(LongyCodeSpace, InvalidCommitmentReveal, format, args...)
 }
 
-// ErrScanAccountsSame occurs when a scan of with the same 1 account is attempted
-func ErrScanAccountsSame(format string, args ...interface{}) sdk.Error {
-	return sdk.NewError(LongyCodeSpace, ScanAccountsSame, format, args...)
+// ErrAccountsSame occurs when a scan of with the same 1 account is attempted
+func ErrAccountsSame(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, AccountsSame, format, args...)
 }
 
 // ErrAccountAddressEmpty occurs when an AccAddress is the empty address
@@ -165,6 +183,31 @@ func ErrScanQRAlreadyOccurred(format string, args ...interface{}) sdk.Error {
 //ErrScanNotComplete occurs when a scan is not complete
 func ErrScanNotComplete(format string, args ...interface{}) sdk.Error {
 	return sdk.NewError(LongyCodeSpace, ScanNotComplete, format, args...)
+}
+
+//ErrDataCannotBeEmpty occurs when the info data in a message is empty
+func ErrDataCannotBeEmpty(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, DataCannotBeEmpty, format, args...)
+}
+
+//ErrDataSizeOverLimit occurs when the info data is above the size limit
+func ErrDataSizeOverLimit(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, DataSizeOverLimit, format, args...)
+}
+
+//ErrCantShareWithSelf occurs when an attendee tries to share info with themselves
+func ErrCantShareWithSelf(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, CantShareWithSelf, format, args...)
+}
+
+//ErrInfoAlreadyExists occurs when someone tries to share info with a person more than once
+func ErrInfoAlreadyExists(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, InfoAlreadyExists, format, args...)
+}
+
+//ErrInvalidShareForScan occurs when someone tries to share info when the corresponding scan is not complete
+func ErrInvalidShareForScan(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, InvalidShareForScan, format, args...)
 }
 
 //ErrDefault occurs when a random error occurs that we do not provide a unique code to

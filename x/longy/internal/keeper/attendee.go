@@ -47,25 +47,78 @@ func (k Keeper) SetAttendee(ctx sdk.Context, a types.Attendee) {
 //AwardScanPoints awards the points to each participant of the scan
 //nolint:gocritic
 func (k Keeper) AwardScanPoints(ctx sdk.Context, scan types.Scan) sdk.Error {
-	if !scan.Complete {
-		return types.ErrScanNotComplete("cannot reward points for a scan that is not complete")
-	}
-	a1, exists := k.GetAttendee(ctx, scan.S1)
-	if !exists {
-		return types.ErrAttendeeNotFound("attendee for points award was not found")
-	}
-	a2, exists := k.GetAttendee(ctx, scan.S2)
-	if !exists {
-		return types.ErrAttendeeNotFound("attendee for points award was not found")
+	a1, a2, err := k.getAttendeesByScan(ctx, scan)
+	if err != nil {
+		return err
 	}
 
 	points := types.ScanAttendeeAwardPoints
 	if a1.Sponsor || a2.Sponsor {
 		points = types.ScanSponsorAwardPoints
 	}
-	a1.Rep += points
-	a2.Rep += points
+	a1.AddRep(points)
+	a2.AddRep(points)
 	k.SetAttendee(ctx, a1)
 	k.SetAttendee(ctx, a2)
 	return nil
+}
+
+//AddSharedID adds the scan id to the scan ids array of both the sender and receiver is they don't contain it yet
+//nolint:gocritic
+func (k Keeper) AddSharedID(ctx sdk.Context, senderAddr sdk.AccAddress, receiverAddr sdk.AccAddress,
+	scanID []byte) sdk.Error {
+	sender, receiver, err := k.GetAttendees(ctx, senderAddr, receiverAddr)
+	if err != nil {
+		return err
+	}
+	if sender.AddScanID(scanID) {
+		k.SetAttendee(ctx, sender)
+	}
+	if receiver.AddScanID(scanID) {
+		k.SetAttendee(ctx, receiver)
+	}
+	return nil
+}
+
+//AwardShareInfoPoints adds points to the sender of the shared info based on if the receiver is a sponsor or not
+//nolint:gocritic
+func (k Keeper) AwardShareInfoPoints(ctx sdk.Context, senderAddr sdk.AccAddress,
+	receiverAddr sdk.AccAddress) sdk.Error {
+	sender, receiver, err := k.GetAttendees(ctx, senderAddr, receiverAddr)
+	if err != nil {
+		return err
+	}
+	//give sender points for sharing, check if receiver is a sponsor
+	val := types.ShareAttendeeAwardPoints
+	if receiver.Sponsor {
+		val = types.ShareSponsorAwardPoints
+	}
+	sender.AddRep(val)
+	k.SetAttendee(ctx, sender)
+	return nil
+}
+
+//GetAttendees returns the attendees for the give account addresses
+//nolint:gocritic
+func (k Keeper) GetAttendees(ctx sdk.Context, acc1 sdk.AccAddress,
+	acc2 sdk.AccAddress) (a1 types.Attendee, a2 types.Attendee, err sdk.Error) {
+	var exists bool
+	a1, exists = k.GetAttendee(ctx, acc1)
+	if !exists {
+		err = types.ErrAttendeeNotFound("attendee for points award was not found")
+		return
+	}
+	a2, exists = k.GetAttendee(ctx, acc2)
+	if !exists {
+		err = types.ErrAttendeeNotFound("attendee for points award was not found")
+		return
+	}
+	return
+}
+
+//getAttendeesByScan returns  the attendees for the give scan
+//nolint:gocritic
+func (k Keeper) getAttendeesByScan(ctx sdk.Context, scan types.Scan) (a1 types.Attendee,
+	a2 types.Attendee, err sdk.Error) {
+	return k.GetAttendees(ctx, scan.S1, scan.S2)
 }

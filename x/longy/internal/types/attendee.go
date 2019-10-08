@@ -13,6 +13,8 @@ type Attendee struct {
 	Commitment util.Commitment
 	Claimed    bool
 	Sponsor    bool
+	EncryptKey string
+	ScanIDs    []string
 
 	Rep uint
 }
@@ -28,6 +30,7 @@ func NewAttendee(id string) Attendee {
 
 		Commitment: nil,
 		Claimed:    false,
+		ScanIDs:    []string{},
 
 		Rep: 0,
 	}
@@ -36,6 +39,24 @@ func NewAttendee(id string) Attendee {
 // NewAttendeeFromGenesis will create an `Attendee` from `GenesisAttendee`
 func NewAttendeeFromGenesis(ga GenesisAttendee) Attendee {
 	return NewAttendee(ga.ID)
+}
+
+//AddScanID adds the new scan id if it isn't already added
+func (a *Attendee) AddScanID(id []byte) (added bool) {
+	if len(id) > 0 && !contains(a.ScanIDs, string(id)) {
+		a.ScanIDs = append(a.ScanIDs, string(id))
+		return true
+	}
+	return false
+}
+
+func contains(s []string, val string) bool {
+	for _, a := range s {
+		if a == val {
+			return true
+		}
+	}
+	return false
 }
 
 // GetID returns the attendee identifier
