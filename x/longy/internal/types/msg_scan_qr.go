@@ -1,7 +1,6 @@
 package types
 
 import (
-	"encoding/json"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"strconv"
 )
@@ -46,12 +45,8 @@ func (msg MsgScanQr) ValidateBasic() sdk.Error {
 
 // GetSignBytes returns byte representation of the message
 func (msg MsgScanQr) GetSignBytes() []byte {
-	b, err := json.Marshal(msg)
-	if err != nil {
-		panic(err)
-	}
-
-	return sdk.MustSortJSON(b)
+	bz := ModuleCdc.MustMarshalJSON(msg)
+	return sdk.MustSortJSON(bz)
 }
 
 // GetSigners returns the signers of this message for the authentication module
