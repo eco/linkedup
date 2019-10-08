@@ -83,7 +83,7 @@ func queryAttendeesByAddr(ctx sdk.Context, path []string, req abci.RequestQuery,
 
 //nolint:gocritic,unparam
 func queryScans(ctx sdk.Context, path []string, req abci.RequestQuery, keeper Keeper) (res []byte, err sdk.Error) {
-	scan, err := keeper.GetScanByID(ctx, []byte(path[0]))
+	scan, err := keeper.GetScanByID(ctx, types.Decode(path[0]))
 	if err != nil {
 		return
 	}
