@@ -17,7 +17,7 @@ func registerKey(
 	eb *eventbrite.Session,
 	mk *masterkey.MasterKey,
 	db *models.DatabaseContext,
-	mc *mail.Client) {
+	mc mail.Client) {
 
 	r.HandleFunc("/key", key(eb, mk, db, mc)).Methods("POST")
 	r.HandleFunc("/key/{email}", keyGetter(db)).Methods("GET")
@@ -29,7 +29,7 @@ func registerKey(
 func key(eb *eventbrite.Session,
 	mk *masterkey.MasterKey,
 	db *models.DatabaseContext,
-	mc *mail.Client) http.HandlerFunc {
+	mc mail.Client) http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 

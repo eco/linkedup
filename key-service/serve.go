@@ -23,7 +23,7 @@ type Service struct {
 	ebSession  *eventbrite.Session
 	masterKey  *masterkey.MasterKey
 	db         *models.DatabaseContext
-	mailClient *mail.Client
+	mailClient mail.Client
 }
 
 // NewService is the creator the the rekey-service
@@ -31,7 +31,7 @@ func NewService(
 	ebSession *eventbrite.Session,
 	key *masterkey.MasterKey,
 	db *models.DatabaseContext,
-	mc *mail.Client) Service {
+	mc mail.Client) Service {
 	return Service{
 		ebSession:  ebSession,
 		masterKey:  key,

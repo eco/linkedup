@@ -85,7 +85,7 @@ var rootCmd = &cobra.Command{
 			return fmt.Errorf("master key: %s", err)
 		}
 
-		service := ks.NewService(&ebSession, &mKey, &db, &mClient)
+		service := ks.NewService(&ebSession, &mKey, &db, mClient)
 		service.StartHTTP(port)
 
 		return nil

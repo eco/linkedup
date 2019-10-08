@@ -15,7 +15,7 @@ func Router(
 	eb *eventbrite.Session,
 	mk *masterkey.MasterKey,
 	db *models.DatabaseContext,
-	mc *mail.Client) http.Handler {
+	mc mail.Client) http.Handler {
 
 	r := mux.NewRouter()
 	registerPing(r)

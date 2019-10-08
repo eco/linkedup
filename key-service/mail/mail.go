@@ -16,13 +16,30 @@ var (
 )
 
 // Client used to send emails
-type Client struct {
+type Client interface {
+	SendOnboardingEmail(string, sdk.AccAddress, string) error
+	SendRecoveryEmail(string, sdk.AccAddress, string) error
+}
+
+type sesClient struct {
 	ses *ses.SES
+}
+
+
+type mockClient struct {
+}
+
+// NewMockClient creates a mock email client session wrapper that just logs
+// the template parameters so that the application can run locally without
+// actually sending email
+func NewMockClient() (client Client, err error) {
+	client = mockClient{}
+	return
 }
 
 // NewClient creates a new email client session wrapper
 func NewClient(cfg client.ConfigProvider) (client Client, err error) {
-	client = Client{
+	client = sesClient{
 		ses: ses.New(cfg),
 	}
 	return
@@ -30,8 +47,8 @@ func NewClient(cfg client.ConfigProvider) (client Client, err error) {
 
 // SendOnboardingEmail will construct and send the email containing the initial
 // onboarding message and URL with the given secret
-func (c Client) SendOnboardingEmail(dest string, attendeeAddr sdk.AccAddress, secret string) error {
-	redirectURI := fmt.Sprintf("https://linkedup.sfblockchainweek.io/claim?attendee=%s&secret=%s", attendeeAddr, secret)
+func (c sesClient) SendOnboardingEmail(dest string, attendeeAddr sdk.AccAddress, secret string) error {
+	redirectURI := makeRedirectURI(attendeeAddr, secret)
 
 	log.Tracef("sending onboarding email to: %s", dest)
 
@@ -50,8 +67,8 @@ func (c Client) SendOnboardingEmail(dest string, attendeeAddr sdk.AccAddress, se
 
 // SendRecoveryEmail will construct and send the email containing the account
 // recovery message and URL with the given secret
-func (c Client) SendRecoveryEmail(dest string, attendeeAddr sdk.AccAddress, secret string) error {
-	redirectURI := fmt.Sprintf("https://linkedup.sfblockchainweek.io/claim?attendee=%s&secret=%s", attendeeAddr, secret)
+func (c sesClient) SendRecoveryEmail(dest string, attendeeAddr sdk.AccAddress, secret string) error {
+	redirectURI := makeRedirectURI(attendeeAddr, secret)
 
 	log.Tracef("sending recovery email to: %s", dest)
 
@@ -68,7 +85,7 @@ func (c Client) SendRecoveryEmail(dest string, attendeeAddr sdk.AccAddress, secr
 	return err
 }
 
-func (c Client) sendEmailWithURL(dest string, url string, template string) (err error) {
+func (c sesClient) sendEmailWithURL(dest string, url string, template string) (err error) {
 	templateData := fmt.Sprintf("{\"url\":\"%s\"}", url)
 
 	_, err = c.ses.SendTemplatedEmail(&ses.SendTemplatedEmailInput{
@@ -80,4 +97,26 @@ func (c Client) sendEmailWithURL(dest string, url string, template string) (err 
 		TemplateData: &templateData,
 	})
 	return
+}
+
+func (c mockClient) SendOnboardingEmail(dest string, attendeeAddr sdk.AccAddress, secret string) error {
+	redirectURI := makeRedirectURI(attendeeAddr, secret)
+
+	log.Warnf("mock onboarding email with url: %s", redirectURI)
+	return nil
+}
+
+func (c mockClient) SendRecoveryEmail(dest string, attendeeAddr sdk.AccAddress, secret string) error {
+	redirectURI := makeRedirectURI(attendeeAddr, secret)
+
+	log.Warnf("mock recovery email with url: %s", redirectURI)
+	return nil
+}
+
+func makeRedirectURI(attendeeAddr sdk.AccAddress, secret string) string {
+	return fmt.Sprintf(
+		"https://linkedup.sfblockchainweek.io/claim?attendee=%s&secret=%s",
+		attendeeAddr,
+		secret,
+	)
 }
