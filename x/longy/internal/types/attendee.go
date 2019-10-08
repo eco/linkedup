@@ -53,6 +53,7 @@ func (a *Attendee) AddScanID(id []byte) (added bool) {
 	return false
 }
 
+//Encode encodes a hex byte array
 func Encode(src []byte) string {
 	dst := make([]byte, hex.EncodedLen(len(src)))
 	hex.Encode(dst, src)
@@ -60,14 +61,14 @@ func Encode(src []byte) string {
 	return fmt.Sprintf("%s", dst)
 }
 
+//Decode decodes a string into a hex byte array
 func Decode(src string) []byte {
 
 	decoded, err := hex.DecodeString(src)
 	if err != nil {
-		//log.Fatal(err)
+		fmt.Println(err.Error())
 	}
 
-	//fmt.Printf("%s\n", dst[:n])
 	return decoded
 }
 func contains(s []string, val string) bool {
