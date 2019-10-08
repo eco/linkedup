@@ -12,18 +12,28 @@ import (
 //nolint:gocritic
 func NewHandler(keeper Keeper) sdk.Handler {
 	return func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
-		switch msg := msg.(type) { //cast message
-
+		switch msg := msg.(type) {
 		case types.MsgScanQr:
 			return handler.HandleMsgQrScan(ctx, keeper, msg)
+		case *types.MsgScanQr:
+			return handler.HandleMsgQrScan(ctx, keeper, *msg)
 		case types.MsgInfo:
 			return handler.HandleMsgInfo(ctx, keeper, msg)
+		case *types.MsgInfo:
+			return handler.HandleMsgInfo(ctx, keeper, *msg)
+
 		case types.MsgKey:
 			return handleMsgKey(ctx, keeper, msg)
+		case *types.MsgKey:
+			return handleMsgKey(ctx, keeper, *msg)
+
 		case types.MsgClaimKey:
 			return handleMsgClaimKey(ctx, keeper, msg)
+		case *types.MsgClaimKey:
+			return handleMsgClaimKey(ctx, keeper, *msg)
+
 		default:
-			errMsg := fmt.Sprintf("unrecognized longy msg type: %v", msg.Type())
+			errMsg := fmt.Sprintf("unrecognized %s msg type: %T", RouterKey, msg)
 			return sdk.ErrUnknownRequest(errMsg).Result()
 		}
 	}
@@ -79,7 +89,7 @@ func handleMsgClaimKey(ctx sdk.Context, k Keeper, msg types.MsgClaimKey) sdk.Res
 		return types.ErrInvalidCommitmentReveal("incorrect commitment").Result()
 	}
 
-	// TODO: disperse reward for onboarding here
+	// award rep for the onboarding flow
 	attendee.AddRep(5)
 
 	// mark the attendee as claimed

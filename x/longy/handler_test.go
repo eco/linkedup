@@ -30,7 +30,7 @@ var _ = Describe("Longy Handler Tests", func() {
 		Expect(handler).ToNot(BeNil())
 
 		genesis := longy.GenesisState{
-			Service: types.GenesisService{
+			KeyService: types.GenesisKeyService{
 				Address: util.IDToAddress("master"),
 			},
 			Attendees: []types.GenesisAttendee{
@@ -103,7 +103,7 @@ var _ = Describe("Longy Handler Tests", func() {
 	})
 
 	var _ = Context("with an attendee that has keyed", func() {
-		var secret []byte
+		var secret string
 		BeforeEach(func() {
 			s, commitment := util.CreateCommitment()
 			secret = s
@@ -133,7 +133,7 @@ var _ = Describe("Longy Handler Tests", func() {
 		It("rejects an invalid commitment", func() {
 			msg := types.MsgClaimKey{
 				AttendeeAddress: addr,
-				Secret:          nil,
+				Secret:          "",
 			}
 			res := handler(ctx, msg)
 			Expect(res.IsOK()).Should(BeFalse())

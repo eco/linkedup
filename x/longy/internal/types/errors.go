@@ -23,8 +23,8 @@ const (
 	// InsufficientPrivileges is the code for when a transaction signer doesn't have the necessary privilege
 	InsufficientPrivileges
 
-	// GenesisServiceAddressEmpty is the code for when the service account address is not set in the genesis file
-	GenesisServiceAddressEmpty
+	// GenesisKeyServiceAddressEmpty is the code for when the service account address is not set in the genesis file
+	GenesisKeyServiceAddressEmpty
 
 	// GenesisAttendeesEmpty is the code for when the attendees are not set in the genesis file
 	GenesisAttendeesEmpty
@@ -40,11 +40,11 @@ const (
 	// attendees from the indexing of the eventbrite calls
 	AttendeeCountMismatch
 
-	// GenesisServiceAccountInvalid is the code when the service account bech32 address is invalidly passed to gen
-	GenesisServiceAccountInvalid
+	// GenesisKeyServiceAccountInvalid is the code when the service account bech32 address is invalidly passed to gen
+	GenesisKeyServiceAccountInvalid
 
-	// GenesisServiceAccountNotPresent is the code when the service account is not found in the genesis accounts
-	GenesisServiceAccountNotPresent
+	// GenesisKeyServiceAccountNotPresent is the code when the service account is not found in the genesis accounts
+	GenesisKeyServiceAccountNotPresent
 
 	// QRCodeInvalid is the code when
 	QRCodeInvalid
@@ -109,9 +109,9 @@ func ErrInsufficientPrivileges(format string, args ...interface{}) sdk.Error {
 	return sdk.NewError(LongyCodeSpace, InsufficientPrivileges, format, args...)
 }
 
-// ErrGenesisServiceAddressEmpty occurs when the re-key service address is not set in the genesis file
-func ErrGenesisServiceAddressEmpty(format string, args ...interface{}) sdk.Error {
-	return sdk.NewError(LongyCodeSpace, GenesisServiceAddressEmpty, format, args...)
+// ErrGenesisKeyServiceAddressEmpty occurs when the re-key service address is not set in the genesis file
+func ErrGenesisKeyServiceAddressEmpty(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, GenesisKeyServiceAddressEmpty, format, args...)
 }
 
 // ErrGenesisAttendeesEmpty occurs when the attendees are not set in the genesis file
@@ -134,14 +134,14 @@ func ErrAttendeeCountMismatch(format string, args ...interface{}) sdk.Error {
 	return sdk.NewError(LongyCodeSpace, AttendeeCountMismatch, format, args...)
 }
 
-// ErrGenesisServiceAccountInvalid occurs when the service account bech32 address is invalidly passed to gen
-func ErrGenesisServiceAccountInvalid(format string, args ...interface{}) sdk.Error {
-	return sdk.NewError(LongyCodeSpace, GenesisServiceAccountInvalid, format, args...)
+// ErrGenesisKeyServiceAccountInvalid occurs when the service account bech32 address is invalidly passed to gen
+func ErrGenesisKeyServiceAccountInvalid(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, GenesisKeyServiceAccountInvalid, format, args...)
 }
 
-// ErrGenesisServiceAccountNotPresent occurs when the service account is not found in the genesis accounts
-func ErrGenesisServiceAccountNotPresent(format string, args ...interface{}) sdk.Error {
-	return sdk.NewError(LongyCodeSpace, GenesisServiceAccountNotPresent, format, args...)
+// ErrGenesisKeyServiceAccountNotPresent occurs when the service account is not found in the genesis accounts
+func ErrGenesisKeyServiceAccountNotPresent(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, GenesisKeyServiceAccountNotPresent, format, args...)
 }
 
 // ErrQRCodeInvalid occurs when a scan message has an invalid QR code, ie not a positive integer

@@ -120,6 +120,7 @@ func NewLongyApp(
 
 	// The ParamsKeeper handles parameter storage for the application
 	app.paramsKeeper = params.NewKeeper(app.cdc, keys[params.StoreKey], tkeys[params.TStoreKey], params.DefaultCodespace)
+
 	// Set specific supspaces
 	authSubspace := app.paramsKeeper.Subspace(auth.DefaultParamspace)
 	bankSupspace := app.paramsKeeper.Subspace(bank.DefaultParamspace)
@@ -216,17 +217,18 @@ func NewLongyApp(
 	app.mm.SetOrderInitGenesis(
 		genaccounts.ModuleName,
 		distr.ModuleName,
+		bank.ModuleName,
+		supply.ModuleName,
+		slashing.ModuleName,
 		staking.ModuleName,
 		auth.ModuleName,
-		bank.ModuleName,
-		slashing.ModuleName,
 		longy.ModuleName,
 		genutil.ModuleName,
-		longy.ModuleName,
 	)
 
 	// register all module routes and module queriers
 	app.mm.RegisterRoutes(app.Router(), app.QueryRouter())
+	app.Router().AddRoute("longy", longy.NewHandler(app.longyKeeper))
 
 	// initialize stores
 	app.MountKVStores(keys)
@@ -235,6 +237,8 @@ func NewLongyApp(
 	// The initChainer handles translating the genesis.json file into initial state for the network
 	app.SetInitChainer(app.InitChainer)
 	app.SetBeginBlocker(app.BeginBlocker)
+	app.SetEndBlocker(app.EndBlocker)
+
 	// The AnteHandler handles signature verification and transaction pre-processing
 	app.SetAnteHandler(
 		auth.NewAnteHandler(
@@ -243,7 +247,6 @@ func NewLongyApp(
 			auth.DefaultSigVerificationGasConsumer,
 		),
 	)
-	app.SetEndBlocker(app.EndBlocker)
 
 	err := app.LoadLatestVersion(app.keys[bam.MainStoreKey])
 	if err != nil {
