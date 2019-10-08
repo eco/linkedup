@@ -9,13 +9,9 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = PDescribe("Info Handler Tests", func() {
-	var sender, receiver sdk.AccAddress
+var _ = Describe("Info Handler Tests", func() {
 	var data = []byte{1, 2, 3, 2, 1}
-	const (
-		qr1 = "1234"
-		qr2 = "asdf"
-	)
+
 	BeforeEach(func() {
 		BeforeTestRun()
 		//create public account addresses
@@ -46,31 +42,54 @@ var _ = PDescribe("Info Handler Tests", func() {
 				utils.AddAttendeeToKeeper(ctx, &keeper, qr2, false)
 			})
 
-			It("should fail when there is already a shared info between sender and receiver", func() {
-				//info, err := types.NewInfo(sender, receiver, data)
-				//Expect(err).To(BeNil())
-				////keeper.SetInfo(ctx, &info)
-				//
-				//msg := types.NewMsgInfo(sender, receiver, data)
-				//result := handler(ctx, msg)
-				//Expect(result.Code).To(Equal(types.InfoAlreadyExists))
-
-			})
-
-			It("should fail when there is no scan between the sender and receiver ", func() {
+			It("should fail when there is no scan for them", func() {
 				msg := types.NewMsgInfo(sender, receiver, data)
 				result := handler(ctx, msg)
 				Expect(result.Code).To(Equal(types.ScanNotFound))
 			})
 
-			It("should fail when the scan between sender and receiver is not complete ", func() {
-				scan, err := types.NewScan(sender, receiver, nil, nil)
-				Expect(err).To(BeNil())
-				keeper.SetScan(ctx, &scan)
+			Context("when there is a partial scan", func() {
+				BeforeEach(func() {
+					createScan(qr1, qr2, sender, receiver, nil, false)
+				})
 
-				msg := types.NewMsgInfo(sender, receiver, data)
-				result := handler(ctx, msg)
-				Expect(result.Code).To(Equal(types.InvalidShareForScan))
+				It("should not update rep if msginfo is sent without data", func() {
+					//get attendees
+					a, ok := keeper.GetAttendee(ctx, sender)
+					Expect(ok).To(BeTrue())
+					b, ok := keeper.GetAttendee(ctx, receiver)
+					Expect(ok).To(BeTrue())
+
+					msg := types.NewMsgInfo(sender, receiver, nil)
+					result := handler(ctx, msg)
+					Expect(result.Code).To(Equal(sdk.CodeOK))
+
+					c, ok := keeper.GetAttendee(ctx, sender)
+					Expect(ok).To(BeTrue())
+					d, ok := keeper.GetAttendee(ctx, receiver)
+					Expect(ok).To(BeTrue())
+					Expect(a.Rep).To(Equal(c.Rep))
+					Expect(b.Rep).To(Equal(d.Rep))
+				})
+
+				It("should update rep if msginfo is sent with data", func() {
+					//get attendees
+					a, ok := keeper.GetAttendee(ctx, sender)
+					Expect(ok).To(BeTrue())
+					b, ok := keeper.GetAttendee(ctx, receiver)
+					Expect(ok).To(BeTrue())
+
+					msg := types.NewMsgInfo(sender, receiver, data)
+					result := handler(ctx, msg)
+					Expect(result.Code).To(Equal(sdk.CodeOK))
+
+					c, ok := keeper.GetAttendee(ctx, sender)
+					Expect(ok).To(BeTrue())
+					d, ok := keeper.GetAttendee(ctx, receiver)
+					Expect(ok).To(BeTrue())
+					Expect(a.Rep + types.ShareAttendeeAwardPoints).To(Equal(c.Rep))
+					Expect(b.Rep).To(Equal(d.Rep))
+				})
 			})
 
 			Context("when scan between sender and receiver is complete", func() {

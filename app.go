@@ -229,6 +229,7 @@ func NewLongyApp(
 	// register all module routes and module queriers
 	app.mm.RegisterRoutes(app.Router(), app.QueryRouter())
 	app.Router().AddRoute("longy", longy.NewHandler(app.longyKeeper))
+	app.QueryRouter().AddRoute("longy", longy.NewQuerier(app.longyKeeper))
 
 	// initialize stores
 	app.MountKVStores(keys)

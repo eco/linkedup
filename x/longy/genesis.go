@@ -52,9 +52,10 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, state GenesisState) {
 	// set the attendees
 	for _, a := range state.Attendees {
 		attendee := types.NewAttendeeFromGenesis(a)
-		k.SetAttendee(ctx, attendee)
 
 		account := accountKeeper.NewAccountWithAddress(ctx, attendee.GetAddress())
 		accountKeeper.SetAccount(ctx, account)
+		//attendee.Address = account.GetAddress()
+		k.SetAttendee(ctx, attendee)
 	}
 }
