@@ -43,7 +43,7 @@ func (msg MsgKey) Route() string {
 // Type is the message type
 //nolint:gocritic
 func (msg MsgKey) Type() string {
-	return "rekey"
+	return "key"
 }
 
 // ValidateBasic peforms sanity checks on the message

@@ -45,7 +45,6 @@ func (a AppModuleBasic) ValidateGenesis(data json.RawMessage) error {
 
 // RegisterRESTRoutes registers our module rest endpoints
 func (a AppModuleBasic) RegisterRESTRoutes(context.CLIContext, *mux.Router) {
-
 }
 
 // GetTxCmd returns any tx commands from this module to the parent command in the cli
@@ -96,7 +95,7 @@ func (am AppModule) QuerierRoute() string {
 // NewQuerierHandler returns the handler for the querier
 //nolint:gocritic
 func (am AppModule) NewQuerierHandler() sdk.Querier {
-	return nil
+	return NewQuerier(am.keeper)
 }
 
 // BeginBlock runs at the beginning of each block

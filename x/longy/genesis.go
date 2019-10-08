@@ -9,19 +9,19 @@ import (
 
 // GenesisState is the genesis struct for the longy module
 type GenesisState struct {
-	Service   GenesisService   `json:"service"`
-	Attendees GenesisAttendees `json:"attendees"`
+	KeyService GenesisKeyService `json:"key_service"`
+	Attendees  GenesisAttendees  `json:"attendees"`
 }
 
 // DefaultGenesisState returns the default genesis struct for the longy module
 func DefaultGenesisState() GenesisState {
-	return GenesisState{Service: GenesisService{}, Attendees: GenesisAttendees{}}
+	return GenesisState{KeyService: GenesisKeyService{}, Attendees: GenesisAttendees{}}
 }
 
 // ValidateGenesis validates that the passed genesis state is valid
 func ValidateGenesis(data GenesisState) error {
-	if data.Service.Address.Empty() {
-		return types.ErrGenesisServiceAddressEmpty("Re-Key Service address must be set")
+	if data.KeyService.Address.Empty() {
+		return types.ErrGenesisKeyServiceAddressEmpty("Re-Key Service address must be set")
 	}
 
 	if data.Attendees == nil {
@@ -41,11 +41,15 @@ func ValidateGenesis(data GenesisState) error {
 // InitGenesis will run module initialization using the genesis state
 //nolint:gocritic
 func InitGenesis(ctx sdk.Context, k keeper.Keeper, state GenesisState) {
-	// set the master public key
-	k.SetMasterPublicKey(ctx, state.Service.Address)
-
 	// create and set of all the attendees and cosmos accounts
 	accountKeeper := k.AccountKeeper()
+
+	// set the master account
+	masterAccount := accountKeeper.NewAccountWithAddress(ctx, state.KeyService.Address)
+	masterAccount.SetPubKey(state.KeyService.PubKey) //nolint
+	accountKeeper.SetAccount(ctx, masterAccount)
+
+	// set the attendees
 	for _, a := range state.Attendees {
 		attendee := types.NewAttendeeFromGenesis(a)
 		k.SetAttendee(ctx, attendee)

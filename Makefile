@@ -4,7 +4,7 @@ TEST_PATHS=./...
 
 .PHONY: all test init lint test-unit
 
-install: lyd lycli
+install: lyd lycli ks
 
 test: lint test-unit
 
@@ -19,9 +19,12 @@ test-unit:
 init:
 	$(MAKE) -C scripts
 lyd:
-	go install ./cmd/lyd
+	go build -o ./bin/lyd ./cmd/lyd
 
 lycli:
-	go install ./cmd/lycli
+	go build -o ./bin/lycli ./cmd/lycli
+
+ks:
+	go build -o ./bin/ks ./cmd/ks
 
 all: install init
