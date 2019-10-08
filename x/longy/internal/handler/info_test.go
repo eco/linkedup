@@ -113,7 +113,7 @@ var _ = Describe("Info Handler Tests", func() {
 					keeper.SetScan(ctx, &scan)
 				})
 
-				It("should succeed when participants are both regular attendees", func() {
+				PIt("should succeed when participants are both regular attendees", func() {
 					msg := types.NewMsgInfo(sender, receiver, data)
 					result := handler(ctx, msg)
 					Expect(result.Code).To(Equal(sdk.CodeOK))
@@ -135,7 +135,7 @@ var _ = Describe("Info Handler Tests", func() {
 					Expect(p.Rep).To(Equal(receiverRep)) //shouldn't change
 				})
 
-				It("should succeed when one participant is a sponsor attendee", func() {
+				PIt("should succeed when one participant is a sponsor attendee", func() {
 					utils.AddAttendeeToKeeper(ctx, &keeper, qr2, true)
 
 					msg := types.NewMsgInfo(sender, receiver, data)

@@ -9,9 +9,12 @@ import (
 )
 
 const (
+	//QueryAttendees  is the key for attendee gets
 	QueryAttendees = "attendees"
-	QueryScans     = "scans"
-	AddressKey     = "address"
+	//QueryScans is the key for scan gets
+	QueryScans = "scans"
+	//AddressKey is the key for attendee gets by address
+	AddressKey = "address"
 )
 
 // NewQuerier is the module level router for state queries
@@ -39,6 +42,7 @@ func NewQuerier(keeper Keeper) sdk.Querier {
 	}
 }
 
+//nolint:gocritic,unparam
 func queryAttendees(ctx sdk.Context, path []string, req abci.RequestQuery, keeper Keeper) (res []byte, err sdk.Error) {
 
 	attendee, ok := keeper.GetAttendeeWithID(ctx, path[0])
@@ -55,7 +59,9 @@ func queryAttendees(ctx sdk.Context, path []string, req abci.RequestQuery, keepe
 	return res, nil
 }
 
-func queryAttendeesByAddr(ctx sdk.Context, path []string, req abci.RequestQuery, keeper Keeper) (res []byte, err sdk.Error) {
+//nolint:gocritic,unparam
+func queryAttendeesByAddr(ctx sdk.Context, path []string, req abci.RequestQuery,
+	keeper Keeper) (res []byte, err sdk.Error) {
 	addr, e := sdk.AccAddressFromBech32(path[0])
 	if e != nil {
 		return nil, sdk.ErrInvalidAddress(fmt.Sprintf("cannot turn param into cosmos address : %s", path[0]))
@@ -75,6 +81,7 @@ func queryAttendeesByAddr(ctx sdk.Context, path []string, req abci.RequestQuery,
 	return
 }
 
+//nolint:gocritic,unparam
 func queryScans(ctx sdk.Context, path []string, req abci.RequestQuery, keeper Keeper) (res []byte, err sdk.Error) {
 	scan, err := keeper.GetScanByID(ctx, []byte(path[0]))
 	if err != nil {
