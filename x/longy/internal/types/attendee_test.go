@@ -1,19 +1,36 @@
-package types
+package types_test
 
 import (
-	"github.com/stretchr/testify/require"
-	"testing"
+	"github.com/eco/longy/x/longy/internal/types"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
-func TestAttendeeSerialization(t *testing.T) {
-	a := NewAttendee("1")
+var _ = Describe("Attendee Tests", func() {
 
-	bz, err := ModuleCdc.MarshalBinaryLengthPrefixed(a)
-	require.NoError(t, err)
+	BeforeEach(func() {
+	})
 
-	var recovered Attendee
-	err = ModuleCdc.UnmarshalBinaryLengthPrefixed(bz, &recovered)
-	require.NoError(t, err)
+	It("should fail if the adding id is nil or empty", func() {
+		attendee := types.NewAttendee("asdf")
+		added := attendee.AddScanID(nil)
+		Expect(added).To(BeFalse())
+	})
 
-	require.Equal(t, a, recovered)
-}
+	It("should succeed if the id is not in the array", func() {
+		b := []byte{1, 2, 3}
+		attendee := types.NewAttendee("asdf")
+		added := attendee.AddScanID(b)
+		Expect(added).To(BeTrue())
+	})
+
+	It("should fail when id already in scan ids", func() {
+		b := []byte{1, 2, 3}
+		attendee := types.NewAttendee("asdf")
+		added := attendee.AddScanID(b)
+		Expect(added).To(BeTrue())
+
+		added = attendee.AddScanID(b)
+		Expect(added).To(BeFalse())
+	})
+})

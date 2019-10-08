@@ -8,7 +8,7 @@ import (
 )
 
 // HandleMsgQrScan processes MsgScanQr message
-//nolint: unparam, gocritic
+//nolint:gocritic
 func HandleMsgQrScan(ctx sdk.Context, k keeper.Keeper, msg types.MsgScanQr) sdk.Result {
 	//get the address for the scanned qr code
 	attendee, ok := k.GetAttendeeWithID(ctx, msg.ScannedQR)
@@ -16,7 +16,7 @@ func HandleMsgQrScan(ctx sdk.Context, k keeper.Keeper, msg types.MsgScanQr) sdk.
 		return types.ErrAttendeeNotFound("cannot find the attendee").Result()
 	}
 	//get the id for the scan event
-	id, err := types.GenID(msg.Sender, attendee.Address)
+	id, err := types.GenScanID(msg.Sender, attendee.Address)
 	if err != nil {
 		return err.Result()
 	}
@@ -24,25 +24,63 @@ func HandleMsgQrScan(ctx sdk.Context, k keeper.Keeper, msg types.MsgScanQr) sdk.
 	//get the scan event
 	scan, err := k.GetScanByID(ctx, id)
 	if err != nil { //if new scan, create it
-		scan, err = types.NewScan(msg.Sender, attendee.Address)
+		scan, err = handleNewScan(ctx, k, msg, attendee)
 		if err != nil {
 			return err.Result()
 		}
-	} else { //scan already existed
-		//since S2 is always the person who's badge was scanned, then both players have scanned
-		//if the sender is that person. We can mark off this scan as complete
-		if scan.S2.Equals(msg.Sender) && !scan.Complete {
-			scan.Complete = true
-			err = k.AwardScanPoints(ctx, scan)
-			if err != nil {
-				return err.Result()
-			}
-		} else { //the original scanner must have rescanned the same badge
-			return types.ErrScanQRAlreadyOccurred("the scan already exists").Result()
+	}
+
+	err = handleShareInfo(ctx, k, scan, msg.Sender, attendee, msg.Data)
+	if err != nil {
+		return err.Result()
+	}
+
+	return sdk.Result{}
+}
+
+//nolint:gocritic
+func handleShareInfo(ctx sdk.Context, k keeper.Keeper, scan types.Scan, sender sdk.AccAddress,
+	attendee types.Attendee, data []byte) sdk.Error {
+	//add share ids, skips if the ids are already added
+	err := k.AddSharedID(ctx, sender, attendee.Address, scan.ID)
+	if err != nil {
+		return err
+	}
+
+	//check who is in what position
+	var oldData *[]byte
+	if scan.S1.Equals(sender) {
+		oldData = &scan.D1
+	} else {
+		oldData = &scan.D2
+	}
+
+	if len(*oldData) == 0 && len(data) > 0 {
+		err := k.AwardShareInfoPoints(ctx, sender, attendee.Address)
+		if err != nil {
+			return err
 		}
+
+		//set new data into scan and save scan
+		*oldData = data
+		k.SetScan(ctx, &scan)
+	}
+	return nil
+}
+
+//nolint:gocritic
+func handleNewScan(ctx sdk.Context, k keeper.Keeper, msg types.MsgScanQr,
+	attendee types.Attendee) (scan types.Scan, err sdk.Error) {
+	scan, err = types.NewScan(msg.Sender, attendee.Address, nil, nil) //dont pass data here
+
+	if err != nil {
+		return
+	}
+	err = k.AwardScanPoints(ctx, scan)
+	if err != nil {
+		return
 	}
 
 	k.SetScan(ctx, &scan)
-
-	return sdk.Result{}
+	return
 }

@@ -16,7 +16,7 @@ var _ = Describe("Scan Keeper Tests", func() {
 		s1 := util.IDToAddress("1234")
 		s2 := util.IDToAddress("asdf")
 		var err sdk.Error
-		scan, err = types.NewScan(s1, s2)
+		scan, err = types.NewScan(s1, s2, nil, nil)
 		Expect(err).To(BeNil())
 	})
 

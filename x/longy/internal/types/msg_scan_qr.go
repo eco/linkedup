@@ -10,16 +10,17 @@ import (
 type MsgScanQr struct {
 	Sender    sdk.AccAddress `json:"sender"`    //Standard for all messages
 	ScannedQR string         `json:"scannedQR"` //the string representation of the other attendee's QR badge
+	Data      []byte         `json:"data"`      //the encrypted data to store
 	//// some interaction to prevent social media posts
 	//ScanCode  string         `json:"scanCode"`  //the scan code from the QR account, used to validate
-
 }
 
 // NewMsgQrScan is the constructor function for MsgScanQr
-func NewMsgQrScan(sender sdk.AccAddress, qrCode string) MsgScanQr {
+func NewMsgQrScan(sender sdk.AccAddress, qrCode string, data []byte) MsgScanQr {
 	return MsgScanQr{
 		Sender:    sender,
 		ScannedQR: qrCode,
+		Data:      data,
 	}
 }
 
@@ -38,6 +39,8 @@ func (msg MsgScanQr) ValidateBasic() sdk.Error {
 	if !ValidQrCode(msg.ScannedQR) {
 		return ErrQRCodeInvalid("message QR code is invalid, should be a string of a positive integer")
 	}
+
+	//data can me empty
 	return nil
 }
 
