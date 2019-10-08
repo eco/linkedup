@@ -79,7 +79,7 @@ func NewAppModule(keeper Keeper) module.AppModule {
 // Route returns the route key for the the appropriate messages
 //nolint:gocritic
 func (am AppModule) Route() string {
-	return RouterKey
+	return ModuleName
 }
 
 // NewHandler return's the module's handler
@@ -91,7 +91,7 @@ func (am AppModule) NewHandler() sdk.Handler {
 // QuerierRoute returns the key for the router
 //nolint:gocritic
 func (am AppModule) QuerierRoute() string {
-	return RouterKey
+	return ModuleName
 }
 
 // NewQuerierHandler returns the handler for the querier
