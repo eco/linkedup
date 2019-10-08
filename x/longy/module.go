@@ -6,6 +6,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
+	"github.com/eco/longy/x/longy/client/rest"
 	"github.com/gorilla/mux"
 	"github.com/spf13/cobra"
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -44,7 +45,8 @@ func (a AppModuleBasic) ValidateGenesis(data json.RawMessage) error {
 }
 
 // RegisterRESTRoutes registers our module rest endpoints
-func (a AppModuleBasic) RegisterRESTRoutes(context.CLIContext, *mux.Router) {
+func (a AppModuleBasic) RegisterRESTRoutes(ctx context.CLIContext, rtr *mux.Router) {
+	rest.RegisterRoutes(ctx, rtr, StoreKey)
 }
 
 // GetTxCmd returns any tx commands from this module to the parent command in the cli
