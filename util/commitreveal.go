@@ -17,11 +17,9 @@ func NewCommitment(secret []byte) Commitment {
 }
 
 // CreateCommitment will return a newly generated secret with it's corresponding Commitment
-func CreateCommitment() (secret []byte, commitment Commitment) {
-	rand := uuid.New()
-
-	secret = rand[:]
-	commitment = NewCommitment(secret)
+func CreateCommitment() (secret string, commitment Commitment) {
+	secret = uuid.New().String()
+	commitment = NewCommitment([]byte(secret))
 
 	return secret, commitment
 }
@@ -47,8 +45,12 @@ func (c Commitment) Len() int {
 }
 
 // VerifyReveal will verify the Commitmentment against `reveal`
-func (c Commitment) VerifyReveal(secret []byte) bool {
-	expected := NewCommitment(secret)
+func (c Commitment) VerifyReveal(secret string) bool {
+	return c.VerifyRevealBytes([]byte(secret))
+}
 
+// VerifyRevealBytes will verifty against `reveal`
+func (c Commitment) VerifyRevealBytes(secret []byte) bool {
+	expected := NewCommitment(secret)
 	return c.Equals(expected)
 }
