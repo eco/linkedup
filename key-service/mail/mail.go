@@ -3,6 +3,7 @@ package mail
 import (
 	"crypto/tls"
 	"fmt"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	gomail "github.com/go-mail/mail"
 	"github.com/sirupsen/logrus"
@@ -38,7 +39,7 @@ func NewClient(host string, port int, username string, pwd string) (Client, erro
 // SendRedirectEmail will construct and send the email containing the redirect
 // uri with the given secret
 func (c Client) SendRedirectEmail(dest string, attendeeAddr sdk.AccAddress, secret string) error {
-	redirectURI := fmt.Sprintf("http://longygame.com/claim?attendee=%s&secret=%s", attendeeAddr, secret)
+	redirectURI := fmt.Sprintf("http://localhost:5000/claim?attendee=%s&secret=%s", attendeeAddr, secret)
 
 	// construct message
 	m := gomail.NewMessage()
