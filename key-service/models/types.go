@@ -1,8 +1,13 @@
 package models
 
-// StoredKey represents a record associating some key data with an email
-// address in the application database.
-type storedKey struct {
-	Email   string
-	KeyData []byte
+// StoredKey represents a record associating some attendee information
+type storedInfo struct {
+	ID   int
+	Data []byte
+}
+
+// StoredAuth represents a record associating an auth token
+type storedAuth struct {
+	ID        int
+	AuthToken string
 }
