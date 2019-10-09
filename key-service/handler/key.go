@@ -92,7 +92,7 @@ func key(eb *eventbrite.Session,
 		bz, err := json.Marshal(info)
 		if err != nil {
 			log.WithError(err).WithField("data", info).
-				Error("marshalling attendee info")
+				Error("marshaling attendee info")
 			// this is a server side error that should be covered. 500
 			http.Error(w, "key storage service down", http.StatusInternalServerError)
 			return
@@ -193,6 +193,6 @@ func keyGetter(db *models.DatabaseContext) http.HandlerFunc {
 		} else {
 			w.WriteHeader(http.StatusOK)
 		}
-		w.Write(bz)
+		_, _ = w.Write(bz)
 	}
 }

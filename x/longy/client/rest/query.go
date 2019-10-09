@@ -12,10 +12,11 @@ import (
 	"github.com/gorilla/mux"
 )
 
+//nolint:gocritic
 func scanGetHandler(cliCtx context.CLIContext, storeName string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		paramType := vars[ScanIdKey]
+		paramType := vars[ScanIDKey]
 
 		res, _, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/%s/%s",
 			storeName, keeper.QueryScans, paramType), nil)
@@ -28,10 +29,11 @@ func scanGetHandler(cliCtx context.CLIContext, storeName string) http.HandlerFun
 	}
 }
 
+//nolint:gocritic
 func attendeeAddressHandler(cliCtx context.CLIContext, storeName string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		paramType := vars[AddressIdKey]
+		paramType := vars[AddressIDKey]
 
 		res, _, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/%s/%s/%s",
 			storeName, keeper.QueryAttendees, keeper.AddressKey, paramType), nil)
@@ -44,10 +46,11 @@ func attendeeAddressHandler(cliCtx context.CLIContext, storeName string) http.Ha
 	}
 }
 
+//nolint:gocritic
 func attendeeHandler(cliCtx context.CLIContext, storeName string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		paramType := vars[AttendeeIdKey]
+		paramType := vars[AttendeeIDKey]
 
 		res, _, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/%s/%s",
 			storeName, keeper.QueryAttendees, paramType), nil)
