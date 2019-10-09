@@ -51,6 +51,7 @@ type AttendeeProfile struct {
 
 // AttendeeProfile retrieves the email associated with the eventbrite account for `id`
 func (s Session) AttendeeProfile(id string) (*AttendeeProfile, error) {
+	/** Construct the appropriate url **/
 	host := "https://www.eventbriteapi.com"
 	path := fmt.Sprintf("/v3/events/%d/attendees/%s/", s.eventID, id)
 	auth := fmt.Sprintf("Bearer %s", s.authToken)
@@ -61,7 +62,7 @@ func (s Session) AttendeeProfile(id string) (*AttendeeProfile, error) {
 		return nil, ErrInternal
 	}
 
-	// create the http request
+	/** Create the request to issue **/
 	req := &http.Request{
 		URL:    url,
 		Method: "GET",
@@ -69,17 +70,20 @@ func (s Session) AttendeeProfile(id string) (*AttendeeProfile, error) {
 			"Authorization": {auth},
 		},
 	}
-
 	resp, err := s.netClient.Do(req)
 	if err != nil {
-		log.WithError(err).Warn("eventbrite api request delivery")
+		log.WithError(err).Error("eventbrite api request delivery")
 		return nil, ErrInternal
 	}
-	defer resp.Body.Close() //nolint
+	defer resp.Body.Close()
+
+	/** Read the EventBrite response **/
 	if resp.StatusCode == http.StatusNotFound {
 		return nil, nil
 	} else if resp.StatusCode != http.StatusOK {
-		log.Warnf("bad eventbrite api response, code=%d, attendee_id=%s", resp.StatusCode, id)
+		log.WithField("status_code", resp.StatusCode).WithField("attendee_id", id).
+			Error("bad eventbrite api response")
+
 		return nil, ErrInternal
 	}
 
@@ -87,6 +91,7 @@ func (s Session) AttendeeProfile(id string) (*AttendeeProfile, error) {
 }
 
 func getProfileFromBody(body io.Reader) (*AttendeeProfile, error) {
+	/** Parse the raw request **/
 	var jsonResp map[string]json.RawMessage
 	d := json.NewDecoder(body)
 	if err := d.Decode(&jsonResp); err != nil {
@@ -94,6 +99,7 @@ func getProfileFromBody(body io.Reader) (*AttendeeProfile, error) {
 		return nil, ErrInternal
 	}
 
+	/** Extract specifically the profile key of the response **/
 	var jsonProfile map[string]json.RawMessage
 	profileData, ok := jsonResp["profile"]
 	if !ok {
@@ -104,6 +110,7 @@ func getProfileFromBody(body io.Reader) (*AttendeeProfile, error) {
 		return nil, ErrInternal
 	}
 
+	/** Decode the struct into the fields we want **/
 	var profile AttendeeProfile
 	err := json.Unmarshal(profileData, &profile)
 	if err != nil {
