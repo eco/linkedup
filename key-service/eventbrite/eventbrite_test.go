@@ -6,17 +6,27 @@ import (
 	"testing"
 )
 
-func TestEmailRetrievalFromBody(t *testing.T) {
+func TestProfileRetrievalFromBody(t *testing.T) {
 	body := `{
 	"foo": "bar",
 	"profile": {
 		"fooMore": "barMore",
-		"email": "kobe@lakers.com"
+		"fields": "we dont care about",
+
+		"email": "kobe@lakers.com",
+		"first_name": "kobe",
+		"last_name": "bryant"
 		}
 	}`
 	reader := strings.NewReader(body)
 
-	email, err := getEmailFromBody(reader)
+	profile, err := getProfileFromBody(reader)
+	expectedProfile := &AttendeeProfile{
+		FirstName: "kobe",
+		LastName:  "bryant",
+		Email:     "kobe@lakers.com",
+	}
+
 	require.NoError(t, err)
-	require.Equal(t, email, "kobe@lakers.com")
+	require.Equal(t, expectedProfile, profile)
 }

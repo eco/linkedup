@@ -36,7 +36,10 @@ func key(eb *eventbrite.Session,
 		/** Read the request body **/
 		type reqBody struct {
 			AttendeeID string `json:"attendee_id"`
-			PrivateKey string `json:"private_key"` // hex-encoded private key
+
+			// private key information
+			PrivateKey string `json:"private_key"`
+			RsaKey     string `json:"rsa_key"`
 		}
 		var body reqBody
 		jsonDecoder := json.NewDecoder(r.Body)
@@ -56,18 +59,18 @@ func key(eb *eventbrite.Session,
 		}
 		attendeeAddress := util.IDToAddress(body.AttendeeID)
 
-		/** Get the Attendee's email **/
-		email, err := eb.EmailFromAttendeeID(body.AttendeeID)
+		/** Get the Attendee's profileemail **/
+		profile, err := eb.AttendeeProfile(body.AttendeeID)
 		if err != nil {
-			http.Error(w, "internal error. try again", http.StatusInternalServerError)
+			http.Error(w, "key-service down", http.StatusInternalServerError)
 			return
-		} else if len(email) == 0 {
+		} else if profile == nil {
 			http.Error(w, "attendee id not present in the event", http.StatusNotFound)
 			return
 		}
 
 		/** Store the private key **/
-		ok := db.StoreKey(email, body.PrivateKey)
+		ok := db.StoreKey(profile.Email, body.PrivateKey)
 		if !ok {
 			http.Error(w, "key storage service down", http.StatusServiceUnavailable)
 		}
@@ -85,7 +88,7 @@ func key(eb *eventbrite.Session,
 		}
 
 		/** Send the redirect **/
-		err = mc.SendRedirectEmail(email, attendeeAddress, secret)
+		err = mc.SendRedirectEmail(profile, attendeeAddress, secret)
 		if err != nil {
 			http.Error(w, "email error. try again", http.StatusInternalServerError)
 		}

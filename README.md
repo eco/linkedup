@@ -55,7 +55,7 @@ Flags:
       --smtp-password string       password of the email account (default "2019longygame")
       --smtp-server string         host:port of the smtp server (default "smtp.gmail.com:587")
       --smtp-username string       username of the email account (default "testecolongy@gmail.com")
-      ```
+```
 
 The configruation can also be set through environment variables. the `-` characters replaced by `_` and all uppercase.  
    i.e `STMP_SERVER` or `EVENTBRITE_AUTH`
@@ -71,6 +71,7 @@ The configruation can also be set through environment variables. the `-` charact
   {
     "attendee_id": "<id>",
     "private_key": "hex-encoded private key"
+    "rsa_key": "string representation of the rsa key"
   }
   ```  
   Status 200: Key transaction was successfully submitted and the email containing the redirect uri was sent
