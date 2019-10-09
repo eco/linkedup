@@ -23,11 +23,14 @@ fi
 ../bin/lyd add-genesis-account $(../bin/lycli keys show alice -a) 1000longy,100000000stake
 ../bin/lyd add-genesis-account $(../bin/lycli keys show bob -a) 1000longy,100000000stake
 
+# Set the default master key
+../bin/lyd set-genesis-service
+
 # Generate the genesis attendees from the eventbrite api
 ../bin/lyd add-genesis-attendees
 
-# Set the default master key
-../bin/lyd set-genesis-service
+# Generate the genesis prizes from the event
+../bin/lyd add-genesis-prizes
 
 # Configure your CLI to eliminate need for chain-id flag
 ../bin/lycli config chain-id longychain

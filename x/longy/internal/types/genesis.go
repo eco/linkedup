@@ -27,3 +27,14 @@ type GenesisKeyService struct {
 	Address       sdk.AccAddress `json:"address"`
 	crypto.PubKey `json:"pubkey"`
 }
+
+//GenesisPrize is the genesis type for the prizes
+type GenesisPrize struct {
+	Tier        int    `json:"tier"`
+	ScansNeeded int    `json:"scansNeeded"`
+	PrizeText   string `json:"prizeText"`
+	Quantity    int    `json:"quantity"`
+}
+
+// GenesisPrizes is the full array of prizes for the event
+type GenesisPrizes []GenesisPrize

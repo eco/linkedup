@@ -9,8 +9,9 @@ import (
 
 // GenesisState is the genesis struct for the longy module
 type GenesisState struct {
-	KeyService GenesisKeyService `json:"key_service"`
-	Attendees  GenesisAttendees  `json:"attendees"`
+	KeyService    GenesisKeyService `json:"key_service"`
+	Attendees     GenesisAttendees  `json:"attendees"`
+	GenesisPrizes GenesisPrizes     `json:"prizes"`
 }
 
 // DefaultGenesisState returns the default genesis struct for the longy module
@@ -19,6 +20,7 @@ func DefaultGenesisState() GenesisState {
 }
 
 // ValidateGenesis validates that the passed genesis state is valid
+//nolint:gocritic
 func ValidateGenesis(data GenesisState) error {
 	if data.KeyService.Address.Empty() {
 		return types.ErrGenesisKeyServiceAddressEmpty("Re-Key Service address must be set")

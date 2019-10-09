@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	app "github.com/eco/longy"
-	"github.com/eco/longy/x/longy/client"
+	"github.com/eco/longy/x/longy/client/cli/genesis"
 	"io"
 
 	"github.com/cosmos/cosmos-sdk/server"
@@ -52,8 +52,11 @@ func main() {
 		// AddGenesisAccountCmd allows users to add accounts to the genesis file
 		genaccscli.AddGenesisAccountCmd(ctx, cdc, app.DefaultNodeHome, app.DefaultCLIHome),
 		// AddAttendeesCmd allows users to add the list of attendees to the chain by their eventbrite id
-		client.AddGenesisAttendeesCmd(ctx, cdc),
-		client.AddSetGenesisServiceCmd(ctx, cdc),
+		genesis.AddGenesisAttendeesCmd(ctx, cdc),
+		// AddGenesisPrizesCmd allows users to add the list of prizes and their quantity for the event
+		genesis.AddGenesisPrizesCmd(ctx, cdc),
+
+		genesis.AddSetGenesisServiceCmd(ctx, cdc),
 	)
 
 	server.AddCommands(ctx, cdc, rootCmd, newApp, exportAppStateAndTMValidators)
