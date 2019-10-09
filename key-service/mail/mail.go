@@ -1,8 +1,12 @@
 package mail
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	eb "github.com/eco/longy/key-service/eventbrite"
 	"github.com/sirupsen/logrus"
 
 	"github.com/aws/aws-sdk-go/aws/client"
@@ -17,8 +21,8 @@ var (
 
 // Client used to send emails
 type Client interface {
-	SendOnboardingEmail(string, sdk.AccAddress, string) error
-	SendRecoveryEmail(string, sdk.AccAddress, string) error
+	SendOnboardingEmail(*eb.AttendeeProfile, sdk.AccAddress, string) error
+	SendRecoveryEmail(*eb.AttendeeProfile, sdk.AccAddress, string) error
 }
 
 type sesClient struct {
@@ -47,17 +51,25 @@ func NewClient(cfg client.ConfigProvider) (client Client, err error) {
 
 // SendOnboardingEmail will construct and send the email containing the initial
 // onboarding message and URL with the given secret
-func (c sesClient) SendOnboardingEmail(dest string, attendeeAddr sdk.AccAddress, secret string) error {
-	redirectURI := makeRedirectURI(attendeeAddr, secret)
+func (c sesClient) SendOnboardingEmail(profile *eb.AttendeeProfile, attendeeAddr sdk.AccAddress, secret string) error {
+	redirectURI, err := makeRedirectURI(profile, attendeeAddr, secret)
 
-	log.Tracef("sending onboarding email to: %s", dest)
+	if err != nil {
+		log.Errorf(
+			"unable to generate email URI: %s",
+			err.Error(),
+		)
+		return err
+	}
 
-	err := c.sendEmailWithURL(dest, redirectURI, "linkedup-onboarding")
+	log.Tracef("sending onboarding email to: %s", profile.Email)
+
+	err = c.sendEmailWithURL(profile.Email, redirectURI, "linkedup-onboarding")
 
 	if err != nil {
 		log.Errorf(
 			"unable to send onboarding email to %s: %s",
-			dest,
+			profile.Email,
 			err.Error(),
 		)
 	}
@@ -67,22 +79,22 @@ func (c sesClient) SendOnboardingEmail(dest string, attendeeAddr sdk.AccAddress,
 
 // SendRecoveryEmail will construct and send the email containing the account
 // recovery message and URL with the given secret
-func (c sesClient) SendRecoveryEmail(dest string, attendeeAddr sdk.AccAddress, secret string) error {
-	redirectURI := makeRedirectURI(attendeeAddr, secret)
+func (c sesClient) SendRecoveryEmail(profile *eb.AttendeeProfile, attendeeAddr sdk.AccAddress, secret string) error {
+	redirectURI := makeRedirectURI(profile, attendeeAddr, secret)
 
-	log.Tracef("sending recovery email to: %s", dest)
+	log.Tracef("sending recovery email to: %s", profile.Email)
 
-	err := c.sendEmailWithURL(dest, redirectURI, "linkedup-rekey")
+	err := c.sendEmailWithURL(profile.Email, redirectURI, "linkedup-rekey")
 
 	if err != nil {
 		log.Errorf(
 			"unable to send recovery email to %s: %s",
-			dest,
+			profile.Email,
 			err.Error(),
 		)
 	}
 
-	return err
+	return nil
 }
 
 func (c sesClient) sendEmailWithURL(dest string, url string, template string) (err error) {
@@ -99,24 +111,40 @@ func (c sesClient) sendEmailWithURL(dest string, url string, template string) (e
 	return
 }
 
-func (c mockClient) SendOnboardingEmail(dest string, attendeeAddr sdk.AccAddress, secret string) error {
-	redirectURI := makeRedirectURI(attendeeAddr, secret)
+func (c mockClient) SendOnboardingEmail(profile *eb.AttendeeProfile, attendeeAddr sdk.AccAddress, secret string) error {
+	redirectURI, err := makeRedirectURI(profile, attendeeAddr, secret)
+
+	if err != nil {
+		return err
+	}
 
 	log.Warnf("mock onboarding email with url: %s", redirectURI)
 	return nil
 }
 
-func (c mockClient) SendRecoveryEmail(dest string, attendeeAddr sdk.AccAddress, secret string) error {
-	redirectURI := makeRedirectURI(attendeeAddr, secret)
+func (c mockClient) SendRecoveryEmail(profile *eb.AttendeeProfile, attendeeAddr sdk.AccAddress, secret string) error {
+	redirectURI, err := makeRedirectURI(profile, attendeeAddr, secret)
+
+	if err != nil {
+		return err
+	}
 
 	log.Warnf("mock recovery email with url: %s", redirectURI)
 	return nil
 }
 
-func makeRedirectURI(attendeeAddr sdk.AccAddress, secret string) string {
+func makeRedirectURI(profile *eb.AttendeeProfile, attendeeAddr sdk.AccAddress, secret string) (string, error) {
+	jsonProfileData, err := json.Marshal(profile)
+	if err != nil {
+		log.WithError(err).Error("attendee profile serialization")
+		return "", err
+	}
+	encodedProfileData := base64.StdEncoding.EncodeToString(jsonProfileData)
+
 	return fmt.Sprintf(
-		"https://linkedup.sfblockchainweek.io/claim?attendee=%s&secret=%s",
+		"http://localhost:5000/claim?attendee=%s&profile=%s&secret=%s",
 		attendeeAddr,
+		encodedProfileData,
 		secret,
-	)
+	), nil
 }
