@@ -7,8 +7,11 @@ import (
 	"github.com/eco/longy/key-service/middleware"
 	"github.com/eco/longy/key-service/models"
 	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 	"net/http"
 )
+
+var log = logrus.WithField("module", "handler")
 
 // Router returns the root http Handler
 func Router(
@@ -20,6 +23,7 @@ func Router(
 	r := mux.NewRouter()
 	registerPing(r)
 	registerKey(r, eb, mk, db, mc)
+	registerIDToAddress(r)
 
 	return middleware.LogHTTP(r)
 }

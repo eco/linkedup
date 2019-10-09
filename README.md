@@ -62,23 +62,40 @@ The configruation can also be set through environment variables. the `-` charact
 
 
 1. `/ping [GET]` is a health check. Simply writes a Status 200 along with "pong" in the request body  
-2. `/key/<email> [GET]` will retrieve the hex-encoded private key associated with the badge id  
-  Status 200: The body will contain the hex-encoded private key
-  Status 404: The email was not found in the database  
+2. `/id/<id> [GET]` is a convenience endpoint to convert an badge id into a determinsistic cosmos address  
 3. `/key [POST]` is the entry point for keying an account.  
   Request Body:  
   ```
   {
     "attendee_id": "<id>",
-    "private_key": "hex-encoded private key"
-    "rsa_key": "string representation of the rsa key"
+    "cosmos_private_key": "hex-encoded private key"
+    "cosmos_rsa_key": "string representation of the rsa key"
   }
   ```  
-  Status 200: Key transaction was successfully submitted and the email containing the redirect uri was sent
-  Status 401: The attendee has already keyed their account
-  Status 403: The attendee id was not found in the eventbrite event
-  Status 500: Something internal went wrong. (Communicating with eventbrite, sending an email, the transaction failed to sent).  
+  Status 200: Key transaction was successfully submitted and the email containing the redirect uri was sent  
+  Status 400: Bad request body. Check the returned response  
+  Status 401: The attendee has already keyed their account  
+  Status 404: The attendee id was not found in the eventbrite event  
+  Status 503: Another external component outside of the key service went wrong. (i.e email / backend storage / etc)  
     - The logs will contain information about what went wrong
+  Status 500: Something internal went wrong. (i.e marshalling data)  
+    - The logs will contain information about what went wrong
+
+4. `/recover [POST]` will start the process of recovering an account  
+  Request Body:  
+  `badge id number`
+
+  Status 200: An email was sent with a redirect uri to hit the following endpoint below with the authentication token to retrieve attendee information.  
+  Status 400: Bad request body. Check the error response  
+  Status 404: The attendee for the corresponding id was not found in eventbrite  
+  Status 503: Another external component outside the service is down. Backend storage or email  
+    - Check the logs
+
+5. `/recover/<id>/<authtoken> [GET]` will retrieve complete attendee information that is stored  
+
+  Status 200: Check the response body for the result  
+  Status 404: No information found on this attendee  
+  Status 401: Incorrect authentication token OR there is not authentication token set for this attendee id. Must start from the `/recover` endpoint above  
 
 ## Running database tests
 The database tests depend on a local DynamoDB instance running on port 8000.
