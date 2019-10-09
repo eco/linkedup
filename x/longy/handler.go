@@ -15,23 +15,12 @@ func NewHandler(keeper Keeper) sdk.Handler {
 		switch msg := msg.(type) {
 		case types.MsgScanQr:
 			return handler.HandleMsgQrScan(ctx, keeper, msg)
-		case *types.MsgScanQr:
-			return handler.HandleMsgQrScan(ctx, keeper, *msg)
 		case types.MsgInfo:
 			return handler.HandleMsgInfo(ctx, keeper, msg)
-		case *types.MsgInfo:
-			return handler.HandleMsgInfo(ctx, keeper, *msg)
-
 		case types.MsgKey:
 			return handleMsgKey(ctx, keeper, msg)
-		case *types.MsgKey:
-			return handleMsgKey(ctx, keeper, *msg)
-
 		case types.MsgClaimKey:
 			return handleMsgClaimKey(ctx, keeper, msg)
-		case *types.MsgClaimKey:
-			return handleMsgClaimKey(ctx, keeper, *msg)
-
 		default:
 			errMsg := fmt.Sprintf("unrecognized %s msg type: %T", RouterKey, msg)
 			return sdk.ErrUnknownRequest(errMsg).Result()
