@@ -55,7 +55,7 @@ Flags:
       --smtp-password string       password of the email account (default "2019longygame")
       --smtp-server string         host:port of the smtp server (default "smtp.gmail.com:587")
       --smtp-username string       username of the email account (default "testecolongy@gmail.com")
-      ```
+```
 
 The configruation can also be set through environment variables. the `-` characters replaced by `_` and all uppercase.  
    i.e `STMP_SERVER` or `EVENTBRITE_AUTH`
