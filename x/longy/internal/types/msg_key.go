@@ -10,14 +10,14 @@ var _ sdk.Msg = MsgKey{}
 
 // MsgKey implements the `sdk.Msg` interface
 type MsgKey struct {
-	AttendeeAddress      sdk.AccAddress
-	NewAttendeePublicKey tmcrypto.PubKey
+	AttendeeAddress      sdk.AccAddress  `json:"attendeeAddress"`
+	NewAttendeePublicKey tmcrypto.PubKey `json:"newAttendeePublicKey"`
 
 	// expected signer of this message
-	MasterAddress sdk.AccAddress
+	MasterAddress sdk.AccAddress `json:"masterAddress"`
 
 	// Commitmentment that needs to be reclaimed
-	Commitment util.Commitment
+	Commitment util.Commitment `json:"commitment"`
 }
 
 // NewMsgKey is the creator for `RekeyMsg`

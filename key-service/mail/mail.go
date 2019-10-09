@@ -2,8 +2,12 @@ package mail
 
 import (
 	"crypto/tls"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	eb "github.com/eco/longy/key-service/eventbrite"
 	gomail "github.com/go-mail/mail"
 	"github.com/sirupsen/logrus"
 )
@@ -36,9 +40,40 @@ func NewClient(host string, port int, username string, pwd string) (Client, erro
 }
 
 // SendRedirectEmail will construct and send the email containing the redirect
-// uri with the given secret
-func (c Client) SendRedirectEmail(dest string, attendeeAddr sdk.AccAddress, secret string) error {
-	redirectURI := fmt.Sprintf("http://longygame.com/claim?attendee=%s&secret=%s", attendeeAddr, secret)
+// uri with the given secret and attendee profile
+func (c Client) SendRedirectEmail(profile *eb.AttendeeProfile, attendeeAddr sdk.AccAddress, secret string) error {
+	jsonProfileData, err := json.Marshal(profile)
+	if err != nil {
+		log.WithError(err).Error("attendee profile serialization")
+		return err
+	}
+	encodedProfileData := base64.StdEncoding.EncodeToString(jsonProfileData)
+
+	redirectURI := fmt.Sprintf("http://longygame.com/claim?attendee=%s&profile=%s&secret=%s",
+		attendeeAddr, encodedProfileData, secret)
+
+	// construct message
+	m := gomail.NewMessage()
+	m.SetHeader("From", "testecolongy@gmail.com")
+	m.SetHeader("To", profile.Email)
+	m.SetHeader("From", "alex@example.com")
+	m.SetHeader("Subject", "Onboard to the the longy game")
+	m.SetBody("text/html", fmt.Sprintf("<b>Hello!</b> enter the game -> %s", redirectURI))
+
+	if err := gomail.Send(c.sender, m); err != nil {
+		log.WithError(err).WithField("dest", profile.Email).
+			Error("failed email delivery")
+
+		return err
+	}
+
+	return nil
+}
+
+// SendRecoveryEmail will send an email with the `authToken` required to hit the /recover/{id}/{token} endpoint and retrieve
+// the keys that are stored in the backend
+func (c Client) SendRecoveryEmail(dest, authToken string, id int) error {
+	redirectURI := fmt.Sprintf("http://longygame.com/recover?id=%d&token=%s", id, authToken)
 
 	// construct message
 	m := gomail.NewMessage()
@@ -46,14 +81,15 @@ func (c Client) SendRedirectEmail(dest string, attendeeAddr sdk.AccAddress, secr
 	m.SetHeader("To", dest)
 	m.SetHeader("From", "alex@example.com")
 	m.SetHeader("Subject", "Onboard to the the longy game")
-	m.SetBody("text/html", fmt.Sprintf("<b>Hello!</b> enter the game -> %s", redirectURI))
+	m.SetBody("text/html", fmt.Sprintf("<b>Hello!</b> recover your account -> %s", redirectURI))
 
-	err := gomail.Send(c.sender, m)
-	if err != nil {
-		log.WithError(err).Warnf("failed email delivery. email: %s", dest)
+	if err := gomail.Send(c.sender, m); err != nil {
+		log.WithError(err).WithField("dest", dest).
+			Error("failed email delivery")
+
+		return err
 	}
-
-	return err
+	return nil
 }
 
 // Close will terminate the connnection with the smtp server
