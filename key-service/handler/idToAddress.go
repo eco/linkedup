@@ -18,6 +18,6 @@ func idToAddress() http.HandlerFunc {
 		addr := util.IDToAddress(id).String()
 
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(addr))
+		_, _ = w.Write([]byte(addr))
 	}
 }

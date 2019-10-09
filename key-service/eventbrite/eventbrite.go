@@ -75,7 +75,12 @@ func (s Session) AttendeeProfile(id int) (*AttendeeProfile, error) {
 		log.WithError(err).Error("eventbrite api request delivery")
 		return nil, ErrInternal
 	}
-	defer resp.Body.Close()
+	defer func() {
+		err := resp.Body.Close()
+		if err != nil {
+			_ = fmt.Errorf(err.Error())
+		}
+	}()
 
 	/** Read the EventBrite response **/
 	if resp.StatusCode == http.StatusNotFound {

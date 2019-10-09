@@ -122,9 +122,9 @@ var _ = Describe("Info Handler Tests", func() {
 					s2, ok := keeper.GetAttendee(ctx, receiver)
 					Expect(ok).To(BeTrue())
 					Expect(len(s2.ScanIDs)).To(Equal(recIdsLen + 1))
-					id, e := types.GenInfoID(sender, receiver)
+					id, e := types.GenScanID(sender, receiver)
 					Expect(e).To(BeNil())
-					Expect(Contains(s2.ScanIDs, string(id))).To(BeTrue())
+					Expect(Contains(s2.ScanIDs, types.Encode(id))).To(BeTrue())
 
 					s, ok := keeper.GetAttendee(ctx, sender)
 					Expect(ok).To(BeTrue())
@@ -146,9 +146,9 @@ var _ = Describe("Info Handler Tests", func() {
 					s2, ok := keeper.GetAttendee(ctx, receiver)
 					Expect(ok).To(BeTrue())
 					Expect(len(s2.ScanIDs)).To(Equal(recIdsLen + 1))
-					id, e := types.GenInfoID(sender, receiver)
+					id, e := types.GenScanID(sender, receiver)
 					Expect(e).To(BeNil())
-					Expect(Contains(s2.ScanIDs, string(id))).To(BeTrue())
+					Expect(Contains(s2.ScanIDs, types.Encode(id))).To(BeTrue())
 
 					s, ok := keeper.GetAttendee(ctx, sender)
 					Expect(ok).To(BeTrue())

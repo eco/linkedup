@@ -125,7 +125,7 @@ func inspectScan(s1 sdk.AccAddress, s2 sdk.AccAddress, dataShared bool) {
 	Expect(a.ScanIDs[0]).To(Equal(b.ScanIDs[0]))
 	id, err = types.GenScanID(a.Address, b.Address)
 	Expect(err).To(BeNil())
-	Expect(bytes.Compare(id, []byte(a.ScanIDs[0]))).To(Equal(0))
+	Expect(bytes.Compare(id, types.Decode(a.ScanIDs[0]))).To(Equal(0))
 }
 
 //nolint:unparam

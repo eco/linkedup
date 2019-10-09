@@ -70,8 +70,8 @@ func (c Client) SendRedirectEmail(profile *eb.AttendeeProfile, attendeeAddr sdk.
 	return nil
 }
 
-// SendRecoveryEmail will send an email with the `authToken` required to hit the /recover/{id}/{token} endpoint and retrieve
-// the keys that are stored in the backend
+// SendRecoveryEmail will send an email with the `authToken` required to hit the /recover/{id}/{token}
+// endpoint and retrieve the keys that are stored in the backend
 func (c Client) SendRecoveryEmail(dest, authToken string, id int) error {
 	redirectURI := fmt.Sprintf("http://longygame.com/recover?id=%d&token=%s", id, authToken)
 

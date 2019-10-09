@@ -45,6 +45,7 @@ func (a AppModuleBasic) ValidateGenesis(data json.RawMessage) error {
 }
 
 // RegisterRESTRoutes registers our module rest endpoints
+//nolint:gocritic
 func (a AppModuleBasic) RegisterRESTRoutes(ctx context.CLIContext, rtr *mux.Router) {
 	rest.RegisterRoutes(ctx, rtr, StoreKey)
 }
