@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	eb "github.com/eco/longy/key-service/eventbrite"
 	gomail "github.com/go-mail/mail"

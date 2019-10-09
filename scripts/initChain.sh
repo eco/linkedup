@@ -44,4 +44,4 @@ fi
 # validate genesis
 ../bin/lyd validate-genesis
 
-../bin/lyd start
+../bin/lyd start --rpc.laddr "tcp://0.0.0.0:26657"
