@@ -8,8 +8,8 @@ var _ sdk.Msg = MsgClaimKey{}
 
 // MsgClaimKey is used to claim a prior rekey message
 type MsgClaimKey struct {
-	AttendeeAddress sdk.AccAddress
-	Secret          string
+	AttendeeAddress sdk.AccAddress `json:"attendeeAddress"`
+	Secret          string         `json:"secret"`
 }
 
 // NewMsgClaimKey in the constructor for `MsgClaimKey`
