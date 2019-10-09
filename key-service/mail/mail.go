@@ -49,7 +49,7 @@ func (c Client) SendRedirectEmail(profile *eb.AttendeeProfile, attendeeAddr sdk.
 	}
 	encodedProfileData := base64.StdEncoding.EncodeToString(jsonProfileData)
 
-	redirectURI := fmt.Sprintf("http://longygame.com/claim?attendee=%s&profile=%s,secret=%s",
+	redirectURI := fmt.Sprintf("http://longygame.com/claim?attendee=%s&profile=%s&secret=%s",
 		attendeeAddr, encodedProfileData, secret)
 
 	// construct message
