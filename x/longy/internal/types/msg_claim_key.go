@@ -8,15 +8,17 @@ var _ sdk.Msg = MsgClaimKey{}
 
 // MsgClaimKey is used to claim a prior rekey message
 type MsgClaimKey struct {
-	AttendeeAddress sdk.AccAddress
-	Secret          string
+	AttendeeAddress sdk.AccAddress `json:"attendeeAddress"`
+	Secret          string         `json:"secret"`
+	RsaPublicKey    string         `json:"rsaPublicKey"`
 }
 
 // NewMsgClaimKey in the constructor for `MsgClaimKey`
-func NewMsgClaimKey(address sdk.AccAddress, secret string) MsgClaimKey {
+func NewMsgClaimKey(address sdk.AccAddress, secret string, rsaPublicKey string) MsgClaimKey {
 	return MsgClaimKey{
 		AttendeeAddress: address,
 		Secret:          secret,
+		RsaPublicKey:    rsaPublicKey,
 	}
 }
 
@@ -32,13 +34,16 @@ func (msg MsgClaimKey) Type() string {
 
 // ValidateBasic performs sanity checks on the message
 func (msg MsgClaimKey) ValidateBasic() sdk.Error {
-	if msg.AttendeeAddress.Empty() {
+	switch {
+	case msg.AttendeeAddress.Empty():
 		return sdk.ErrInvalidAddress("empty attendee address")
-	} else if len(msg.Secret) == 0 {
-		return sdk.ErrNoSignatures("missing secret")
+	case len(msg.Secret) == 0:
+		return ErrEmptySecret("secret cannot be empty")
+	case len(msg.RsaPublicKey) == 0:
+		return ErrEmptyRsaKey("rsa public key cannot be empty")
+	default:
+		return nil
 	}
-
-	return nil
 }
 
 // GetSignBytes returns the byte array that is signed over

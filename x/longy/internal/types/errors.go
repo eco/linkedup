@@ -79,6 +79,10 @@ const (
 	InfoAlreadyExists
 	//InvalidShareForScan is the code for when someone tries to share info when the corresponding scan is not complete
 	InvalidShareForScan
+	//EmptySecret is the code for when the secret on a claim key message is empty
+	EmptySecret
+	//EmptyRsaKey is the code for when the rsa public key on a claim key message is empty
+	EmptyRsaKey
 
 	// DefaultError is the code for when a random error occurs that we do not provide a unique code to
 	DefaultError
@@ -208,6 +212,16 @@ func ErrInfoAlreadyExists(format string, args ...interface{}) sdk.Error {
 //ErrInvalidShareForScan occurs when someone tries to share info when the corresponding scan is not complete
 func ErrInvalidShareForScan(format string, args ...interface{}) sdk.Error {
 	return sdk.NewError(LongyCodeSpace, InvalidShareForScan, format, args...)
+}
+
+//ErrEmptySecret occurs when the secret on a claim key message is empty
+func ErrEmptySecret(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, EmptySecret, format, args...)
+}
+
+//ErrEmptyRsaKey occurs when the rsa public key on a claim key message is empty
+func ErrEmptyRsaKey(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, EmptyRsaKey, format, args...)
 }
 
 //ErrDefault occurs when a random error occurs that we do not provide a unique code to

@@ -92,6 +92,9 @@ func handleMsgClaimKey(ctx sdk.Context, k Keeper, msg types.MsgClaimKey) sdk.Res
 	// award rep for the onboarding flow
 	attendee.AddRep(5)
 
+	// add the rsa public key
+	attendee.RsaPublicKey = msg.RsaPublicKey
+
 	// mark the attendee as claimed
 	attendee.SetClaimed()
 	k.SetAttendee(ctx, attendee)

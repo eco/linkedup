@@ -12,11 +12,11 @@ type Attendee struct {
 	ID      string
 	Address sdk.AccAddress
 
-	Commitment util.Commitment
-	Claimed    bool
-	Sponsor    bool
-	EncryptKey string
-	ScanIDs    []string
+	Commitment   util.Commitment
+	Claimed      bool
+	Sponsor      bool
+	RsaPublicKey string
+	ScanIDs      []string
 
 	Rep uint
 }
