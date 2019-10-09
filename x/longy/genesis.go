@@ -55,10 +55,7 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, state GenesisState) {
 
 		account := accountKeeper.NewAccountWithAddress(ctx, attendee.GetAddress())
 		accountKeeper.SetAccount(ctx, account)
-		if attendee.ID == "1422437101" { //andy
-			attendee.Address = account.GetAddress()
-			attendee.Claimed = true
-		}
+		//attendee.Address = account.GetAddress()
 		k.SetAttendee(ctx, attendee)
 	}
 }
