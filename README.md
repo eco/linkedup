@@ -71,6 +71,7 @@ The configruation can also be set through environment variables. the `-` charact
   {
     "attendee_id": "<id>",
     "private_key": "hex-encoded private key"
+    "rsa_key": "string representation of the rsa key"
   }
   ```  
   Status 200: Key transaction was successfully submitted and the email containing the redirect uri was sent
