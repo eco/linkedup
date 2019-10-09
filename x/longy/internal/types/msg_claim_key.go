@@ -25,16 +25,19 @@ func NewMsgClaimKey(address sdk.AccAddress, secret string, rsaPublicKey string, 
 }
 
 // Route defines the route for this message
+//nolint:gocritic
 func (msg MsgClaimKey) Route() string {
 	return RouterKey
 }
 
 // Type is the message type
+//nolint:gocritic
 func (msg MsgClaimKey) Type() string {
 	return "claim_key"
 }
 
 // ValidateBasic performs sanity checks on the message
+//nolint:gocritic
 func (msg MsgClaimKey) ValidateBasic() sdk.Error {
 	switch {
 	case msg.AttendeeAddress.Empty():
@@ -51,12 +54,14 @@ func (msg MsgClaimKey) ValidateBasic() sdk.Error {
 }
 
 // GetSignBytes returns the byte array that is signed over
+//nolint:gocritic
 func (msg MsgClaimKey) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }
 
 // GetSigners returns the
+//nolint:gocritic
 func (msg MsgClaimKey) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.AttendeeAddress}
 }

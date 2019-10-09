@@ -8,7 +8,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = FDescribe("MsgClaimKey Tests", func() {
+var _ = Describe("MsgClaimKey Tests", func() {
 	var s1 sdk.AccAddress
 	var secret, rsa string
 	BeforeEach(func() {
