@@ -7,7 +7,7 @@ cache:
 before_cache:
 - cd; rm -rf $TRAVIS_BUILD_DIR
 go:
-- 1.12.4
+- 1.13
 before_install:
 - "./scripts/before_script.sh"
 script:
