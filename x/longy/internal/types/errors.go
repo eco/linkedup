@@ -83,6 +83,8 @@ const (
 	EmptySecret
 	//EmptyRsaKey is the code for when the rsa public key on a claim key message is empty
 	EmptyRsaKey
+	//EmptyEncryptedInfo is the code for when the encrypted info on a claim key message is empty
+	EmptyEncryptedInfo
 
 	// DefaultError is the code for when a random error occurs that we do not provide a unique code to
 	DefaultError
@@ -222,6 +224,11 @@ func ErrEmptySecret(format string, args ...interface{}) sdk.Error {
 //ErrEmptyRsaKey occurs when the rsa public key on a claim key message is empty
 func ErrEmptyRsaKey(format string, args ...interface{}) sdk.Error {
 	return sdk.NewError(LongyCodeSpace, EmptyRsaKey, format, args...)
+}
+
+//ErrEmptyEncryptedInfo occurs when  the encrypted info on a claim key message is empty
+func ErrEmptyEncryptedInfo(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, EmptyEncryptedInfo, format, args...)
 }
 
 //ErrDefault occurs when a random error occurs that we do not provide a unique code to

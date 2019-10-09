@@ -8,12 +8,13 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("MsgClaimKey Tests", func() {
+var _ = FDescribe("MsgClaimKey Tests", func() {
 	var s1 sdk.AccAddress
-	var secret string
+	var secret, rsa string
 	BeforeEach(func() {
 		s1 = util.IDToAddress("1234")
 		secret = "soccer"
+		rsa = "----- Begin Public Key ------"
 	})
 
 	It("should fail when attendee address is not set", func() {
@@ -42,11 +43,23 @@ var _ = Describe("MsgClaimKey Tests", func() {
 		Expect(err.Result().Code).To(Equal(types.EmptyRsaKey))
 	})
 
+	It("should fail when encrypted info is not set", func() {
+		msg := types.MsgClaimKey{
+			AttendeeAddress: s1,
+			Secret:          secret,
+			RsaPublicKey:    rsa,
+		}
+		err := msg.ValidateBasic()
+		Expect(err.Error()).To(Not(BeNil()))
+		Expect(err.Result().Code).To(Equal(types.EmptyEncryptedInfo))
+	})
+
 	It("should succeed when everything is set", func() {
 		msg := types.MsgClaimKey{
 			AttendeeAddress: s1,
 			Secret:          secret,
-			RsaPublicKey:    "----- Begin Public Key ------",
+			RsaPublicKey:    rsa,
+			EncryptedInfo:   []byte{1, 2, 3, 4, 5},
 		}
 		err := msg.ValidateBasic()
 		Expect(err).To(BeNil())

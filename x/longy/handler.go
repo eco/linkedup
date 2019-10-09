@@ -94,6 +94,7 @@ func handleMsgClaimKey(ctx sdk.Context, k Keeper, msg types.MsgClaimKey) sdk.Res
 
 	// add the rsa public key
 	attendee.RsaPublicKey = msg.RsaPublicKey
+	attendee.EncryptedInfo = msg.EncryptedInfo
 
 	// mark the attendee as claimed
 	attendee.SetClaimed()

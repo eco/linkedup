@@ -12,11 +12,12 @@ type Attendee struct {
 	ID      string
 	Address sdk.AccAddress
 
-	Commitment   util.Commitment
-	Claimed      bool
-	Sponsor      bool
-	RsaPublicKey string
-	ScanIDs      []string
+	Commitment    util.Commitment
+	Claimed       bool
+	Sponsor       bool
+	RsaPublicKey  string
+	EncryptedInfo []byte
+	ScanIDs       []string
 
 	Rep uint
 }
@@ -30,9 +31,10 @@ func NewAttendee(id string) Attendee {
 		ID:      id,
 		Address: addr,
 
-		Commitment: nil,
-		Claimed:    false,
-		ScanIDs:    []string{},
+		Commitment:    nil,
+		Claimed:       false,
+		EncryptedInfo: []byte{},
+		ScanIDs:       []string{},
 
 		Rep: 0,
 	}

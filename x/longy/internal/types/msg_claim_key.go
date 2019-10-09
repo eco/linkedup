@@ -11,14 +11,16 @@ type MsgClaimKey struct {
 	AttendeeAddress sdk.AccAddress `json:"attendeeAddress"`
 	Secret          string         `json:"secret"`
 	RsaPublicKey    string         `json:"rsaPublicKey"`
+	EncryptedInfo   []byte         `json:"encryptedInfo"`
 }
 
 // NewMsgClaimKey in the constructor for `MsgClaimKey`
-func NewMsgClaimKey(address sdk.AccAddress, secret string, rsaPublicKey string) MsgClaimKey {
+func NewMsgClaimKey(address sdk.AccAddress, secret string, rsaPublicKey string, encryptedInfo []byte) MsgClaimKey {
 	return MsgClaimKey{
 		AttendeeAddress: address,
 		Secret:          secret,
 		RsaPublicKey:    rsaPublicKey,
+		EncryptedInfo:   encryptedInfo,
 	}
 }
 
@@ -41,6 +43,8 @@ func (msg MsgClaimKey) ValidateBasic() sdk.Error {
 		return ErrEmptySecret("secret cannot be empty")
 	case len(msg.RsaPublicKey) == 0:
 		return ErrEmptyRsaKey("rsa public key cannot be empty")
+	case len(msg.EncryptedInfo) == 0:
+		return ErrEmptyEncryptedInfo("encrypted info cannot be empty")
 	default:
 		return nil
 	}
