@@ -1,6 +1,8 @@
 package types
 
 import (
+	"encoding/hex"
+	"fmt"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/eco/longy/util"
 )
@@ -10,11 +12,12 @@ type Attendee struct {
 	ID      string
 	Address sdk.AccAddress
 
-	Commitment util.Commitment
-	Claimed    bool
-	Sponsor    bool
-	EncryptKey string
-	ScanIDs    []string
+	Commitment    util.Commitment
+	Claimed       bool
+	Sponsor       bool
+	RsaPublicKey  string
+	EncryptedInfo []byte
+	ScanIDs       []string
 
 	Rep uint
 }
@@ -28,9 +31,10 @@ func NewAttendee(id string) Attendee {
 		ID:      id,
 		Address: addr,
 
-		Commitment: nil,
-		Claimed:    false,
-		ScanIDs:    []string{},
+		Commitment:    nil,
+		Claimed:       false,
+		EncryptedInfo: []byte{},
+		ScanIDs:       []string{},
 
 		Rep: 0,
 	}
@@ -43,13 +47,32 @@ func NewAttendeeFromGenesis(ga GenesisAttendee) Attendee {
 
 //AddScanID adds the new scan id if it isn't already added
 func (a *Attendee) AddScanID(id []byte) (added bool) {
-	if len(id) > 0 && !contains(a.ScanIDs, string(id)) {
-		a.ScanIDs = append(a.ScanIDs, string(id))
+	encoded := Encode(id)
+	if len(id) > 0 && !contains(a.ScanIDs, encoded) {
+		a.ScanIDs = append(a.ScanIDs, encoded)
 		return true
 	}
 	return false
 }
 
+//Encode encodes a hex byte array
+func Encode(src []byte) string {
+	dst := make([]byte, hex.EncodedLen(len(src)))
+	hex.Encode(dst, src)
+
+	return fmt.Sprintf("%s", dst)
+}
+
+//Decode decodes a string into a hex byte array
+func Decode(src string) []byte {
+
+	decoded, err := hex.DecodeString(src)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	return decoded
+}
 func contains(s []string, val string) bool {
 	for _, a := range s {
 		if a == val {

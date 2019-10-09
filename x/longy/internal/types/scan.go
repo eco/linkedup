@@ -56,3 +56,19 @@ func GenScanID(s1, s2 sdk.AccAddress) (id []byte, err sdk.Error) {
 	id = ScanKey(id)
 	return
 }
+
+//CheckSameness checks the address are not empty or the same
+//nolint:interfacer
+func CheckSameness(s1 sdk.AccAddress, s2 sdk.AccAddress) (err sdk.Error) {
+	if s1.Empty() || s2.Empty() {
+		err = ErrAccountAddressEmpty("cannot have empty addresses")
+		return
+	}
+
+	if s1.Equals(s2) {
+		err = ErrAccountsSame("addresses cannot be the same")
+		return
+	}
+
+	return
+}

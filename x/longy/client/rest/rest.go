@@ -9,19 +9,26 @@ import (
 )
 
 const (
-	AttendeeIdKey = "attendee_id"
-	AddressIdKey  = "address_id"
-	ScanIdKey     = "scan_id"
+	//AttendeeIDKey is the attribute key for attendee id
+	AttendeeIDKey = "attendee_id"
+	//AddressIDKey is the attribute key for atttendee address
+	AddressIDKey = "address_id"
+	//ScanIDKey  is the attribute key for scan id
+	ScanIDKey = "scan_id"
 )
 
 // RegisterRoutes - Central function to define routes that get registered by the main application
+//nolint:gocritic
 func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, storeName string) {
 	//longy/attendees/{attendee_id}
-	r.HandleFunc(fmt.Sprintf("/%s/%s/{%s}", storeName, keeper.QueryAttendees, AttendeeIdKey), attendeeHandler(cliCtx, storeName)).Methods("GET")
+	r.HandleFunc(fmt.Sprintf("/%s/%s/{%s}", storeName, keeper.QueryAttendees, AttendeeIDKey),
+		attendeeHandler(cliCtx, storeName)).Methods("GET")
 	//longy/attendees/address/{address_id}
-	r.HandleFunc(fmt.Sprintf("/%s/%s/%s/{%s}", storeName, keeper.QueryAttendees, keeper.AddressKey, AddressIdKey), attendeeAddressHandler(cliCtx, storeName)).Methods("GET")
+	r.HandleFunc(fmt.Sprintf("/%s/%s/%s/{%s}", storeName, keeper.QueryAttendees, keeper.AddressKey,
+		AddressIDKey), attendeeAddressHandler(cliCtx, storeName)).Methods("GET")
 	//longy/scans/{scan_id}
-	r.HandleFunc(fmt.Sprintf("/%s/%s/{%s}", storeName, keeper.QueryScans, ScanIdKey), scanGetHandler(cliCtx, storeName)).Methods("GET")
+	r.HandleFunc(fmt.Sprintf("/%s/%s/{%s}", storeName, keeper.QueryScans, ScanIDKey),
+		scanGetHandler(cliCtx, storeName)).Methods("GET")
 
 	//open endpoint to post transactions directly to full node
 	r.HandleFunc("/longy/txs", rest.BroadcastTxRequest(cliCtx)).Methods("POST")

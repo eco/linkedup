@@ -8,9 +8,21 @@ import (
 	"github.com/eco/longy/key-service/masterkey"
 	"github.com/eco/longy/key-service/models"
 	"github.com/eco/longy/util"
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"io/ioutil"
 	"net/http"
+	"strconv"
 )
+
+// AttendeeInfo -
+type AttendeeInfo struct {
+	Profile *eventbrite.AttendeeProfile `json:"attendee"`
+
+	// private key information
+	CosmosPrivateKey string `json:"cosmos_private_key"`
+	RSAPrivateKey    string `json:"RSA_key"`
+}
 
 func registerKey(
 	r *mux.Router,
@@ -20,7 +32,9 @@ func registerKey(
 	mc mail.Client) {
 
 	r.HandleFunc("/key", key(eb, mk, db, mc)).Methods("POST")
-	r.HandleFunc("/key/{email}", keyGetter(db)).Methods("GET")
+	r.HandleFunc("/recover", keyRecover(db, eb, mc)).Methods("POST")
+
+	r.HandleFunc("/recover/{id}/{token}", keyGetter(db)).Methods("GET")
 }
 
 // All core logic is implemented here. If there are plans to expand this service,
@@ -35,8 +49,11 @@ func key(eb *eventbrite.Session,
 
 		/** Read the request body **/
 		type reqBody struct {
-			AttendeeID string `json:"attendee_id"`
-			PrivateKey string `json:"private_key"` // hex-encoded private key
+			AttendeeID int `json:"attendee_id"`
+
+			// private key information
+			CosmosPrivateKey string `json:"cosmos_private_key"`
+			RSAPrivateKey    string `json:"rsa_private_key"`
 		}
 		var body reqBody
 		jsonDecoder := json.NewDecoder(r.Body)
@@ -48,28 +65,42 @@ func key(eb *eventbrite.Session,
 		}
 
 		/** Attendee information + their their new private key **/
-		privKey, err := util.Secp256k1FromHex(body.PrivateKey)
+		privKey, err := util.Secp256k1FromHex(body.CosmosPrivateKey)
 		if err != nil {
-			errMsg := fmt.Sprintf("bad private key: %s", err)
+			errMsg := fmt.Sprintf("bad cosmos private key: %s", err)
 			http.Error(w, errMsg, http.StatusBadRequest)
 			return
 		}
-		attendeeAddress := util.IDToAddress(body.AttendeeID)
+		attendeeAddress := util.IDToAddress(fmt.Sprintf("%d", body.AttendeeID))
 
-		/** Get the Attendee's email **/
-		email, err := eb.EmailFromAttendeeID(body.AttendeeID)
+		/** Get the Attendee's profile **/
+		profile, err := eb.AttendeeProfile(body.AttendeeID)
 		if err != nil {
-			http.Error(w, "internal error. try again", http.StatusInternalServerError)
+			http.Error(w, "key-service down", http.StatusServiceUnavailable)
 			return
-		} else if len(email) == 0 {
+		} else if profile == nil {
 			http.Error(w, "attendee id not present in the event", http.StatusNotFound)
 			return
 		}
 
-		/** Store the private key **/
-		ok := db.StoreKey(email, body.PrivateKey)
+		/** Store the attendee information **/
+		info := AttendeeInfo{
+			Profile:          profile,
+			CosmosPrivateKey: body.CosmosPrivateKey,
+			RSAPrivateKey:    body.RSAPrivateKey,
+		}
+		bz, err := json.Marshal(info)
+		if err != nil {
+			log.WithError(err).WithField("data", info).
+				Error("marshaling attendee info")
+			// this is a server side error that should be covered. 500
+			http.Error(w, "key storage service down", http.StatusInternalServerError)
+			return
+		}
+		ok := db.StoreAttendeeInfo(body.AttendeeID, bz)
 		if !ok {
 			http.Error(w, "key storage service down", http.StatusServiceUnavailable)
+			return
 		}
 
 		/** Construct the secret for this and send the key transaction **/
@@ -85,7 +116,7 @@ func key(eb *eventbrite.Session,
 		}
 
 		/** Send the redirect **/
-		err = mc.SendOnboardingEmail(email, attendeeAddress, secret)
+		err = mc.SendOnboardingEmail(profile, attendeeAddress, secret)
 		if err != nil {
 			http.Error(w, "email error. try again", http.StatusInternalServerError)
 		}
@@ -94,23 +125,74 @@ func key(eb *eventbrite.Session,
 	}
 }
 
-func keyGetter(db *models.DatabaseContext) http.HandlerFunc {
+func keyRecover(db *models.DatabaseContext, eb *eventbrite.Session, mc mail.Client) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		email, ok := mux.Vars(r)["email"]
-		if !ok {
-			http.Error(w, "email parameter required", http.StatusBadRequest)
+		/** Read the attendee id from the body **/
+		body, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			http.Error(w, "unable to read request body", http.StatusBadRequest)
+			return
+		}
+		id, err := strconv.Atoi(string(body))
+		if err != nil || id < 0 {
+			http.Error(w, "body expected to be a positive integer denoting the attendee id", http.StatusBadRequest)
+			return
 		}
 
-		key := db.GetKey(email)
-		if len(key) == 0 {
-			w.WriteHeader(http.StatusNotFound)
+		/** Retrieve email information **/
+		profile, err := eb.AttendeeProfile(id)
+		if profile == nil && err == nil {
+			http.Error(w, "attendee not found", http.StatusNotFound)
+			return
+		} else if err != nil {
+			http.Error(w, "key service down", http.StatusServiceUnavailable)
+			return
+		}
 
-			errMsg := fmt.Sprintf("non-existent email: %s\n", email)
-			w.Write([]byte(errMsg)) //nolint
+		/** Create an auth token and send recovery email **/
+		token := uuid.New().String()
+		ok := db.StoreAuthToken(id, token)
+		if !ok {
+			http.Error(w, "key service down", http.StatusServiceUnavailable)
+			return
+		}
+
+		if err := mc.SendRecoveryEmail(profile, id, token); err != nil {
+			http.Error(w, "key service down", http.StatusServiceUnavailable)
 			return
 		}
 
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(key)) //nolint
+	}
+}
+
+func keyGetter(db *models.DatabaseContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		token := vars["token"]
+
+		id, err := strconv.Atoi(vars["id"])
+		if err != nil || id < 0 {
+			http.Error(w, "id expected to be a positive integer", http.StatusBadRequest)
+			return
+		}
+
+		expectedToken := db.GetAuthToken(id)
+		if len(expectedToken) == 0 {
+			http.Error(w, "attendee has not attempted recovery", http.StatusUnauthorized)
+			return
+		} else if expectedToken != token {
+			http.Error(w, "incorrect auth token", http.StatusUnauthorized)
+			return
+		}
+
+		// checks passed
+		bz := db.GetAttendeeInfo(id)
+		if bz == nil {
+			w.WriteHeader(http.StatusNotFound)
+		} else {
+			w.WriteHeader(http.StatusOK)
+		}
+		_, _ = w.Write(bz)
 	}
 }
