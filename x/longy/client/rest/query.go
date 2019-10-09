@@ -13,6 +13,23 @@ import (
 )
 
 //nolint:gocritic
+func prizesGetHandler(cliCtx context.CLIContext, storeName string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		//vars := mux.Vars(r)
+		//paramType := vars[ScanIDKey]
+		//
+		//res, _, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/%s/%s",
+		//	storeName, keeper.QueryScans, paramType), nil)
+		//if err != nil {
+		//	rest.WriteErrorResponse(w, http.StatusNotFound, err.Error())
+		//	return
+		//}
+		//
+		//rest.PostProcessResponse(w, cliCtx, res)
+	}
+}
+
+//nolint:gocritic
 func scanGetHandler(cliCtx context.CLIContext, storeName string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)

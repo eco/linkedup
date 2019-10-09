@@ -33,6 +33,8 @@ func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, storeName string) 
 		scanGetHandler(cliCtx, storeName)).Methods("GET")
 
 	//longy/prizes
+	r.HandleFunc(fmt.Sprintf("/%s/%s", storeName, keeper.PrizesKey),
+		prizesGetHandler(cliCtx, storeName)).Methods("GET")
 
 	//open endpoint to post transactions directly to full node
 	r.HandleFunc("/longy/txs", rest.BroadcastTxRequest(cliCtx)).Methods("POST")

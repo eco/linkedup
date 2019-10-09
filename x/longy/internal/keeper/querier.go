@@ -15,6 +15,8 @@ const (
 	QueryScans = "scans"
 	//AddressKey is the key for attendee gets by address
 	AddressKey = "address"
+	//PrizesKey is the key for the event prizes
+	PrizesKey = "prizes"
 )
 
 // NewQuerier is the module level router for state queries
