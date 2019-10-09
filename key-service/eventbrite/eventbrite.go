@@ -42,17 +42,15 @@ func CreateSession(authToken string, eventID int) Session {
 	}
 }
 
-// WithTimeout returns a new `Session` with the corresponding `time` timeout
-func (s Session) WithTimeout(time time.Duration) Session {
-	s.netClient = http.Client{
-		Timeout: time,
-	}
-
-	return s
+// AttendeeProfile -
+type AttendeeProfile struct {
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Email     string `json:"email"`
 }
 
-// EmailFromAttendeeID retrieves the email associated with the eventbrite account for `id`
-func (s Session) EmailFromAttendeeID(id string) (string, error) {
+// AttendeeProfile retrieves the email associated with the eventbrite account for `id`
+func (s Session) AttendeeProfile(id string) (*AttendeeProfile, error) {
 	host := "https://www.eventbriteapi.com"
 	path := fmt.Sprintf("/v3/events/%d/attendees/%s/", s.eventID, id)
 	auth := fmt.Sprintf("Bearer %s", s.authToken)
@@ -60,7 +58,7 @@ func (s Session) EmailFromAttendeeID(id string) (string, error) {
 	url, err := url.Parse(host + path)
 	if err != nil {
 		log.Warnf("bad event url: %s", host+path)
-		return "", ErrInternal
+		return nil, ErrInternal
 	}
 
 	// create the http request
@@ -75,48 +73,42 @@ func (s Session) EmailFromAttendeeID(id string) (string, error) {
 	resp, err := s.netClient.Do(req)
 	if err != nil {
 		log.WithError(err).Warn("eventbrite api request delivery")
-		return "", ErrInternal
+		return nil, ErrInternal
 	}
 	defer resp.Body.Close() //nolint
 	if resp.StatusCode == http.StatusNotFound {
-		return "", nil
+		return nil, nil
 	} else if resp.StatusCode != http.StatusOK {
-		// TODO: emperically check the different response types. id does not exist a 403 (NotFound)?
-		// Log a warning?
 		log.Warnf("bad eventbrite api response, code=%d, attendee_id=%s", resp.StatusCode, id)
-		return "", ErrInternal
+		return nil, ErrInternal
 	}
 
-	return getEmailFromBody(resp.Body)
+	return getProfileFromBody(resp.Body)
 }
 
-func getEmailFromBody(body io.Reader) (string, error) {
+func getProfileFromBody(body io.Reader) (*AttendeeProfile, error) {
 	var jsonResp map[string]json.RawMessage
 	d := json.NewDecoder(body)
 	if err := d.Decode(&jsonResp); err != nil {
 		log.WithError(err).Error("parsing eventbrite response")
-		return "", ErrInternal
+		return nil, ErrInternal
 	}
 
 	var jsonProfile map[string]json.RawMessage
 	profileData, ok := jsonResp["profile"]
 	if !ok {
 		log.Error("eventbrite response missing attendee profile")
-		return "", ErrInternal
+		return nil, ErrInternal
 	} else if err := json.Unmarshal(profileData, &jsonProfile); err != nil {
 		log.WithError(err).Error("parsing attendee profile")
-		return "", ErrInternal
+		return nil, ErrInternal
 	}
 
-	var email string
-	emailData, ok := jsonProfile["email"]
-	if !ok {
-		log.Error("attendee profile missing email")
-		return "", ErrInternal
-	} else if err := json.Unmarshal(emailData, &email); err != nil {
-		log.WithError(err).Error("parsing email")
-		return "", ErrInternal
+	var profile AttendeeProfile
+	err := json.Unmarshal(profileData, &profile)
+	if err != nil {
+		return nil, err
 	}
 
-	return email, nil
+	return &profile, nil
 }
