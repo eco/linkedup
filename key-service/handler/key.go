@@ -125,7 +125,7 @@ func key(eb *eventbrite.Session,
 	}
 }
 
-func keyRecover(db *models.DatabaseContext, eb *eventbrite.Session, mc *mail.Client) http.HandlerFunc {
+func keyRecover(db *models.DatabaseContext, eb *eventbrite.Session, mc mail.Client) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		/** Read the attendee id from the body **/
 		body, err := ioutil.ReadAll(r.Body)
@@ -157,7 +157,7 @@ func keyRecover(db *models.DatabaseContext, eb *eventbrite.Session, mc *mail.Cli
 			return
 		}
 
-		if err := mc.SendRecoveryEmail(profile.Email, token, id); err != nil {
+		if err := mc.SendRecoveryEmail(profile, id, token); err != nil {
 			http.Error(w, "key service down", http.StatusServiceUnavailable)
 			return
 		}

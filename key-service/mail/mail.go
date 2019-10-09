@@ -22,7 +22,7 @@ var (
 // Client used to send emails
 type Client interface {
 	SendOnboardingEmail(*eb.AttendeeProfile, sdk.AccAddress, string) error
-	SendRecoveryEmail(*eb.AttendeeProfile, sdk.AccAddress, string) error
+	SendRecoveryEmail(*eb.AttendeeProfile, int, string) error
 }
 
 type sesClient struct {
@@ -52,7 +52,7 @@ func NewClient(cfg client.ConfigProvider) (client Client, err error) {
 // SendOnboardingEmail will construct and send the email containing the initial
 // onboarding message and URL with the given secret
 func (c sesClient) SendOnboardingEmail(profile *eb.AttendeeProfile, attendeeAddr sdk.AccAddress, secret string) error {
-	redirectURI, err := makeRedirectURI(profile, attendeeAddr, secret)
+	redirectURI, err := makeOnboardingURI(profile, attendeeAddr, secret)
 
 	if err != nil {
 		log.Errorf(
@@ -79,8 +79,8 @@ func (c sesClient) SendOnboardingEmail(profile *eb.AttendeeProfile, attendeeAddr
 
 // SendRecoveryEmail will construct and send the email containing the account
 // recovery message and URL with the given secret
-func (c sesClient) SendRecoveryEmail(profile *eb.AttendeeProfile, attendeeAddr sdk.AccAddress, secret string) error {
-	redirectURI := makeRedirectURI(profile, attendeeAddr, secret)
+func (c sesClient) SendRecoveryEmail(profile *eb.AttendeeProfile, id int, token string) error {
+	redirectURI := makeRecoveryURI(id, token)
 
 	log.Tracef("sending recovery email to: %s", profile.Email)
 
@@ -112,7 +112,7 @@ func (c sesClient) sendEmailWithURL(dest string, url string, template string) (e
 }
 
 func (c mockClient) SendOnboardingEmail(profile *eb.AttendeeProfile, attendeeAddr sdk.AccAddress, secret string) error {
-	redirectURI, err := makeRedirectURI(profile, attendeeAddr, secret)
+	redirectURI, err := makeOnboardingURI(profile, attendeeAddr, secret)
 
 	if err != nil {
 		return err
@@ -122,18 +122,18 @@ func (c mockClient) SendOnboardingEmail(profile *eb.AttendeeProfile, attendeeAdd
 	return nil
 }
 
-func (c mockClient) SendRecoveryEmail(profile *eb.AttendeeProfile, attendeeAddr sdk.AccAddress, secret string) error {
-	redirectURI, err := makeRedirectURI(profile, attendeeAddr, secret)
-
-	if err != nil {
-		return err
-	}
+func (c mockClient) SendRecoveryEmail(profile *eb.AttendeeProfile, id int, token string) error {
+	redirectURI := makeRecoveryURI(id, token)
 
 	log.Warnf("mock recovery email with url: %s", redirectURI)
 	return nil
 }
 
-func makeRedirectURI(profile *eb.AttendeeProfile, attendeeAddr sdk.AccAddress, secret string) (string, error) {
+func makeRecoveryURI(id int, token string) string {
+	return fmt.Sprintf("http://longygame.com/recover?id=%d&token=%s", id, token)
+}
+
+func makeOnboardingURI(profile *eb.AttendeeProfile, attendeeAddr sdk.AccAddress, secret string) (string, error) {
 	jsonProfileData, err := json.Marshal(profile)
 	if err != nil {
 		log.WithError(err).Error("attendee profile serialization")
