@@ -50,10 +50,10 @@ type AttendeeProfile struct {
 }
 
 // AttendeeProfile retrieves the email associated with the eventbrite account for `id`
-func (s Session) AttendeeProfile(id string) (*AttendeeProfile, error) {
+func (s Session) AttendeeProfile(id int) (*AttendeeProfile, error) {
 	/** Construct the appropriate url **/
 	host := "https://www.eventbriteapi.com"
-	path := fmt.Sprintf("/v3/events/%d/attendees/%s/", s.eventID, id)
+	path := fmt.Sprintf("/v3/events/%d/attendees/%d/", s.eventID, id)
 	auth := fmt.Sprintf("Bearer %s", s.authToken)
 
 	url, err := url.Parse(host + path)

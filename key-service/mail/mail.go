@@ -69,6 +69,28 @@ func (c Client) SendRedirectEmail(profile *eb.AttendeeProfile, attendeeAddr sdk.
 	return nil
 }
 
+// SendRecoveryEmail will send an email with the `authToken` required to hit the /recover/{id}/{token} endpoint and retrieve
+// the keys that are stored in the backend
+func (c Client) SendRecoveryEmail(dest, authToken string, id int) error {
+	redirectURI := fmt.Sprintf("http://longygame.com/recover?id=%d&token=%s", id, authToken)
+
+	// construct message
+	m := gomail.NewMessage()
+	m.SetHeader("From", "testecolongy@gmail.com")
+	m.SetHeader("To", dest)
+	m.SetHeader("From", "alex@example.com")
+	m.SetHeader("Subject", "Onboard to the the longy game")
+	m.SetBody("text/html", fmt.Sprintf("<b>Hello!</b> recover your account -> %s", redirectURI))
+
+	if err := gomail.Send(c.sender, m); err != nil {
+		log.WithError(err).WithField("dest", dest).
+			Error("failed email delivery")
+
+		return err
+	}
+	return nil
+}
+
 // Close will terminate the connnection with the smtp server
 func (c Client) Close() error {
 	log.Info("terminating connection with smtp server")
