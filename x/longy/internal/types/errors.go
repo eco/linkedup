@@ -67,8 +67,8 @@ const (
 	// ScanQRAlreadyOccurred is the code for when the scan message has already been sent by the scanner or the scan
 	// is complete for those two parties
 	ScanQRAlreadyOccurred
-	//ScanNotComplete is the code for when a scan is not complete
-	ScanNotComplete
+	//ScanNotAccepted is the code for when a scan is not complete
+	ScanNotAccepted
 	//DataCannotBeEmpty is the code for when the info data in a message is empty
 	DataCannotBeEmpty
 	//DataSizeOverLimit is the code for when the info data is above the size limit
@@ -186,9 +186,9 @@ func ErrScanQRAlreadyOccurred(format string, args ...interface{}) sdk.Error {
 	return sdk.NewError(LongyCodeSpace, ScanQRAlreadyOccurred, format, args...)
 }
 
-//ErrScanNotComplete occurs when a scan is not complete
-func ErrScanNotComplete(format string, args ...interface{}) sdk.Error {
-	return sdk.NewError(LongyCodeSpace, ScanNotComplete, format, args...)
+//ErrScanNotAccepted occurs when a scan is not accepted by both parties
+func ErrScanNotAccepted(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, ScanNotAccepted, format, args...)
 }
 
 //ErrDataCannotBeEmpty occurs when the info data in a message is empty

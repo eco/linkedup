@@ -47,22 +47,30 @@ func (k Keeper) SetAttendee(ctx sdk.Context, a types.Attendee) {
 //AwardScanPoints awards the points to each participant of the scan
 //nolint:gocritic
 func (k Keeper) AwardScanPoints(ctx sdk.Context, scan *types.Scan) sdk.Error {
+	if !scan.Accepted {
+		return types.ErrScanNotAccepted("scan must be accepted by both parties before awarding points")
+	}
 	a1, a2, err := k.getAttendeesByScan(ctx, scan)
 	if err != nil {
 		return err
 	}
 
-	points := types.ScanAttendeeAwardPoints
-	if a1.Sponsor || a2.Sponsor {
-		points = types.ScanSponsorAwardPoints
+	a1Points := types.ScanAttendeeAwardPoints
+	a2Points := types.ScanAttendeeAwardPoints
+	if a2.Sponsor {
+		a1Points = types.ScanSponsorAwardPoints
 	}
-	a1.AddRep(points)
-	a2.AddRep(points)
+	if a1.Sponsor {
+		a2Points = types.ScanSponsorAwardPoints
+	}
+
+	a1.AddRep(a1Points)
+	a2.AddRep(a2Points)
 	k.SetAttendee(ctx, a1)
 	k.SetAttendee(ctx, a2)
 
 	//update scan points
-	scan.AddPoints(points, points)
+	scan.AddPoints(a1Points, a2Points)
 	k.SetScan(ctx, scan)
 	return nil
 }

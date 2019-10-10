@@ -61,11 +61,13 @@ func handleShareInfo(ctx sdk.Context, k keeper.Keeper, scan *types.Scan, sender 
 	} else {
 		oldData = &scan.D2
 	}
-
-	if len(*oldData) == 0 && len(data) > 0 {
-		err := k.AwardShareInfoPoints(ctx, scan, sender, attendee.Address)
-		if err != nil {
-			return err
+	dataShared := len(*oldData) == 0 && len(data) > 0
+	if dataShared {
+		if scan.Accepted {
+			err := k.AwardShareInfoPoints(ctx, scan, sender, attendee.Address)
+			if err != nil {
+				return err
+			}
 		}
 
 		//set new data into scan and save scan
@@ -82,6 +84,15 @@ func handleAcceptance(ctx sdk.Context, k keeper.Keeper, scan *types.Scan, sender
 	if !scan.Accepted && scan.S2.Equals(sender) {
 		scan.Accepted = true
 		k.SetScan(ctx, scan)
+
+		if len(scan.D1) > 0 {
+			err := k.AwardShareInfoPoints(ctx, scan, scan.S1, scan.S2)
+			if err != nil {
+				return err
+			}
+		}
+		//dont need to do D2 as it'll be auto-set with accepted on
+
 		return k.AwardScanPoints(ctx, scan)
 	}
 	return nil
