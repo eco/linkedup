@@ -47,12 +47,13 @@ func (k Keeper) SetAttendee(ctx sdk.Context, a types.Attendee) {
 //AwardScanPoints awards the points to each participant of the scan
 //nolint:gocritic
 func (k Keeper) AwardScanPoints(ctx sdk.Context, scan *types.Scan) sdk.Error {
-	if !scan.Accepted {
-		return types.ErrScanNotAccepted("scan must be accepted by both parties before awarding points")
-	}
 	a1, a2, err := k.getAttendeesByScan(ctx, scan)
 	if err != nil {
 		return err
+	}
+
+	if !scan.Accepted {
+		return types.ErrScanNotAccepted("scan must be accepted by both parties before awarding points")
 	}
 
 	a1Points := types.ScanAttendeeAwardPoints
@@ -75,6 +76,32 @@ func (k Keeper) AwardScanPoints(ctx sdk.Context, scan *types.Scan) sdk.Error {
 	return nil
 }
 
+//AwardShareInfoPoints adds points to the sender of the shared info based on if the receiver is a sponsor or not
+//nolint:gocritic
+func (k Keeper) AwardShareInfoPoints(ctx sdk.Context, scan *types.Scan, senderAddr sdk.AccAddress,
+	receiverAddr sdk.AccAddress) sdk.Error {
+	sender, receiver, err := k.GetAttendees(ctx, senderAddr, receiverAddr)
+	if err != nil {
+		return err
+	}
+
+	if !scan.Accepted {
+		return types.ErrScanNotAccepted("scan must be accepted by both parties before awarding points")
+	}
+
+	//give sender points for sharing, check if receiver is a sponsor
+	val := types.ShareAttendeeAwardPoints
+	if receiver.Sponsor {
+		val = types.ShareSponsorAwardPoints
+	}
+	sender.AddRep(val)
+	k.SetAttendee(ctx, sender)
+	//update scan points
+	scan.AddPointsToAccount(sender.Address, val)
+	k.SetScan(ctx, scan)
+	return nil
+}
+
 //AddSharedID adds the scan id to the scan ids array of both the sender and receiver is they don't contain it yet
 //nolint:gocritic
 func (k Keeper) AddSharedID(ctx sdk.Context, senderAddr sdk.AccAddress, receiverAddr sdk.AccAddress,
@@ -89,27 +116,6 @@ func (k Keeper) AddSharedID(ctx sdk.Context, senderAddr sdk.AccAddress, receiver
 	if receiver.AddScanID(scanID) {
 		k.SetAttendee(ctx, receiver)
 	}
-	return nil
-}
-
-//AwardShareInfoPoints adds points to the sender of the shared info based on if the receiver is a sponsor or not
-//nolint:gocritic
-func (k Keeper) AwardShareInfoPoints(ctx sdk.Context, scan *types.Scan, senderAddr sdk.AccAddress,
-	receiverAddr sdk.AccAddress) sdk.Error {
-	sender, receiver, err := k.GetAttendees(ctx, senderAddr, receiverAddr)
-	if err != nil {
-		return err
-	}
-	//give sender points for sharing, check if receiver is a sponsor
-	val := types.ShareAttendeeAwardPoints
-	if receiver.Sponsor {
-		val = types.ShareSponsorAwardPoints
-	}
-	sender.AddRep(val)
-	k.SetAttendee(ctx, sender)
-	//update scan points
-	scan.AddPointsToAccount(sender.Address, val)
-	k.SetScan(ctx, scan)
 	return nil
 }
 

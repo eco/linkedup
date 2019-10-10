@@ -26,61 +26,114 @@ var _ = Describe("Attendee Keeper Tests", func() {
 		Expect(err).To(BeNil())
 	})
 
-	Context("For scan events", func() {
-		It("should fail when scan not complete", func() {
+	Context("when attendees don't exist", func() {
+		It("should fail to award scan points", func() {
 			err := keeper.AwardScanPoints(ctx, scan)
 			Expect(err).To(Not(BeNil()))
-			Expect(err.Code()).To(Equal(types.ScanNotAccepted))
+			Expect(err.Code()).To(Equal(types.AttendeeNotFound))
 		})
 
-		Context("when a can has been completed by both parties", func() {
+		It("should fail to award share info points", func() {
+			err := keeper.AwardShareInfoPoints(ctx, scan, s1, s2)
+			Expect(err).To(Not(BeNil()))
+			Expect(err.Code()).To(Equal(types.AttendeeNotFound))
+		})
+
+		It("should fail add scan ids to participants", func() {
+			err := keeper.AddSharedID(ctx, s1, s2, scan.ID)
+			Expect(err).To(Not(BeNil()))
+			Expect(err.Code()).To(Equal(types.AttendeeNotFound))
+		})
+
+		Context("when attendee's exist but a scan has not been accepted", func() {
 			BeforeEach(func() {
-				scan.Accepted = true
-				keeper.SetScan(ctx, scan)
+				BeforeTestRun()
+				utils.AddAttendeeToKeeper(ctx, &keeper, qr1, false)
+				utils.AddAttendeeToKeeper(ctx, &keeper, qr2, false)
 			})
 
-			It("should fail when attendee does not exist", func() {
+			It("should fail to award scan points", func() {
 				err := keeper.AwardScanPoints(ctx, scan)
 				Expect(err).To(Not(BeNil()))
-				Expect(err.Code()).To(Equal(types.AttendeeNotFound))
-
-				inspectScan(ctx, scan.ID, 0, 0)
+				Expect(err.Code()).To(Equal(types.ScanNotAccepted))
+				inspectAttendees(ctx, s1, s2, 0, 0)
 			})
 
-			It("should succeed when both are attendees", func() {
-				a1 := utils.AddAttendeeToKeeper(ctx, &keeper, qr1, false)
-				a2 := utils.AddAttendeeToKeeper(ctx, &keeper, qr2, false)
-
-				err := keeper.AwardScanPoints(ctx, scan)
-				Expect(err).To(BeNil())
-				b1, ok := keeper.GetAttendeeWithID(ctx, qr1)
-				Expect(ok).To(BeTrue())
-				b2, ok := keeper.GetAttendeeWithID(ctx, qr2)
-				Expect(ok).To(BeTrue())
-				Expect(a1.Rep + types.ScanAttendeeAwardPoints).To(Equal(b1.Rep))
-				Expect(a2.Rep + types.ScanAttendeeAwardPoints).To(Equal(b2.Rep))
-
-				inspectScan(ctx, scan.ID, b1.Rep, b2.Rep)
+			It("should fail to award share info points", func() {
+				err := keeper.AwardShareInfoPoints(ctx, scan, s1, s2)
+				Expect(err).To(Not(BeNil()))
+				Expect(err.Code()).To(Equal(types.ScanNotAccepted))
+				inspectAttendees(ctx, s1, s2, 0, 0)
 			})
 
-			It("should succeed when one is a sponsor", func() {
-				a1 := utils.AddAttendeeToKeeper(ctx, &keeper, qr1, false)
-				a2 := utils.AddAttendeeToKeeper(ctx, &keeper, qr2, true)
-
-				err := keeper.AwardScanPoints(ctx, scan)
+			It("should succeed add scan ids to participants", func() {
+				err := keeper.AddSharedID(ctx, s1, s2, scan.ID)
 				Expect(err).To(BeNil())
-				b1, ok := keeper.GetAttendeeWithID(ctx, qr1)
-				Expect(ok).To(BeTrue())
-				b2, ok := keeper.GetAttendeeWithID(ctx, qr2)
-				Expect(ok).To(BeTrue())
-				Expect(a1.Rep + types.ScanSponsorAwardPoints).To(Equal(b1.Rep))
-				Expect(a2.Rep + types.ScanAttendeeAwardPoints).To(Equal(b2.Rep))
+				sender, receiver, err := keeper.GetAttendees(ctx, s1, s2)
+				Expect(err).To(BeNil())
+				Expect(len(sender.ScanIDs)).To(Equal(1))
+				Expect(len(receiver.ScanIDs)).To(Equal(1))
+				Expect(receiver.ScanIDs[0]).To(Equal(receiver.ScanIDs[0]))
+				Expect(receiver.ScanIDs[0]).To(Equal(types.Encode(scan.ID)))
+				inspectAttendees(ctx, s1, s2, 0, 0)
+			})
 
-				inspectScan(ctx, scan.ID, b1.Rep, b2.Rep)
+			Context("when a scan has been completed by both parties", func() {
+				BeforeEach(func() {
+					scan.Accepted = true
+					keeper.SetScan(ctx, scan)
+				})
+
+				It("should succeed to award scan points to attendees", func() {
+					err := keeper.AwardScanPoints(ctx, scan)
+					Expect(err).To(BeNil())
+					point := types.ScanAttendeeAwardPoints
+					inspectScan(ctx, scan.ID, point, point)
+					inspectAttendees(ctx, s1, s2, point, point)
+				})
+
+				It("should succeed to award share info points to attendees", func() {
+					err := keeper.AwardShareInfoPoints(ctx, scan, s1, s2)
+					Expect(err).To(BeNil())
+					point := types.ShareAttendeeAwardPoints
+					inspectScan(ctx, scan.ID, point, 0)
+					inspectAttendees(ctx, s1, s2, point, 0)
+
+					err = keeper.AwardShareInfoPoints(ctx, scan, s2, s1)
+					Expect(err).To(BeNil())
+					point = types.ShareAttendeeAwardPoints
+					inspectScan(ctx, scan.ID, point, point)
+					inspectAttendees(ctx, s1, s2, point, point)
+				})
+
+				It("should succeed to award share info points to attendee and sponsor", func() {
+					utils.AddAttendeeToKeeper(ctx, &keeper, qr2, true)
+
+					err := keeper.AwardShareInfoPoints(ctx, scan, s1, s2)
+					Expect(err).To(BeNil())
+					pointSpon := types.ShareSponsorAwardPoints
+					inspectScan(ctx, scan.ID, pointSpon, 0)
+					inspectAttendees(ctx, s1, s2, pointSpon, 0)
+
+					err = keeper.AwardShareInfoPoints(ctx, scan, s2, s1)
+					Expect(err).To(BeNil())
+					pointAtt := types.ShareAttendeeAwardPoints
+					inspectScan(ctx, scan.ID, pointSpon, pointAtt)
+					inspectAttendees(ctx, s1, s2, pointSpon, pointAtt)
+				})
 			})
 		})
 	})
+
 })
+
+//nolint:gocritic
+func inspectAttendees(ctx sdk.Context, s1 sdk.AccAddress, s2 sdk.AccAddress, p1 uint, p2 uint) {
+	a1, a2, err := keeper.GetAttendees(ctx, s1, s2)
+	Expect(err).To(BeNil())
+	a1.Rep = p1
+	a2.Rep = p2
+}
 
 //nolint:gocritic
 func inspectScan(ctx sdk.Context, scanID []byte, p1 uint, p2 uint) {
