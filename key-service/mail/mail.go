@@ -130,7 +130,7 @@ func (c mockClient) SendRecoveryEmail(profile *eb.AttendeeProfile, id int, token
 }
 
 func makeRecoveryURI(id int, token string) string {
-	return fmt.Sprintf("http://longygame.com/recover?id=%d&token=%s", id, token)
+	return fmt.Sprintf("http://localhost:5000/recover?id=%d&token=%s", id, token)
 }
 
 func makeOnboardingURI(profile *eb.AttendeeProfile, attendeeAddr sdk.AccAddress, secret string) (string, error) {
@@ -139,7 +139,7 @@ func makeOnboardingURI(profile *eb.AttendeeProfile, attendeeAddr sdk.AccAddress,
 		log.WithError(err).Error("attendee profile serialization")
 		return "", err
 	}
-	encodedProfileData := base64.StdEncoding.EncodeToString(jsonProfileData)
+	encodedProfileData := base64.URLEncoding.EncodeToString(jsonProfileData)
 
 	return fmt.Sprintf(
 		"http://localhost:5000/claim?attendee=%s&profile=%s&secret=%s",
