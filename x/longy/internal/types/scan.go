@@ -23,6 +23,9 @@ type Scan struct {
 	P2 uint
 	//UnixTimeSec is the unix time in seconds of the block header of when this scan was created
 	UnixTimeSec int64
+	//Accepted is true when S2, the scanned participant, posts on-chain that they accept the connection
+	//this is equivalent of posting their own MsgScanQR or MsgInfo
+	Accepted bool
 }
 
 //NewScan creates a new scan and sets its id

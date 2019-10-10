@@ -47,6 +47,13 @@ func handleShareInfo(ctx sdk.Context, k keeper.Keeper, scan *types.Scan, sender 
 		return err
 	}
 
+	//set scan complete if ever the sender is S2, ie the scanned participant, indicating that hey give consent to
+	//share info
+	err = handleAcceptance(ctx, k, scan, sender)
+	if err != nil {
+		return err
+	}
+
 	//check who is in what position
 	var oldData *[]byte
 	if scan.S1.Equals(sender) {
@@ -68,6 +75,17 @@ func handleShareInfo(ctx sdk.Context, k keeper.Keeper, scan *types.Scan, sender 
 	return nil
 }
 
+//handleAcceptance sets scan complete if ever the sender is S2, ie the scanned participant, indicating that hey
+//give consent to share info
+func handleAcceptance(ctx sdk.Context, k keeper.Keeper, scan *types.Scan, sender sdk.AccAddress) sdk.Error {
+	if !scan.Accepted && scan.S2.Equals(sender) {
+		scan.Accepted = true
+		k.SetScan(ctx, scan)
+		return k.AwardScanPoints(ctx, scan)
+	}
+	return nil
+}
+
 //nolint:gocritic
 func handleNewScan(ctx sdk.Context, k keeper.Keeper, msg types.MsgScanQr,
 	attendee types.Attendee) (scan *types.Scan, err sdk.Error) {
@@ -76,10 +94,7 @@ func handleNewScan(ctx sdk.Context, k keeper.Keeper, msg types.MsgScanQr,
 	if err != nil {
 		return
 	}
-	err = k.AwardScanPoints(ctx, scan)
-	if err != nil {
-		return
-	}
+
 	//Set the time TODO check that this is indeed deterministic time on block header
 	scan.SetTimeUnixSeconds(ctx.BlockTime().Unix())
 	k.SetScan(ctx, scan)
