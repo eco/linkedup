@@ -128,8 +128,8 @@ func fetchPage(eventID int, authToken string, page int) (attendees []AttendeePro
 	numAttendees := len(data.Attendees)
 	attendees = make([]AttendeeProfile, numAttendees)
 	for i := 0; i < numAttendees; i++ {
-		attendee, err := getProfile(data.Attendees[i])
-		if err != nil {
+		attendee, err2 := getProfile(data.Attendees[i])
+		if err2 != nil {
 			return nil, false, err
 		}
 
