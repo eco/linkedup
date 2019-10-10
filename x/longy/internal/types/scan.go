@@ -17,8 +17,6 @@ type Scan struct {
 	D1 []byte
 	//D2 is the encrypted data shared by S2 with S1
 	D2 []byte
-	//Complete is true when both S1 and S2 have posted this scan interaction on-chain
-	Complete bool
 }
 
 //NewScan creates a new scan and sets its id
@@ -28,12 +26,11 @@ func NewScan(s1 sdk.AccAddress, s2 sdk.AccAddress, d1 []byte, d2 []byte) (Scan, 
 		return Scan{}, err
 	}
 	return Scan{
-		ID:       id,
-		S1:       s1,
-		S2:       s2,
-		D1:       d1,
-		D2:       d2,
-		Complete: false,
+		ID: id,
+		S1: s1,
+		S2: s2,
+		D1: d1,
+		D2: d2,
 	}, nil
 }
 

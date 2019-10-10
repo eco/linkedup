@@ -35,7 +35,6 @@ var _ = Describe("Attendee Keeper Tests", func() {
 
 		Context("when a can has been completed by both parties", func() {
 			BeforeEach(func() {
-				scan.Complete = true
 			})
 
 			It("should fail when attendee does not exist", func() {

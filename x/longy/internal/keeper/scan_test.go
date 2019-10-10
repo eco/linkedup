@@ -34,6 +34,5 @@ var _ = Describe("Scan Keeper Tests", func() {
 		Expect(storeScan.ID).To(Equal(scan.ID))
 		Expect(storeScan.S1.Equals(scan.S1)).To(BeTrue())
 		Expect(storeScan.S2.Equals(scan.S2)).To(BeTrue())
-		Expect(storeScan.Complete).To(Equal(scan.Complete))
 	})
 })

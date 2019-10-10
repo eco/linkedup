@@ -109,7 +109,6 @@ var _ = Describe("Info Handler Tests", func() {
 
 					scan, err := types.NewScan(sender, receiver, nil, nil)
 					Expect(err).To(BeNil())
-					scan.Complete = true
 					keeper.SetScan(ctx, &scan)
 				})
 
