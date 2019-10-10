@@ -5,7 +5,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/eco/longy/x/longy"
-	"github.com/eco/longy/x/longy/utils"
+	"github.com/eco/longy/x/longy/internal/types"
 	"github.com/spf13/cobra"
 )
 
@@ -43,7 +43,7 @@ func buildPrizeGenesisState(appState map[string]json.RawMessage, cdc *codec.Code
 	cdc.MustUnmarshalJSON(appState[longy.ModuleName], &genesisState)
 
 	//get the prizes
-	genesisState.GenesisPrizes = utils.GetGenesisPrizes()
+	genesisState.Prizes = types.GetGenesisPrizes()
 
 	return genesisState
 }

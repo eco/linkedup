@@ -53,42 +53,6 @@ func GetAttendees() (ga longy.GenesisAttendees, err sdk.Error) {
 	return
 }
 
-//GetGenesisPrizes returns the array of prizes that we start the chain with
-func GetGenesisPrizes() types.GenesisPrizes {
-	return types.GenesisPrizes{
-		types.GenesisPrize{
-			Tier:        1,
-			ScansNeeded: 100,
-			PrizeText:   "Nano Ledger",
-			Quantity:    400,
-		},
-		types.GenesisPrize{
-			Tier:        2,
-			ScansNeeded: 200,
-			PrizeText:   "Key Keeper",
-			Quantity:    200,
-		},
-		types.GenesisPrize{
-			Tier:        3,
-			ScansNeeded: 300,
-			PrizeText:   "Customized SFBW Week Shirt",
-			Quantity:    150,
-		},
-		types.GenesisPrize{
-			Tier:        4,
-			ScansNeeded: 350,
-			PrizeText:   "Customized SFBW Physical Coins",
-			Quantity:    100,
-		},
-		types.GenesisPrize{
-			Tier:        5,
-			ScansNeeded: 400,
-			PrizeText:   "Artwork",
-			Quantity:    50,
-		},
-	}
-}
-
 //fetchAttendees async gets and process the index of attendees from the paginated endpoint
 func fetchAttendees(eventID string, authKey string) (ga longy.GenesisAttendees, e sdk.Error) {
 	client := http.Client{}

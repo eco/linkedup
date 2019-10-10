@@ -9,9 +9,9 @@ import (
 
 // GenesisState is the genesis struct for the longy module
 type GenesisState struct {
-	KeyService    GenesisKeyService `json:"key_service"`
-	Attendees     GenesisAttendees  `json:"attendees"`
-	GenesisPrizes GenesisPrizes     `json:"prizes"`
+	KeyService GenesisKeyService `json:"key_service"`
+	Attendees  GenesisAttendees  `json:"attendees"`
+	Prizes     GenesisPrizes     `json:"prizes"`
 }
 
 // DefaultGenesisState returns the default genesis struct for the longy module
@@ -48,7 +48,10 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, state GenesisState) {
 
 	// set the master account
 	masterAccount := accountKeeper.NewAccountWithAddress(ctx, state.KeyService.Address)
-	masterAccount.SetPubKey(state.KeyService.PubKey) //nolint
+	err := masterAccount.SetPubKey(state.KeyService.PubKey) //nolint
+	if err != nil {
+		panic(err)
+	}
 	accountKeeper.SetAccount(ctx, masterAccount)
 
 	// set the attendees
@@ -59,5 +62,9 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, state GenesisState) {
 		accountKeeper.SetAccount(ctx, account)
 		//attendee.Address = account.GetAddress()
 		k.SetAttendee(ctx, attendee)
+	}
+
+	for i := range state.Prizes {
+		k.SetPrize(ctx, &state.Prizes[i])
 	}
 }
