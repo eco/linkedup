@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
 	ks "github.com/eco/longy/key-service"
 	eb "github.com/eco/longy/key-service/eventbrite"
 	"github.com/eco/longy/key-service/mail"
@@ -10,8 +12,6 @@ import (
 	"github.com/eco/longy/util"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"os"
 	"strings"
 )
@@ -68,7 +68,12 @@ var rootCmd = &cobra.Command{
 		}
 
 		/** Eventbrite session **/
-		ebSession := eb.CreateSession(authToken, eventID)
+		ebSession, err := eb.CreateSession(eventID, authToken)
+		if err != nil {
+			return err
+		}
+
+		/** Mail Client **/
 		mClient, err := mail.NewMockClient()
 		if !mockEmail {
 			mClient, err = mail.NewClient(session.Must(session.NewSession(&aws.Config{
@@ -91,7 +96,7 @@ var rootCmd = &cobra.Command{
 			return fmt.Errorf("master key: %s", err)
 		}
 
-		service := ks.NewService(&ebSession, &mKey, &db, mClient)
+		service := ks.NewService(ebSession, &mKey, &db, mClient)
 		service.StartHTTP(port)
 
 		return nil
