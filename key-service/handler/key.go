@@ -29,7 +29,7 @@ func registerKey(
 	eb *eventbrite.Session,
 	mk *masterkey.MasterKey,
 	db *models.DatabaseContext,
-	mc *mail.Client) {
+	mc mail.Client) {
 
 	r.HandleFunc("/key", key(eb, mk, db, mc)).Methods("POST")
 	r.HandleFunc("/recover", keyRecover(db, eb, mc)).Methods("POST")
@@ -43,7 +43,7 @@ func registerKey(
 func key(eb *eventbrite.Session,
 	mk *masterkey.MasterKey,
 	db *models.DatabaseContext,
-	mc *mail.Client) http.HandlerFunc {
+	mc mail.Client) http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 
@@ -116,7 +116,7 @@ func key(eb *eventbrite.Session,
 		}
 
 		/** Send the redirect **/
-		err = mc.SendRedirectEmail(profile, attendeeAddress, secret)
+		err = mc.SendOnboardingEmail(profile, attendeeAddress, secret)
 		if err != nil {
 			http.Error(w, "email error. try again", http.StatusInternalServerError)
 		}
@@ -125,7 +125,7 @@ func key(eb *eventbrite.Session,
 	}
 }
 
-func keyRecover(db *models.DatabaseContext, eb *eventbrite.Session, mc *mail.Client) http.HandlerFunc {
+func keyRecover(db *models.DatabaseContext, eb *eventbrite.Session, mc mail.Client) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		/** Read the attendee id from the body **/
 		body, err := ioutil.ReadAll(r.Body)
@@ -157,7 +157,7 @@ func keyRecover(db *models.DatabaseContext, eb *eventbrite.Session, mc *mail.Cli
 			return
 		}
 
-		if err := mc.SendRecoveryEmail(profile.Email, token, id); err != nil {
+		if err := mc.SendRecoveryEmail(profile, id, token); err != nil {
 			http.Error(w, "key service down", http.StatusServiceUnavailable)
 			return
 		}

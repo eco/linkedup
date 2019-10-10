@@ -19,7 +19,7 @@ else
   fi
 fi
 
-if (($needsInstall == 1)); then
+if [ $needsInstall -eq 1 ]; then
   echo "Installing golangci-lint"
   go get github.com/golangci/golangci-lint/cmd/golangci-lint@${requiredVersion}
   echo "Finished installing gometaliner"
