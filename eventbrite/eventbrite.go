@@ -109,7 +109,7 @@ func fetchPage(eventID int, authToken string, page int) (attendees []AttendeePro
 		err = fmt.Errorf("eventbrite request delivery: %s", err)
 		return nil, false, err
 	}
-	defer resp.Body.Close()
+	defer resp.Body.Close() //nolint
 	if resp.StatusCode != http.StatusOK {
 		err = fmt.Errorf("bad response. status code=%d", resp.StatusCode)
 		return nil, false, err
@@ -118,7 +118,8 @@ func fetchPage(eventID int, authToken string, page int) (attendees []AttendeePro
 	// decode body
 	decoder := json.NewDecoder(resp.Body)
 	var data bodyResp
-	if err := decoder.Decode(&data); err != nil {
+	err = decoder.Decode(&data)
+	if err != nil {
 		err = fmt.Errorf("reading request body: %s", err)
 		return nil, false, err
 	}
@@ -164,7 +165,7 @@ func getProfile(body json.RawMessage) (*AttendeeProfile, error) {
 	profileData, ok := jsonResp["profile"]
 	if !ok {
 		return nil, fmt.Errorf("attendee missing profile")
-	} else if err := json.Unmarshal(profileData, &jsonProfile); err != nil {
+	} else if err := json.Unmarshal(profileData, &jsonProfile); err != nil { //nolint
 		err = fmt.Errorf("parsing attendee profile: %s", err)
 		return nil, err
 	}

@@ -48,8 +48,9 @@ func CreateSession(eventID int, authToken string) (*Session, error) {
 	go session.poll(ticker, eventID, authToken)
 
 	session.Lock()
-	for _, a := range attendees {
-		session.attendees[a.ID] = a
+	for i := 0; i < len(attendees); i++ {
+		id := attendees[i].ID
+		session.attendees[id] = attendees[i]
 	}
 	session.Unlock()
 
@@ -79,8 +80,9 @@ func (s *Session) poll(ticker *time.Ticker, eventID int, authToken string) {
 		if len(attendees) != s.numAttendees {
 			// there are updates
 			newMap := make(map[int]eventbrite.AttendeeProfile)
-			for _, a := range attendees {
-				newMap[a.ID] = a
+			for i := 0; i < len(attendees); i++ {
+				id := attendees[i].ID
+				newMap[id] = attendees[i]
 			}
 
 			s.Lock()
