@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
 	ks "github.com/eco/longy/key-service"
 	eb "github.com/eco/longy/key-service/eventbrite"
 	"github.com/eco/longy/key-service/mail"
@@ -32,8 +34,9 @@ func init() {
 	rootCmd.Flags().String("eventbrite-auth", "", "eventbrite authorization token")
 	rootCmd.Flags().Int("eventbrite-event", 0, "id associated with the eventbrite event")
 
-	rootCmd.Flags().String("aws-region", "us-west-1", "aws region for dynamodb")
+	rootCmd.Flags().String("aws-region", "us-west-2", "aws region for dynamodb")
 	rootCmd.Flags().String("aws-dynamo-url", "http://localhost:8000", "dynamodb url")
+	rootCmd.Flags().Bool("email-mock", false, "print email URLs instead of emailing")
 }
 
 var rootCmd = &cobra.Command{
@@ -50,12 +53,10 @@ var rootCmd = &cobra.Command{
 		authToken := viper.GetString("eventbrite-auth")
 		eventID := viper.GetInt("eventbrite-event")
 
-		smtpServer := viper.GetString("smtp-server")
-		smtpUsername := viper.GetString("smtp-username")
-		smtpPassword := viper.GetString("smtp-password")
-
 		awsRegion := viper.GetString("aws-region")
 		dynamoURL := viper.GetString("aws-dynamo-url")
+
+		mockEmail := viper.GetBool("email-mock")
 
 		longyChainID := viper.GetString("longy-chain-id")
 		longyFullNodeURL := viper.GetString("longy-fullnode")
@@ -66,15 +67,19 @@ var rootCmd = &cobra.Command{
 			return fmt.Errorf("masterkey: %s", err)
 		}
 
-		/** SMTP connection **/
-		smtpHost, smtpPort, err := util.HostAndPort(smtpServer)
+		/** Eventbrite session **/
+		ebSession, err := eb.CreateSession(eventID, authToken)
 		if err != nil {
-			return fmt.Errorf("smtp server: %s", err)
+			return err
 		}
 
-		/** Eventbrite session **/
-		ebSession := eb.CreateSession(authToken, eventID)
-		mClient, err := mail.NewClient(smtpHost, smtpPort, smtpUsername, smtpPassword)
+		/** Mail Client **/
+		mClient, err := mail.NewMockClient()
+		if !mockEmail {
+			mClient, err = mail.NewClient(session.Must(session.NewSession(&aws.Config{
+				Region: aws.String(awsRegion),
+			})))
+		}
 		if err != nil {
 			return fmt.Errorf("mail client: %s", err)
 		}
@@ -91,7 +96,7 @@ var rootCmd = &cobra.Command{
 			return fmt.Errorf("master key: %s", err)
 		}
 
-		service := ks.NewService(&ebSession, &mKey, &db, &mClient)
+		service := ks.NewService(ebSession, &mKey, &db, mClient)
 		service.StartHTTP(port)
 
 		return nil
