@@ -169,7 +169,7 @@ func makeOnboardingURI(profile *eb.AttendeeProfile, attendeeAddr sdk.AccAddress,
 
 	params := url.Values{}
 	params.Add("attendee", attendeeAddr.String())
-	params.Add("profile", base64.URLEncoding.EncodeToString(jsonProfileData))
+	params.Add("profile", base64.StdEncoding.EncodeToString(jsonProfileData))
 	params.Add("secret", secret)
 
 	baseURL.RawQuery = params.Encode()
