@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/url"
 	"fmt"
+	"strconv"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	eb "github.com/eco/longy/eventbrite"
@@ -145,7 +146,7 @@ func makeRecoveryURI(id int, token string) (string, error) {
 	}
 
 	params := url.Values{}
-	params.Add("id", string(id))
+	params.Add("id", strconv.Itoa(id))
 	params.Add("token", token)
 
 	baseURL.RawQuery = params.Encode()
@@ -167,7 +168,7 @@ func makeOnboardingURI(profile *eb.AttendeeProfile, attendeeAddr sdk.AccAddress,
 	}
 
 	params := url.Values{}
-	params.Add("attendee", string(attendeeAddr))
+	params.Add("attendee", attendeeAddr.String())
 	params.Add("profile", base64.URLEncoding.EncodeToString(jsonProfileData))
 	params.Add("secret", secret)
 
