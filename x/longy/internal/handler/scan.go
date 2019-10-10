@@ -77,6 +77,7 @@ func handleShareInfo(ctx sdk.Context, k keeper.Keeper, scan *types.Scan, sender 
 
 //handleAcceptance sets scan complete if ever the sender is S2, ie the scanned participant, indicating that hey
 //give consent to share info
+//nolint:gocritic
 func handleAcceptance(ctx sdk.Context, k keeper.Keeper, scan *types.Scan, sender sdk.AccAddress) sdk.Error {
 	if !scan.Accepted && scan.S2.Equals(sender) {
 		scan.Accepted = true
