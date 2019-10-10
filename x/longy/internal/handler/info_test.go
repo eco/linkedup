@@ -107,9 +107,9 @@ var _ = Describe("Info Handler Tests", func() {
 					receiverRep = s.Rep
 					recIdsLen = len(s.ScanIDs)
 
-					scan, err := types.NewScan(sender, receiver, nil, nil)
+					scan, err := types.NewScan(sender, receiver, nil, nil, 0, 0)
 					Expect(err).To(BeNil())
-					keeper.SetScan(ctx, &scan)
+					keeper.SetScan(ctx, scan)
 				})
 
 				It("should succeed when participants are both regular attendees", func() {

@@ -115,7 +115,9 @@ func inspectScan(s1 sdk.AccAddress, s2 sdk.AccAddress, dataShared bool) {
 	if dataShared {
 		point += types.ShareAttendeeAwardPoints
 	}
-	Expect(a.Rep).To(Equal(types.ScanAttendeeAwardPoints + point))
+	point = types.ScanAttendeeAwardPoints + point
+	Expect(a.Rep).To(Equal(point))
+	Expect(scan.P1).To(Equal(point))
 	Expect(b.Rep).To(Equal(types.ScanAttendeeAwardPoints))
 
 	//Check share ids

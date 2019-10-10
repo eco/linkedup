@@ -9,14 +9,14 @@ import (
 )
 
 var _ = Describe("Scan Keeper Tests", func() {
-	var scan types.Scan
+	var scan *types.Scan
 	BeforeEach(func() {
 		BeforeTestRun()
 
 		s1 := util.IDToAddress("1234")
 		s2 := util.IDToAddress("asdf")
 		var err sdk.Error
-		scan, err = types.NewScan(s1, s2, nil, nil)
+		scan, err = types.NewScan(s1, s2, nil, nil, 0, 0)
 		Expect(err).To(BeNil())
 	})
 
@@ -27,7 +27,7 @@ var _ = Describe("Scan Keeper Tests", func() {
 	})
 
 	It("should succeed to get a scan that exists", func() {
-		keeper.SetScan(ctx, &scan)
+		keeper.SetScan(ctx, scan)
 
 		storeScan, err := keeper.GetScanByID(ctx, scan.ID)
 		Expect(err).To(BeNil())

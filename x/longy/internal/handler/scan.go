@@ -39,7 +39,7 @@ func HandleMsgQrScan(ctx sdk.Context, k keeper.Keeper, msg types.MsgScanQr) sdk.
 }
 
 //nolint:gocritic
-func handleShareInfo(ctx sdk.Context, k keeper.Keeper, scan types.Scan, sender sdk.AccAddress,
+func handleShareInfo(ctx sdk.Context, k keeper.Keeper, scan *types.Scan, sender sdk.AccAddress,
 	attendee types.Attendee, data []byte) sdk.Error {
 	//add share ids, skips if the ids are already added
 	err := k.AddSharedID(ctx, sender, attendee.Address, scan.ID)
@@ -56,22 +56,22 @@ func handleShareInfo(ctx sdk.Context, k keeper.Keeper, scan types.Scan, sender s
 	}
 
 	if len(*oldData) == 0 && len(data) > 0 {
-		err := k.AwardShareInfoPoints(ctx, sender, attendee.Address)
+		err := k.AwardShareInfoPoints(ctx, scan, sender, attendee.Address)
 		if err != nil {
 			return err
 		}
 
 		//set new data into scan and save scan
 		*oldData = data
-		k.SetScan(ctx, &scan)
+		k.SetScan(ctx, scan)
 	}
 	return nil
 }
 
 //nolint:gocritic
 func handleNewScan(ctx sdk.Context, k keeper.Keeper, msg types.MsgScanQr,
-	attendee types.Attendee) (scan types.Scan, err sdk.Error) {
-	scan, err = types.NewScan(msg.Sender, attendee.Address, nil, nil) //dont pass data here
+	attendee types.Attendee) (scan *types.Scan, err sdk.Error) {
+	scan, err = types.NewScan(msg.Sender, attendee.Address, nil, nil, 0, 0) //dont pass data here
 
 	if err != nil {
 		return
@@ -80,7 +80,8 @@ func handleNewScan(ctx sdk.Context, k keeper.Keeper, msg types.MsgScanQr,
 	if err != nil {
 		return
 	}
-
-	k.SetScan(ctx, &scan)
+	//Set the time TODO check that this is indeed deterministic time on block header
+	scan.SetTimeUnixSeconds(ctx.BlockTime().Unix())
+	k.SetScan(ctx, scan)
 	return
 }

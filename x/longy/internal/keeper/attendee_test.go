@@ -11,7 +11,7 @@ import (
 
 var _ = Describe("Attendee Keeper Tests", func() {
 	var s1, s2 sdk.AccAddress
-	var scan types.Scan
+	var scan *types.Scan
 	const (
 		qr1 = "1234"
 		qr2 = "asdf"
@@ -22,7 +22,7 @@ var _ = Describe("Attendee Keeper Tests", func() {
 		s1 = util.IDToAddress(qr1)
 		s2 = util.IDToAddress(qr2)
 		var err sdk.Error
-		scan, err = types.NewScan(s1, s2, nil, nil)
+		scan, err = types.NewScan(s1, s2, nil, nil, 0, 0)
 		Expect(err).To(BeNil())
 	})
 

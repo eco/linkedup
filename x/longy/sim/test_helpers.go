@@ -6,6 +6,7 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
+	"time"
 )
 
 // setup initializes a new SimApp. A Nop logger is set in SimApp.
@@ -35,7 +36,9 @@ func setup(isCheckTx bool) *LongyApp {
 // CreateTestApp sets up a new test app
 func CreateTestApp(isCheckTx bool) (*LongyApp, sdk.Context) {
 	longyApp := setup(isCheckTx)
-	ctx := longyApp.BaseApp.NewContext(isCheckTx, abci.Header{})
+	ctx := longyApp.BaseApp.NewContext(isCheckTx, abci.Header{
+		Time: time.Now(),
+	})
 
 	return longyApp, ctx
 }

@@ -46,7 +46,7 @@ func (k Keeper) SetAttendee(ctx sdk.Context, a types.Attendee) {
 
 //AwardScanPoints awards the points to each participant of the scan
 //nolint:gocritic
-func (k Keeper) AwardScanPoints(ctx sdk.Context, scan types.Scan) sdk.Error {
+func (k Keeper) AwardScanPoints(ctx sdk.Context, scan *types.Scan) sdk.Error {
 	a1, a2, err := k.getAttendeesByScan(ctx, scan)
 	if err != nil {
 		return err
@@ -60,6 +60,10 @@ func (k Keeper) AwardScanPoints(ctx sdk.Context, scan types.Scan) sdk.Error {
 	a2.AddRep(points)
 	k.SetAttendee(ctx, a1)
 	k.SetAttendee(ctx, a2)
+
+	//update scan points
+	scan.AddPoints(points, points)
+	k.SetScan(ctx, scan)
 	return nil
 }
 
@@ -82,7 +86,7 @@ func (k Keeper) AddSharedID(ctx sdk.Context, senderAddr sdk.AccAddress, receiver
 
 //AwardShareInfoPoints adds points to the sender of the shared info based on if the receiver is a sponsor or not
 //nolint:gocritic
-func (k Keeper) AwardShareInfoPoints(ctx sdk.Context, senderAddr sdk.AccAddress,
+func (k Keeper) AwardShareInfoPoints(ctx sdk.Context, scan *types.Scan, senderAddr sdk.AccAddress,
 	receiverAddr sdk.AccAddress) sdk.Error {
 	sender, receiver, err := k.GetAttendees(ctx, senderAddr, receiverAddr)
 	if err != nil {
@@ -95,6 +99,9 @@ func (k Keeper) AwardShareInfoPoints(ctx sdk.Context, senderAddr sdk.AccAddress,
 	}
 	sender.AddRep(val)
 	k.SetAttendee(ctx, sender)
+	//update scan points
+	scan.AddPointsToAccount(sender.Address, val)
+	k.SetScan(ctx, scan)
 	return nil
 }
 
@@ -118,7 +125,7 @@ func (k Keeper) GetAttendees(ctx sdk.Context, acc1 sdk.AccAddress,
 
 //getAttendeesByScan returns  the attendees for the give scan
 //nolint:gocritic
-func (k Keeper) getAttendeesByScan(ctx sdk.Context, scan types.Scan) (a1 types.Attendee,
+func (k Keeper) getAttendeesByScan(ctx sdk.Context, scan *types.Scan) (a1 types.Attendee,
 	a2 types.Attendee, err sdk.Error) {
 	return k.GetAttendees(ctx, scan.S1, scan.S2)
 }

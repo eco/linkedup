@@ -20,30 +20,30 @@ var _ = Describe("Scan Tests", func() {
 	})
 
 	It("should fail when any address is empty", func() {
-		_, err := types.NewScan(s1, empty, nil, nil)
+		_, err := types.NewScan(s1, empty, nil, nil, 0, 0)
 		Expect(err).To(Not(BeNil()))
 		Expect(err.Code()).To(Equal(types.AccountAddressEmpty))
 
-		_, err = types.NewScan(empty, s1, nil, nil)
+		_, err = types.NewScan(empty, s1, nil, nil, 0, 0)
 		Expect(err).To(Not(BeNil()))
 		Expect(err.Code()).To(Equal(types.AccountAddressEmpty))
 
-		_, err = types.NewScan(empty, empty, nil, nil)
+		_, err = types.NewScan(empty, empty, nil, nil, 0, 0)
 		Expect(err).To(Not(BeNil()))
 		Expect(err.Code()).To(Equal(types.AccountAddressEmpty))
 	})
 
 	It("should fail when both addresses are the same", func() {
-		_, err := types.NewScan(s2, s2, nil, nil)
+		_, err := types.NewScan(s2, s2, nil, nil, 0, 0)
 		Expect(err).To(Not(BeNil()))
 		Expect(err.Code()).To(Equal(types.AccountsSame))
 	})
 
 	It("should return the same id regardless of account params order", func() {
-		scan0, err := types.NewScan(s1, s2, nil, nil)
+		scan0, err := types.NewScan(s1, s2, nil, nil, 0, 0)
 		Expect(err).To(BeNil())
 
-		scan1, err := types.NewScan(s2, s1, nil, nil)
+		scan1, err := types.NewScan(s2, s1, nil, nil, 0, 0)
 		Expect(err).To(BeNil())
 		Expect(len(scan1.ID)).To(Equal(len(s1)*2 + prefixLen))
 
@@ -51,7 +51,7 @@ var _ = Describe("Scan Tests", func() {
 	})
 
 	It("should prefix the id with the scan prefix key", func() {
-		scan0, err := types.NewScan(s1, s2, nil, nil)
+		scan0, err := types.NewScan(s1, s2, nil, nil, 0, 0)
 		keyIncrease := len(s2)*2 + prefixLen
 		Expect(err).To(BeNil())
 		Expect(len(scan0.ID)).To(Equal(keyIncrease))
