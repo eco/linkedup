@@ -3,7 +3,8 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/eco/longy/key-service/eventbrite"
+	"github.com/eco/longy/eventbrite"
+	ebSession "github.com/eco/longy/key-service/eventbrite"
 	"github.com/eco/longy/key-service/mail"
 	"github.com/eco/longy/key-service/masterkey"
 	"github.com/eco/longy/key-service/models"
@@ -26,7 +27,7 @@ type AttendeeInfo struct {
 
 func registerKey(
 	r *mux.Router,
-	eb *eventbrite.Session,
+	eb *ebSession.Session,
 	mk *masterkey.MasterKey,
 	db *models.DatabaseContext,
 	mc mail.Client) {
@@ -40,7 +41,7 @@ func registerKey(
 // All core logic is implemented here. If there are plans to expand this service,
 // logic (email retrieval, etc) can be lifted into http middleware to allow for better
 // composability
-func key(eb *eventbrite.Session,
+func key(eb *ebSession.Session,
 	mk *masterkey.MasterKey,
 	db *models.DatabaseContext,
 	mc mail.Client) http.HandlerFunc {
@@ -74,12 +75,9 @@ func key(eb *eventbrite.Session,
 		attendeeAddress := util.IDToAddress(fmt.Sprintf("%d", body.AttendeeID))
 
 		/** Get the Attendee's profile **/
-		profile, err := eb.AttendeeProfile(body.AttendeeID)
-		if err != nil {
+		profile, ok := eb.AttendeeProfile(body.AttendeeID)
+		if !ok {
 			http.Error(w, "key-service down", http.StatusServiceUnavailable)
-			return
-		} else if profile == nil {
-			http.Error(w, "attendee id not present in the event", http.StatusNotFound)
 			return
 		}
 
@@ -97,7 +95,7 @@ func key(eb *eventbrite.Session,
 			http.Error(w, "key storage service down", http.StatusInternalServerError)
 			return
 		}
-		ok := db.StoreAttendeeInfo(body.AttendeeID, bz)
+		ok = db.StoreAttendeeInfo(body.AttendeeID, bz)
 		if !ok {
 			http.Error(w, "key storage service down", http.StatusServiceUnavailable)
 			return
@@ -125,7 +123,7 @@ func key(eb *eventbrite.Session,
 	}
 }
 
-func keyRecover(db *models.DatabaseContext, eb *eventbrite.Session, mc mail.Client) http.HandlerFunc {
+func keyRecover(db *models.DatabaseContext, eb *ebSession.Session, mc mail.Client) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		/** Read the attendee id from the body **/
 		body, err := ioutil.ReadAll(r.Body)
@@ -140,19 +138,15 @@ func keyRecover(db *models.DatabaseContext, eb *eventbrite.Session, mc mail.Clie
 		}
 
 		/** Retrieve email information **/
-		profile, err := eb.AttendeeProfile(id)
-		if profile == nil && err == nil {
+		profile, ok := eb.AttendeeProfile(id)
+		if !ok {
 			http.Error(w, "attendee not found", http.StatusNotFound)
-			return
-		} else if err != nil {
-			http.Error(w, "key service down", http.StatusServiceUnavailable)
 			return
 		}
 
 		/** Create an auth token and send recovery email **/
 		token := uuid.New().String()
-		ok := db.StoreAuthToken(id, token)
-		if !ok {
+		if ok := db.StoreAuthToken(id, token); !ok {
 			http.Error(w, "key service down", http.StatusServiceUnavailable)
 			return
 		}

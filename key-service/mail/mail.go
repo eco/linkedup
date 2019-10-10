@@ -7,7 +7,7 @@ import (
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	eb "github.com/eco/longy/key-service/eventbrite"
+	eb "github.com/eco/longy/eventbrite"
 	"github.com/sirupsen/logrus"
 
 	"github.com/aws/aws-sdk-go/aws/client"
@@ -29,7 +29,6 @@ type Client interface {
 type sesClient struct {
 	ses *ses.SES
 }
-
 
 type mockClient struct {
 }
@@ -109,8 +108,8 @@ func (c sesClient) sendEmailWithURL(dest string, url string, template string) (e
 		Destination: &ses.Destination{
 			ToAddresses: []*string{&dest},
 		},
-		Source: &gmEmail,
-		Template: &template,
+		Source:       &gmEmail,
+		Template:     &template,
 		TemplateData: &templateData,
 	})
 	return

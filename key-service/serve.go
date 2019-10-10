@@ -56,6 +56,7 @@ func (srv *Service) StartHTTP(port int) {
 
 // Close will release the resources used by the server
 func (srv *Service) Close() {
+	srv.ebSession.Close()
 	log.Info("done")
 }
 
