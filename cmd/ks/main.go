@@ -36,6 +36,7 @@ func init() {
 
 	rootCmd.Flags().String("aws-region", "us-west-2", "aws region for dynamodb")
 	rootCmd.Flags().String("aws-dynamo-url", "http://localhost:8000", "dynamodb url")
+	rootCmd.Flags().Bool("email-mock", false, "print email URLs instead of emailing")
 }
 
 var rootCmd = &cobra.Command{
@@ -55,6 +56,8 @@ var rootCmd = &cobra.Command{
 		awsRegion := viper.GetString("aws-region")
 		dynamoURL := viper.GetString("aws-dynamo-url")
 
+		mockEmail := viper.GetBool("email-mock")
+
 		longyChainID := viper.GetString("longy-chain-id")
 		longyFullNodeURL := viper.GetString("longy-fullnode")
 		longyRestURL := viper.GetString("longy-restservice")
@@ -66,9 +69,12 @@ var rootCmd = &cobra.Command{
 
 		/** Eventbrite session **/
 		ebSession := eb.CreateSession(authToken, eventID)
-		mClient, err := mail.NewClient(session.Must(session.NewSession(&aws.Config{
-			Region: aws.String(awsRegion),
-		})))
+		mClient, err := mail.NewMockClient()
+		if !mockEmail {
+			mClient, err = mail.NewClient(session.Must(session.NewSession(&aws.Config{
+				Region: aws.String(awsRegion),
+			})))
+		}
 		if err != nil {
 			return fmt.Errorf("mail client: %s", err)
 		}
