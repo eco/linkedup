@@ -17,8 +17,8 @@ const (
 	// ScanNotFound is the code when we cannot find a scan in the keeper with the given id
 	ScanNotFound
 
-	//InfoNotFound is the code when we cannot find an info in the keeper with the given id
-	InfoNotFound
+	//PrizeNotFound is the code when we cannot find an info in the keeper with the given id
+	PrizeNotFound
 
 	// InsufficientPrivileges is the code for when a transaction signer doesn't have the necessary privilege
 	InsufficientPrivileges
@@ -100,9 +100,9 @@ func ErrScanNotFound(format string, args ...interface{}) sdk.Error {
 	return sdk.NewError(LongyCodeSpace, ScanNotFound, format, args...)
 }
 
-// ErrInfoNotFound occurs when we cannot find an info in the keeper with the given id
-func ErrInfoNotFound(format string, args ...interface{}) sdk.Error {
-	return sdk.NewError(LongyCodeSpace, InfoNotFound, format, args...)
+// ErrPrizeNotFound occurs when we cannot find a prize in the keeper with the given id
+func ErrPrizeNotFound(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, PrizeNotFound, format, args...)
 }
 
 // ErrAttendeeNotFound occurs when we cannot find the attendee

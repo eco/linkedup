@@ -15,6 +15,8 @@ const (
 	QueryScans = "scans"
 	//AddressKey is the key for attendee gets by address
 	AddressKey = "address"
+	//PrizesKey is the key for the event prizes
+	PrizesKey = "prizes"
 )
 
 // NewQuerier is the module level router for state queries
@@ -28,12 +30,13 @@ func NewQuerier(keeper Keeper) sdk.Querier {
 		case QueryAttendees:
 			if path[1] == AddressKey {
 				queryArgs = path[2:]
-				return queryAttendeesByAddr(ctx, queryArgs, req, keeper)
+				return queryAttendeesByAddr(ctx, queryArgs, keeper)
 			}
-			return queryAttendees(ctx, queryArgs, req, keeper)
-
+			return queryAttendees(ctx, queryArgs, keeper)
 		case QueryScans:
-			return queryScans(ctx, queryArgs, req, keeper)
+			return queryScans(ctx, queryArgs, keeper)
+		case PrizesKey:
+			return queryPrizes(ctx, keeper)
 		default:
 			break
 		}
@@ -43,7 +46,22 @@ func NewQuerier(keeper Keeper) sdk.Querier {
 }
 
 //nolint:gocritic,unparam
-func queryAttendees(ctx sdk.Context, path []string, req abci.RequestQuery, keeper Keeper) (res []byte, err sdk.Error) {
+func queryPrizes(ctx sdk.Context, keeper Keeper) (res []byte, err sdk.Error) {
+	prizes, err := keeper.GetPrizes(ctx)
+	if err != nil {
+		return
+	}
+
+	res, e := codec.MarshalJSONIndent(keeper.cdc, prizes)
+	if e != nil {
+		panic("could not marshal result to JSON")
+	}
+
+	return
+}
+
+//nolint:gocritic,unparam
+func queryAttendees(ctx sdk.Context, path []string, keeper Keeper) (res []byte, err sdk.Error) {
 
 	attendee, ok := keeper.GetAttendeeWithID(ctx, path[0])
 
@@ -60,7 +78,7 @@ func queryAttendees(ctx sdk.Context, path []string, req abci.RequestQuery, keepe
 }
 
 //nolint:gocritic,unparam
-func queryAttendeesByAddr(ctx sdk.Context, path []string, req abci.RequestQuery,
+func queryAttendeesByAddr(ctx sdk.Context, path []string,
 	keeper Keeper) (res []byte, err sdk.Error) {
 	addr, e := sdk.AccAddressFromBech32(path[0])
 	if e != nil {
@@ -82,7 +100,7 @@ func queryAttendeesByAddr(ctx sdk.Context, path []string, req abci.RequestQuery,
 }
 
 //nolint:gocritic,unparam
-func queryScans(ctx sdk.Context, path []string, req abci.RequestQuery, keeper Keeper) (res []byte, err sdk.Error) {
+func queryScans(ctx sdk.Context, path []string, keeper Keeper) (res []byte, err sdk.Error) {
 	scan, err := keeper.GetScanByID(ctx, types.Decode(path[0]))
 	if err != nil {
 		return

@@ -1,4 +1,4 @@
-package client
+package genesis
 
 import (
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -12,7 +12,7 @@ import (
 	"github.com/tendermint/tendermint/libs/cli"
 )
 
-// AddSetGenesisServiceCmd will set the tesing master public/address keys where "master" is the seed
+// AddSetGenesisServiceCmd will set the testing master public/address keys where "master" is the seed
 func AddSetGenesisServiceCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use: "set-genesis-service",

@@ -21,8 +21,8 @@ var (
 	AttendeePrefix = []byte{0x0}
 	//ScanPrefix is the prefix for the scan type
 	ScanPrefix = []byte{0x1}
-	//InfoPrefix is the prefix for the info type
-	InfoPrefix = []byte{0x2}
+	//PrizePrefix is the prefix for the prize type
+	PrizePrefix = []byte{0x2}
 	//MasterKeyPrefix is the prefix for storing the public address of the service account
 	MasterKeyPrefix = []byte{0x3}
 	//KeySeparator is the separator between the prefix and the type key
@@ -39,9 +39,9 @@ func ScanKey(id []byte) []byte {
 	return prefixKey(ScanPrefix, id)
 }
 
-//InfoKey returns the prefixed key for managing info in the store
-func InfoKey(id []byte) []byte {
-	return prefixKey(InfoPrefix, id)
+//PrizeKey returns the prefixed key for managing prizes in the store
+func PrizeKey(id []byte) []byte {
+	return prefixKey(PrizePrefix, id)
 }
 
 // MasterKey will return the store key for the master key

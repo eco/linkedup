@@ -1,16 +1,13 @@
-package client
+package genesis
 
 import (
 	"encoding/json"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/server"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/genutil"
 	"github.com/eco/longy/x/longy"
 	"github.com/eco/longy/x/longy/utils"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-	"github.com/tendermint/tendermint/libs/cli"
 )
 
 // AddGenesisAttendeesCmd returns add-genesis-attendees cobra Command. Allows users to add the list of attendees
@@ -29,37 +26,20 @@ func AddGenesisAttendeesCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Comman
 
 // AddGenesisAttendees adds the attendees and the service account to the genesis file under the longy key
 func addGenesisAttendees(ctx *server.Context, cdc *codec.Codec) error {
-	config := ctx.Config
-	config.SetRoot(viper.GetString(cli.HomeFlag))
-
-	// retrieve the app state
-	genFile := config.GenesisFile()
-	appState, genDoc, err := genutil.GenesisStateFromGenFile(cdc, genFile)
+	appState, genDoc, genFile, err := getGenesisState(ctx, cdc)
 	if err != nil {
 		return err
 	}
 
-	genesisState, err := buildGenesisState(appState, cdc)
+	genesisState, err := buildAttendeeGenesisState(appState, cdc)
 	if err != nil {
 		return err
 	}
-
-	genesisStateBz := cdc.MustMarshalJSON(genesisState)
-	appState[longy.ModuleName] = genesisStateBz
-
-	appStateJSON, err := cdc.MarshalJSON(appState)
-	if err != nil {
-		return err
-	}
-
-	// export app state
-	genDoc.AppState = appStateJSON
-
-	return genutil.ExportGenesisFile(genDoc, genFile)
+	return updateGenesisState(cdc, genesisState, appState, genDoc, genFile)
 }
 
 // BuildGenesisState builds the genesis state for the longy module
-func buildGenesisState(appState map[string]json.RawMessage, cdc *codec.Codec) (longy.GenesisState, sdk.Error) {
+func buildAttendeeGenesisState(appState map[string]json.RawMessage, cdc *codec.Codec) (longy.GenesisState, sdk.Error) {
 	var (
 		genesisState longy.GenesisState
 		err          sdk.Error
