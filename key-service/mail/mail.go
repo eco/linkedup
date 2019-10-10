@@ -3,6 +3,7 @@ package mail
 import (
 	"encoding/base64"
 	"encoding/json"
+	"net/url"
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -80,11 +81,15 @@ func (c sesClient) SendOnboardingEmail(profile *eb.AttendeeProfile, attendeeAddr
 // SendRecoveryEmail will construct and send the email containing the account
 // recovery message and URL with the given secret
 func (c sesClient) SendRecoveryEmail(profile *eb.AttendeeProfile, id int, token string) error {
-	redirectURI := makeRecoveryURI(id, token)
+	redirectURI, err := makeRecoveryURI(id, token)
+
+	if err != nil {
+		return err
+	}
 
 	log.Tracef("sending recovery email to: %s", profile.Email)
 
-	err := c.sendEmailWithURL(profile.Email, redirectURI, "linkedup-rekey")
+	err = c.sendEmailWithURL(profile.Email, redirectURI, "linkedup-rekey")
 
 	if err != nil {
 		log.Errorf(
@@ -123,14 +128,30 @@ func (c mockClient) SendOnboardingEmail(profile *eb.AttendeeProfile, attendeeAdd
 }
 
 func (c mockClient) SendRecoveryEmail(profile *eb.AttendeeProfile, id int, token string) error {
-	redirectURI := makeRecoveryURI(id, token)
+	redirectURI, err := makeRecoveryURI(id, token)
+
+	if err != nil {
+		return err
+	}
 
 	log.Warnf("mock recovery email with url: %s", redirectURI)
 	return nil
 }
 
-func makeRecoveryURI(id int, token string) string {
-	return fmt.Sprintf("http://longygame.com/recover?id=%d&token=%s", id, token)
+func makeRecoveryURI(id int, token string) (string, error) {
+	baseURL, err := url.Parse("http://localhost:5000/recover")
+
+	if err != nil {
+		return "", err
+	}
+
+	params := url.Values{}
+	params.Add("id", string(id))
+	params.Add("token", token)
+
+	baseURL.RawQuery = params.Encode()
+
+	return baseURL.String(), nil
 }
 
 func makeOnboardingURI(profile *eb.AttendeeProfile, attendeeAddr sdk.AccAddress, secret string) (string, error) {
@@ -139,12 +160,19 @@ func makeOnboardingURI(profile *eb.AttendeeProfile, attendeeAddr sdk.AccAddress,
 		log.WithError(err).Error("attendee profile serialization")
 		return "", err
 	}
-	encodedProfileData := base64.StdEncoding.EncodeToString(jsonProfileData)
 
-	return fmt.Sprintf(
-		"http://localhost:5000/claim?attendee=%s&profile=%s&secret=%s",
-		attendeeAddr,
-		encodedProfileData,
-		secret,
-	), nil
+	baseURL, err := url.Parse("http://localhost:5000/claim")
+
+	if err != nil {
+		return "", err
+	}
+
+	params := url.Values{}
+	params.Add("attendee", string(attendeeAddr))
+	params.Add("profile", base64.URLEncoding.EncodeToString(jsonProfileData))
+	params.Add("secret", secret)
+
+	baseURL.RawQuery = params.Encode()
+
+	return baseURL.String(), nil
 }
