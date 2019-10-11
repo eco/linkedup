@@ -6,6 +6,9 @@ import (
 	"github.com/aws/aws-sdk-go/aws/client"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/aws/aws-sdk-go/service/s3"
+	"time"
+	"fmt"
 )
 
 const (
@@ -15,31 +18,43 @@ const (
 
 // DatabaseContext carries context needed to interact with the database.
 type DatabaseContext struct {
-	DB *dynamodb.DynamoDB
+	db *dynamodb.DynamoDB
+	s3 *s3.S3
+	contentBucket string
 }
 
 // NewDatabaseContext will establish a session with the backend db.
 //
 // `DatabaseContext` effectively acts as a key-value store for a variety of operations
-func NewDatabaseContext(region string, endpoint string) (DatabaseContext, error) {
-	sess := session.Must(session.NewSession(&aws.Config{
-		Region:   aws.String(region),
-		Endpoint: aws.String(endpoint),
-	}))
-
-	return NewDatabaseContextWithCfg(sess)
+func NewDatabaseContext(endpoint string, contentBucket string) (DatabaseContext, error) {
+	return NewDatabaseContextWithCfg(
+		session.Must(session.NewSession()),
+		endpoint,
+		contentBucket,
+	)
 }
 
 // NewDatabaseContextWithCfg constructs a new DatabaseContext, using the given AWS
 // session handle.
-func NewDatabaseContextWithCfg(cfg client.ConfigProvider) (DatabaseContext, error) {
+func NewDatabaseContextWithCfg(cfg client.ConfigProvider, endpoint string, bucket string) (DatabaseContext, error) {
 	context := DatabaseContext{}
-	context.DB = dynamodb.New(cfg)
+	if endpoint == "" {
+		context.db = dynamodb.New(cfg)
+	} else {
+		context.db = dynamodb.New(
+			cfg,
+			&aws.Config{
+				Endpoint: aws.String(endpoint),
+			},
+		)
+	}
+	context.s3 = s3.New(cfg)
+	context.contentBucket = bucket
 
 	log.Info("establishing session with dynamo")
 
 	// try create the tables if they haven't already been instantiated
-	if err := createTables(context.DB); err != nil {
+	if err := createTables(context.db); err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
 			if aerr.Code() != dynamodb.ErrCodeResourceInUseException {
 				log.Info("dynamo table already created")
@@ -135,4 +150,20 @@ func (db DatabaseContext) GetAuthToken(id int) string {
 	}
 
 	return value.AuthToken
+}
+
+// GetImageUploadURL get a URL that an image can be uploaded to
+func (db DatabaseContext) GetImageUploadURL(key string) (string, error) {
+	req, _ := db.s3.PutObjectRequest(&s3.PutObjectInput{
+		Bucket: aws.String(db.contentBucket),
+		Key:    aws.String(fmt.Sprintf("avatars/%s", key)),
+	})
+
+	result, err := req.Presign(15 * time.Minute)
+
+	if err != nil {
+		return "", err
+	}
+
+	return result, nil
 }
