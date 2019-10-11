@@ -59,4 +59,26 @@ var _ = Describe("Attendee Tests", func() {
 		back := types.Decode(enc)
 		Expect(bytes.Compare(id, back)).To(Equal(0))
 	})
+
+	It("should return the correct tier for the attendee", func() {
+		attendee := types.NewAttendee("asdf")
+		Expect(attendee.GetTier()).To(Equal(types.Tier0))
+
+		attendee.Rep = types.Tier1Rep
+		Expect(attendee.GetTier()).To(Equal(types.Tier1))
+
+		attendee.Rep = types.Tier2Rep
+		Expect(attendee.GetTier()).To(Equal(types.Tier2))
+
+		attendee.Rep = types.Tier3Rep
+		Expect(attendee.GetTier()).To(Equal(types.Tier3))
+
+		attendee.Rep = types.Tier4Rep
+		Expect(attendee.GetTier()).To(Equal(types.Tier4))
+
+		attendee.Rep = types.Tier5Rep
+		Expect(attendee.GetTier()).To(Equal(types.Tier5))
+		attendee.Rep = types.Tier5Rep + types.Tier5Rep
+		Expect(attendee.GetTier()).To(Equal(types.Tier5))
+	})
 })

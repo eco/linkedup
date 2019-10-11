@@ -7,9 +7,9 @@ import (
 
 // MsgScanQr defines the message for starting off a QR scan meet of another attendee
 type MsgScanQr struct {
-	Sender    sdk.AccAddress `json:"sender"`    //Standard for all messages
-	ScannedQR string         `json:"scannedQR"` //the string representation of the other attendee's QR badge
-	Data      []byte         `json:"data"`      //the encrypted data to store
+	Sender    sdk.AccAddress `json:"sender"`         //Standard for all messages
+	ScannedQR string         `json:"scannedQR"`      //the string representation of the other attendee's QR badge
+	Data      []byte         `json:"data,omitempty"` //the encrypted data to store
 	//// some interaction to prevent social media posts
 	//ScanCode  string         `json:"scanCode"`  //the scan code from the QR account, used to validate
 }

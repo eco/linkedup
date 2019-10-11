@@ -44,6 +44,7 @@ func NewAttendee(id string) Attendee {
 }
 
 // NewAttendeeFromGenesis will create an `Attendee` from `GenesisAttendee`
+//nolint:gocritic
 func NewAttendeeFromGenesis(ga GenesisAttendee) Attendee {
 	return NewAttendee(ga.ID)
 }
@@ -56,6 +57,24 @@ func (a *Attendee) AddScanID(id []byte) (added bool) {
 		return true
 	}
 	return false
+}
+
+//GetTier returns the tier group that an attendee is in based on their rep value
+func (a *Attendee) GetTier() int {
+	switch {
+	case a.Rep < Tier1Rep:
+		return Tier0
+	case a.Rep < Tier2Rep:
+		return Tier1
+	case a.Rep < Tier3Rep:
+		return Tier2
+	case a.Rep < Tier4Rep:
+		return Tier3
+	case a.Rep < Tier5Rep:
+		return Tier4
+	default:
+		return Tier5
+	}
 }
 
 //Encode encodes a hex byte array
