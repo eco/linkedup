@@ -113,8 +113,18 @@ func key(eb *ebSession.Session,
 			return
 		}
 
+		imageUploadURL, err := db.GetImageUploadURL(strconv.Itoa(body.AttendeeID))
+
+		if err != nil {
+			http.Error(
+				w,
+				"failed to sign image upload URL",
+				http.StatusInternalServerError,
+			)
+		}
+
 		/** Send the redirect **/
-		err = mc.SendOnboardingEmail(profile, attendeeAddress, secret)
+		err = mc.SendOnboardingEmail(profile, attendeeAddress, secret, imageUploadURL)
 		if err != nil {
 			http.Error(w, "email error. try again", http.StatusInternalServerError)
 		}
