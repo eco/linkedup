@@ -39,10 +39,17 @@ func HandleMsgQrScan(ctx sdk.Context, k keeper.Keeper, msg types.MsgScanQr) sdk.
 }
 
 //nolint:gocritic
-func handleShareInfo(ctx sdk.Context, k keeper.Keeper, scan types.Scan, sender sdk.AccAddress,
+func handleShareInfo(ctx sdk.Context, k keeper.Keeper, scan *types.Scan, sender sdk.AccAddress,
 	attendee types.Attendee, data []byte) sdk.Error {
 	//add share ids, skips if the ids are already added
 	err := k.AddSharedID(ctx, sender, attendee.Address, scan.ID)
+	if err != nil {
+		return err
+	}
+
+	//set scan complete if ever the sender is S2, ie the scanned participant, indicating that hey give consent to
+	//share info
+	err = handleAcceptance(ctx, k, scan, sender)
 	if err != nil {
 		return err
 	}
@@ -54,33 +61,54 @@ func handleShareInfo(ctx sdk.Context, k keeper.Keeper, scan types.Scan, sender s
 	} else {
 		oldData = &scan.D2
 	}
-
-	if len(*oldData) == 0 && len(data) > 0 {
-		err := k.AwardShareInfoPoints(ctx, sender, attendee.Address)
-		if err != nil {
-			return err
+	dataShared := len(*oldData) == 0 && len(data) > 0
+	if dataShared {
+		if scan.Accepted {
+			err := k.AwardShareInfoPoints(ctx, scan, sender, attendee.Address)
+			if err != nil {
+				return err
+			}
 		}
 
 		//set new data into scan and save scan
 		*oldData = data
-		k.SetScan(ctx, &scan)
+		k.SetScan(ctx, scan)
+	}
+	return nil
+}
+
+//handleAcceptance sets scan complete if ever the sender is S2, ie the scanned participant, indicating that hey
+//give consent to share info
+//nolint:gocritic
+func handleAcceptance(ctx sdk.Context, k keeper.Keeper, scan *types.Scan, sender sdk.AccAddress) sdk.Error {
+	if !scan.Accepted && scan.S2.Equals(sender) {
+		scan.Accepted = true
+		k.SetScan(ctx, scan)
+
+		if len(scan.D1) > 0 {
+			err := k.AwardShareInfoPoints(ctx, scan, scan.S1, scan.S2)
+			if err != nil {
+				return err
+			}
+		}
+		//dont need to do D2 as it'll be auto-set with accepted on
+
+		return k.AwardScanPoints(ctx, scan)
 	}
 	return nil
 }
 
 //nolint:gocritic
 func handleNewScan(ctx sdk.Context, k keeper.Keeper, msg types.MsgScanQr,
-	attendee types.Attendee) (scan types.Scan, err sdk.Error) {
-	scan, err = types.NewScan(msg.Sender, attendee.Address, nil, nil) //dont pass data here
+	attendee types.Attendee) (scan *types.Scan, err sdk.Error) {
+	scan, err = types.NewScan(msg.Sender, attendee.Address, nil, nil, 0, 0) //dont pass data here
 
 	if err != nil {
 		return
 	}
-	err = k.AwardScanPoints(ctx, scan)
-	if err != nil {
-		return
-	}
 
-	k.SetScan(ctx, &scan)
+	//Set the time TODO check that this is indeed deterministic time on block header
+	scan.SetTimeUnixSeconds(ctx.BlockTime().Unix())
+	k.SetScan(ctx, scan)
 	return
 }

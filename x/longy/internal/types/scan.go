@@ -17,24 +17,52 @@ type Scan struct {
 	D1 []byte
 	//D2 is the encrypted data shared by S2 with S1
 	D2 []byte
-	//Complete is true when both S1 and S2 have posted this scan interaction on-chain
-	Complete bool
+	//P1 are the points earned by S1 for a scan
+	P1 uint
+	//P2 are the points earned by S2 for a scan
+	P2 uint
+	//UnixTimeSec is the unix time in seconds of the block header of when this scan was created
+	UnixTimeSec int64
+	//Accepted is true when S2, the scanned participant, posts on-chain that they accept the connection
+	//this is equivalent of posting their own MsgScanQR or MsgInfo
+	Accepted bool
 }
 
 //NewScan creates a new scan and sets its id
-func NewScan(s1 sdk.AccAddress, s2 sdk.AccAddress, d1 []byte, d2 []byte) (Scan, sdk.Error) {
+func NewScan(s1 sdk.AccAddress, s2 sdk.AccAddress, d1 []byte, d2 []byte, p1 uint, p2 uint) (*Scan, sdk.Error) {
 	id, err := GenScanID(s1, s2)
 	if err != nil {
-		return Scan{}, err
+		return &Scan{}, err
 	}
-	return Scan{
-		ID:       id,
-		S1:       s1,
-		S2:       s2,
-		D1:       d1,
-		D2:       d2,
-		Complete: false,
+	return &Scan{
+		ID: id,
+		S1: s1,
+		S2: s2,
+		D1: d1,
+		D2: d2,
+		P1: p1,
+		P2: p2,
 	}, nil
+}
+
+//AddPoints adds points to the s1 and s2 respectively
+func (s *Scan) AddPoints(p1 uint, p2 uint) {
+	s.P1 += p1
+	s.P2 += p2
+}
+
+//AddPointsToAccount Adds points to the given account, assumes address is one of S1 or S2
+func (s *Scan) AddPointsToAccount(address sdk.AccAddress, points uint) {
+	if address.Equals(s.S1) {
+		s.AddPoints(points, 0)
+	} else {
+		s.AddPoints(0, points)
+	}
+}
+
+//SetTimeUnixSeconds sets the unix time in seconds of the block header of when this scan was created
+func (s *Scan) SetTimeUnixSeconds(unix int64) {
+	s.UnixTimeSec = unix
 }
 
 //GenScanID creates the unique id between a scan pair, regardless of the order of the account addresses passed into it

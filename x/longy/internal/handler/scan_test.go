@@ -36,11 +36,14 @@ var _ = Describe("Scan Handler Tests", func() {
 
 	It("should succeed to create a new scan record without data", func() {
 		createScan(qr1, qr2, sender, receiver, nil, false)
+		inspectScan(sender, receiver, 0, 0, false)
+
 	})
 
 	It("should succeed to create a new scan record with data", func() {
 		data := []byte("asdfasdfa")
 		createScan(qr1, qr2, sender, receiver, data, false)
+		inspectScan(sender, receiver, 0, 0, false)
 	})
 
 	Context("when a partial scan already exists but doesn't have shared info from both parties", func() {
@@ -48,53 +51,121 @@ var _ = Describe("Scan Handler Tests", func() {
 		BeforeEach(func() {
 			//Add the partial scan to the keeper
 			createScan(qr1, qr2, sender, receiver, nil, false)
+			inspectScan(sender, receiver, 0, 0, false)
 			data = []byte("asdfasdfa")
 		})
 
-		It("should add info and increment points", func() {
+		It("should add info for s1 without increment points", func() {
 			//Add the partial scan to the keeper
 			msg := types.NewMsgQrScan(sender, qr2, data)
 			result := handler(ctx, msg)
 			Expect(result.Code).To(Equal(sdk.CodeOK))
-			inspectScan(sender, receiver, len(data) != 0)
-
-			for i := 0; i < 2; i++ {
-				msg = types.NewMsgQrScan(receiver, qr1, data)
-				result = handler(ctx, msg)
-				Expect(result.Code).To(Equal(sdk.CodeOK))
-			}
-
-			//get attendees
-			a, ok := keeper.GetAttendee(ctx, sender)
-			Expect(ok).To(BeTrue())
-			b, ok := keeper.GetAttendee(ctx, receiver)
-			Expect(ok).To(BeTrue())
-			//Check share ids
-			Expect(len(a.ScanIDs)).To(Equal(1))
-			Expect(len(b.ScanIDs)).To(Equal(1))
-
-			Expect(a.Rep).To(Equal(types.ScanAttendeeAwardPoints + types.ShareAttendeeAwardPoints))
-			Expect(b.Rep).To(Equal(types.ScanAttendeeAwardPoints + types.ShareAttendeeAwardPoints))
+			inspectScan(sender, receiver, 0, 0, false)
 		})
 
-		It("should not allow us to reset data and earn more points", func() {
-			a, ok := keeper.GetAttendee(ctx, sender)
-			Expect(ok).To(BeTrue())
-			//Add the partial scan to the keeper
-			msg := types.NewMsgQrScan(sender, qr2, nil)
+		It("should add scan points for s1 and s2 when s2 accepts", func() {
+			msg := types.NewMsgQrScan(receiver, qr1, nil)
 			result := handler(ctx, msg)
 			Expect(result.Code).To(Equal(sdk.CodeOK))
-			Expect(a.Rep).To(Equal(types.ScanAttendeeAwardPoints))
+			points := types.ScanAttendeeAwardPoints
+			inspectScan(sender, receiver, points, points, true)
+		})
+
+		It("should add scan points for s1 and s2 when s2 accepts, and share info for s1", func() {
+			msg := types.NewMsgQrScan(sender, qr2, data)
+			result := handler(ctx, msg)
+			Expect(result.Code).To(Equal(sdk.CodeOK))
+			inspectScan(sender, receiver, 0, 0, false)
+
+			msg = types.NewMsgQrScan(receiver, qr1, nil)
+			result = handler(ctx, msg)
+			Expect(result.Code).To(Equal(sdk.CodeOK))
+			points := types.ScanAttendeeAwardPoints
+			inspectScan(sender, receiver, points+types.ShareAttendeeAwardPoints, points, true)
+		})
+
+		It("should add scan and share points for s1 and s2 when s2 accepts", func() {
+			msg := types.NewMsgQrScan(sender, qr2, data)
+			result := handler(ctx, msg)
+			Expect(result.Code).To(Equal(sdk.CodeOK))
+			inspectScan(sender, receiver, 0, 0, false)
+
+			msg = types.NewMsgQrScan(receiver, qr1, data)
+			result = handler(ctx, msg)
+			Expect(result.Code).To(Equal(sdk.CodeOK))
+			points := types.ScanAttendeeAwardPoints + types.ShareAttendeeAwardPoints
+			inspectScan(sender, receiver, points, points, true)
+		})
+
+		It("should add scan and share points for s1 and s2 when s2 accepts and one is a sponsor", func() {
+			createScan(qr1, qr2, sender, receiver, nil, true) //make sponsor
+			msg := types.NewMsgQrScan(sender, qr2, data)
+			result := handler(ctx, msg)
+			Expect(result.Code).To(Equal(sdk.CodeOK))
+			inspectScan(sender, receiver, 0, 0, false)
+
+			msg = types.NewMsgQrScan(receiver, qr1, data)
+			result = handler(ctx, msg)
+			Expect(result.Code).To(Equal(sdk.CodeOK))
+			attendeePoints := types.ScanSponsorAwardPoints + types.ShareSponsorAwardPoints
+			sponsorPoints := types.ScanAttendeeAwardPoints + types.ShareAttendeeAwardPoints
+			inspectScan(sender, receiver, sponsorPoints, attendeePoints, true)
+		})
+
+		It("should allow s1 to add scan points after acceptance by s2", func() {
+			sumPoints := types.ScanAttendeeAwardPoints + types.ShareAttendeeAwardPoints
+			//Add the partial scan to the keeper
+			msg := types.NewMsgQrScan(receiver, qr1, data)
+			result := handler(ctx, msg)
+			Expect(result.Code).To(Equal(sdk.CodeOK))
+			inspectScan(sender, receiver, types.ScanAttendeeAwardPoints, sumPoints, true)
 
 			msg = types.NewMsgQrScan(sender, qr2, data)
 			result = handler(ctx, msg)
 			Expect(result.Code).To(Equal(sdk.CodeOK))
-			Expect(a.Rep).To(Equal(types.ScanAttendeeAwardPoints))
+			inspectScan(sender, receiver, sumPoints, sumPoints, true)
+		})
+
+		Context("when an accepted and full data share scan exists", func() {
+			points := types.ScanAttendeeAwardPoints + types.ShareAttendeeAwardPoints
+			BeforeEach(func() {
+				//Add the partial scan to the keeper
+				createScan(qr1, qr2, sender, receiver, data, false)
+				inspectScan(sender, receiver, 0, 0, false)
+				msg := types.NewMsgQrScan(receiver, qr1, data)
+				result := handler(ctx, msg)
+				Expect(result.Code).To(Equal(sdk.CodeOK))
+				inspectScan(sender, receiver, points, points, true)
+			})
+
+			It("should not allow us to reset data and earn more points", func() {
+				//attendeePoints := types.ScanSponsorAwardPoints + types.ShareSponsorAwardPoints
+				////Add the partial scan to the keeper
+				msg := types.NewMsgQrScan(sender, qr2, nil)
+				result := handler(ctx, msg)
+				Expect(result.Code).To(Equal(sdk.CodeOK))
+				inspectScan(sender, receiver, points, points, true)
+
+				msg = types.NewMsgQrScan(receiver, qr1, nil)
+				result = handler(ctx, msg)
+				Expect(result.Code).To(Equal(sdk.CodeOK))
+				inspectScan(sender, receiver, points, points, true)
+
+				msg = types.NewMsgQrScan(sender, qr2, data)
+				result = handler(ctx, msg)
+				Expect(result.Code).To(Equal(sdk.CodeOK))
+				inspectScan(sender, receiver, points, points, true)
+
+				msg = types.NewMsgQrScan(receiver, qr1, data)
+				result = handler(ctx, msg)
+				Expect(result.Code).To(Equal(sdk.CodeOK))
+				inspectScan(sender, receiver, points, points, true)
+			})
 		})
 	})
 })
 
-func inspectScan(s1 sdk.AccAddress, s2 sdk.AccAddress, dataShared bool) {
+func inspectScan(s1 sdk.AccAddress, s2 sdk.AccAddress, p1 uint, p2 uint, accepted bool) {
 	id, err := types.GenScanID(s2, s1) //invert for fun, order shouldn't matter
 	Expect(err).To(BeNil())
 	scan, err := keeper.GetScanByID(ctx, id)
@@ -110,13 +181,13 @@ func inspectScan(s1 sdk.AccAddress, s2 sdk.AccAddress, dataShared bool) {
 	b, ok := keeper.GetAttendee(ctx, s2)
 	Expect(ok).To(BeTrue())
 
-	//Check rewards
-	var point uint
-	if dataShared {
-		point += types.ShareAttendeeAwardPoints
-	}
-	Expect(a.Rep).To(Equal(types.ScanAttendeeAwardPoints + point))
-	Expect(b.Rep).To(Equal(types.ScanAttendeeAwardPoints))
+	//check the rep on both the scan and attendees
+	Expect(a.Rep).To(Equal(p1))
+	Expect(b.Rep).To(Equal(p2))
+	Expect(scan.P1).To(Equal(p1))
+	Expect(scan.P2).To(Equal(p2))
+	//check accepted
+	Expect(scan.Accepted).To(Equal(accepted))
 
 	//Check share ids
 	Expect(len(a.ScanIDs)).To(Equal(1))
@@ -139,5 +210,15 @@ func createScan(qr1 string, qr2 string,
 	msg := types.NewMsgQrScan(s1, qr2, data)
 	result := handler(ctx, msg)
 	Expect(result.Code).To(Equal(sdk.CodeOK))
-	inspectScan(s1, s2, len(data) != 0)
+
+	//check that D1 is being set
+	id, err := types.GenScanID(sender, receiver)
+	Expect(err).To(BeNil())
+	scan, err := keeper.GetScanByID(ctx, id)
+	Expect(err).To(BeNil())
+	if data == nil {
+		Expect(len(scan.D1)).To(Equal(0))
+	} else {
+		Expect(bytes.Compare(scan.D1, data)).To(Equal(0))
+	}
 }

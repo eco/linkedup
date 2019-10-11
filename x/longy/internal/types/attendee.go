@@ -11,13 +11,15 @@ import (
 type Attendee struct {
 	ID      string
 	Address sdk.AccAddress
-
-	Commitment    util.Commitment
-	Claimed       bool
-	Sponsor       bool
-	RsaPublicKey  string
-	EncryptedInfo []byte
-	ScanIDs       []string
+	Name    string
+	//UnixTimeSecClaimed is the unix time in seconds of the block header of when this attendee account was claimed
+	UnixTimeSecClaimed int64
+	Commitment         util.Commitment
+	Claimed            bool
+	Sponsor            bool
+	RsaPublicKey       string
+	EncryptedInfo      []byte
+	ScanIDs            []string
 
 	Rep uint
 }
@@ -30,6 +32,7 @@ func NewAttendee(id string) Attendee {
 	return Attendee{
 		ID:      id,
 		Address: addr,
+		Name:    "",
 
 		Commitment:    nil,
 		Claimed:       false,

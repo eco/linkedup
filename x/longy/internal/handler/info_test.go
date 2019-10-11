@@ -48,123 +48,102 @@ var _ = Describe("Info Handler Tests", func() {
 				Expect(result.Code).To(Equal(types.ScanNotFound))
 			})
 
-			Context("when there is a partial scan", func() {
+			Context("when there is a non-accepted scan", func() {
 				BeforeEach(func() {
 					createScan(qr1, qr2, sender, receiver, nil, false)
+					inspectScan(sender, receiver, 0, 0, false)
 				})
 
-				It("should not update rep if msginfo is sent without data", func() {
-					//get attendees
-					a, ok := keeper.GetAttendee(ctx, sender)
-					Expect(ok).To(BeTrue())
-					b, ok := keeper.GetAttendee(ctx, receiver)
-					Expect(ok).To(BeTrue())
-
+				It("should not update rep if MsgInfo is sent without data", func() {
 					msg := types.NewMsgInfo(sender, receiver, nil)
 					result := handler(ctx, msg)
 					Expect(result.Code).To(Equal(sdk.CodeOK))
-
-					c, ok := keeper.GetAttendee(ctx, sender)
-					Expect(ok).To(BeTrue())
-					d, ok := keeper.GetAttendee(ctx, receiver)
-					Expect(ok).To(BeTrue())
-					Expect(a.Rep).To(Equal(c.Rep))
-					Expect(b.Rep).To(Equal(d.Rep))
+					inspectScan(sender, receiver, 0, 0, false)
 				})
 
-				It("should update rep if msginfo is sent with data", func() {
-					//get attendees
-					a, ok := keeper.GetAttendee(ctx, sender)
-					Expect(ok).To(BeTrue())
-					b, ok := keeper.GetAttendee(ctx, receiver)
-					Expect(ok).To(BeTrue())
-
+				It("should not update rep s1 sends with data", func() {
 					msg := types.NewMsgInfo(sender, receiver, data)
 					result := handler(ctx, msg)
 					Expect(result.Code).To(Equal(sdk.CodeOK))
-
-					c, ok := keeper.GetAttendee(ctx, sender)
-					Expect(ok).To(BeTrue())
-					d, ok := keeper.GetAttendee(ctx, receiver)
-					Expect(ok).To(BeTrue())
-					Expect(a.Rep + types.ShareAttendeeAwardPoints).To(Equal(c.Rep))
-					Expect(b.Rep).To(Equal(d.Rep))
+					inspectScan(sender, receiver, 0, 0, false)
 				})
+
+				It("should update scan rep for both s1 and s2 on no data", func() {
+					msg := types.NewMsgInfo(receiver, sender, nil)
+					result := handler(ctx, msg)
+					Expect(result.Code).To(Equal(sdk.CodeOK))
+					points := types.ScanAttendeeAwardPoints
+					inspectScan(sender, receiver, points, points, true)
+				})
+
+				It("should add shared points when s2 accepts", func() {
+					msg := types.NewMsgInfo(sender, receiver, data)
+					result := handler(ctx, msg)
+					Expect(result.Code).To(Equal(sdk.CodeOK))
+					inspectScan(sender, receiver, 0, 0, false)
+
+					msg = types.NewMsgInfo(receiver, sender, data)
+					result = handler(ctx, msg)
+					Expect(result.Code).To(Equal(sdk.CodeOK))
+					points := types.ScanAttendeeAwardPoints + types.ShareAttendeeAwardPoints
+					inspectScan(sender, receiver, points, points, true)
+				})
+
+				It("should add scan and share points for s1 and s2 when s2 accepts and one is a sponsor", func() {
+					createScan(qr1, qr2, sender, receiver, data, true) //make sponsor
+					inspectScan(sender, receiver, 0, 0, false)
+					//
+					msg := types.NewMsgInfo(receiver, sender, data)
+					result := handler(ctx, msg)
+					Expect(result.Code).To(Equal(sdk.CodeOK))
+					attendeePoints := types.ScanSponsorAwardPoints + types.ShareSponsorAwardPoints
+					sponsorPoints := types.ScanAttendeeAwardPoints + types.ShareAttendeeAwardPoints
+					inspectScan(sender, receiver, sponsorPoints, attendeePoints, true)
+				})
+
+				Context("when an accepted and full data share scan exists", func() {
+					points := types.ScanAttendeeAwardPoints + types.ShareAttendeeAwardPoints
+					BeforeEach(func() {
+						//Add the partial scan to the keeper
+						createScan(qr1, qr2, sender, receiver, data, false)
+						inspectScan(sender, receiver, 0, 0, false)
+						msg := types.NewMsgInfo(receiver, sender, data)
+						result := handler(ctx, msg)
+						Expect(result.Code).To(Equal(sdk.CodeOK))
+						inspectScan(sender, receiver, points, points, true)
+					})
+
+					It("should not allow us to reset data and earn more points", func() {
+						//Add the partial scan to the keeper
+						msg := types.NewMsgInfo(sender, receiver, nil)
+						result := handler(ctx, msg)
+						Expect(result.Code).To(Equal(sdk.CodeOK))
+						inspectScan(sender, receiver, points, points, true)
+
+						msg = types.NewMsgInfo(receiver, sender, nil)
+						result = handler(ctx, msg)
+						Expect(result.Code).To(Equal(sdk.CodeOK))
+						inspectScan(sender, receiver, points, points, true)
+
+						msg = types.NewMsgInfo(sender, receiver, data)
+						result = handler(ctx, msg)
+						Expect(result.Code).To(Equal(sdk.CodeOK))
+						inspectScan(sender, receiver, points, points, true)
+
+						msg = types.NewMsgInfo(receiver, sender, data)
+						result = handler(ctx, msg)
+						Expect(result.Code).To(Equal(sdk.CodeOK))
+						inspectScan(sender, receiver, points, points, true)
+					})
+				})
+
 			})
-
-			Context("when scan between sender and receiver is complete", func() {
-				var senderRep, receiverRep uint
-				var recIdsLen int
-				BeforeEach(func() {
-					//store the init rep
-					s, ok := keeper.GetAttendee(ctx, sender)
-					Expect(ok).To(BeTrue())
-					senderRep = s.Rep
-
-					//store the init ids array length
-					s, ok = keeper.GetAttendee(ctx, receiver)
-					Expect(ok).To(BeTrue())
-					receiverRep = s.Rep
-					recIdsLen = len(s.ScanIDs)
-
-					scan, err := types.NewScan(sender, receiver, nil, nil)
-					Expect(err).To(BeNil())
-					scan.Complete = true
-					keeper.SetScan(ctx, &scan)
-				})
-
-				It("should succeed when participants are both regular attendees", func() {
-					msg := types.NewMsgInfo(sender, receiver, data)
-					result := handler(ctx, msg)
-					Expect(result.Code).To(Equal(sdk.CodeOK))
-
-					//receiver should have info id
-					s2, ok := keeper.GetAttendee(ctx, receiver)
-					Expect(ok).To(BeTrue())
-					Expect(len(s2.ScanIDs)).To(Equal(recIdsLen + 1))
-					id, e := types.GenScanID(sender, receiver)
-					Expect(e).To(BeNil())
-					Expect(Contains(s2.ScanIDs, types.Encode(id))).To(BeTrue())
-
-					s, ok := keeper.GetAttendee(ctx, sender)
-					Expect(ok).To(BeTrue())
-					Expect(s.Rep).To(Equal(senderRep + types.ShareAttendeeAwardPoints))
-
-					p, ok := keeper.GetAttendee(ctx, receiver)
-					Expect(ok).To(BeTrue())
-					Expect(p.Rep).To(Equal(receiverRep)) //shouldn't change
-				})
-
-				It("should succeed when one participant is a sponsor attendee", func() {
-					utils.AddAttendeeToKeeper(ctx, &keeper, qr2, true)
-
-					msg := types.NewMsgInfo(sender, receiver, data)
-					result := handler(ctx, msg)
-					Expect(result.Code).To(Equal(sdk.CodeOK))
-
-					//receiver should have info id
-					s2, ok := keeper.GetAttendee(ctx, receiver)
-					Expect(ok).To(BeTrue())
-					Expect(len(s2.ScanIDs)).To(Equal(recIdsLen + 1))
-					id, e := types.GenScanID(sender, receiver)
-					Expect(e).To(BeNil())
-					Expect(Contains(s2.ScanIDs, types.Encode(id))).To(BeTrue())
-
-					s, ok := keeper.GetAttendee(ctx, sender)
-					Expect(ok).To(BeTrue())
-					Expect(s.Rep).To(Equal(senderRep + types.ShareSponsorAwardPoints))
-
-					p, ok := keeper.GetAttendee(ctx, receiver)
-					Expect(ok).To(BeTrue())
-					Expect(p.Rep).To(Equal(receiverRep)) //shouldn't change
-				})
-			})
-
 		})
 	})
 })
 
 //Contains checks to see if a value is in the array
+//nolint:unused
 func Contains(vals []string, v string) (contains bool) {
 	for _, a := range vals {
 		if a == v {
