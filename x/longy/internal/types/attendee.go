@@ -12,13 +12,14 @@ type Attendee struct {
 	ID      string
 	Address sdk.AccAddress
 	Name    string
-
-	Commitment    util.Commitment
-	Claimed       bool
-	Sponsor       bool
-	RsaPublicKey  string
-	EncryptedInfo []byte
-	ScanIDs       []string
+	//UnixTimeSecClaimed is the unix time in seconds of the block header of when this attendee account was claimed
+	UnixTimeSecClaimed int64
+	Commitment         util.Commitment
+	Claimed            bool
+	Sponsor            bool
+	RsaPublicKey       string
+	EncryptedInfo      []byte
+	ScanIDs            []string
 
 	Rep uint
 }

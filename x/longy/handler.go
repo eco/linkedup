@@ -83,6 +83,8 @@ func handleMsgClaimKey(ctx sdk.Context, k Keeper, msg types.MsgClaimKey) sdk.Res
 
 	// add the rsa public key
 	attendee.Name = msg.Name
+	//Set the time TODO check that this is indeed deterministic time on block header
+	attendee.UnixTimeSecClaimed = ctx.BlockTime().Unix()
 	attendee.RsaPublicKey = msg.RsaPublicKey
 	attendee.EncryptedInfo = msg.EncryptedInfo
 
