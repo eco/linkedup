@@ -63,7 +63,7 @@ func handleMsgKey(ctx sdk.Context, k Keeper, msg types.MsgKey) sdk.Result {
 }
 
 //nolint: unparam, gocritic
-func handleMsgClaimKey(ctx sdk.Context, k Keeper, msg types.MsgClaimKey) sdk.Result {
+func handleMsgClaimKey(ctx sdk.Context, k Keeper, msg types.MsgClaimKey) sdk.Result { pull out and fix tests, test for name, and time stamp
 
 	// retrieve the attendee and make sure the attendee has not been claimed
 	attendee, ok := k.GetAttendee(ctx, msg.AttendeeAddress)
