@@ -10,9 +10,10 @@ import (
 
 var _ = Describe("MsgClaimKey Tests", func() {
 	var s1 sdk.AccAddress
-	var secret, rsa string
+	var name, secret, rsa string
 	BeforeEach(func() {
 		s1 = util.IDToAddress("1234")
+		name = "Stoyan Fysh"
 		secret = "soccer"
 		rsa = "----- Begin Public Key ------"
 	})
@@ -24,9 +25,18 @@ var _ = Describe("MsgClaimKey Tests", func() {
 		Expect(err.Result().Code).To(Equal(sdk.CodeInvalidAddress))
 	})
 
+	It("should fail when attendee name is not set", func() {
+		msg := types.MsgClaimKey{
+			AttendeeAddress: s1,
+		}
+		err := msg.ValidateBasic()
+		Expect(err.Error()).To(Not(BeNil()))
+		Expect(err.Result().Code).To(Equal(types.EmptyName))
+	})
 	It("should fail when secret is not set", func() {
 		msg := types.MsgClaimKey{
 			AttendeeAddress: s1,
+			Name:            name,
 		}
 		err := msg.ValidateBasic()
 		Expect(err.Error()).To(Not(BeNil()))
@@ -36,6 +46,7 @@ var _ = Describe("MsgClaimKey Tests", func() {
 	It("should fail when rsa key is not set", func() {
 		msg := types.MsgClaimKey{
 			AttendeeAddress: s1,
+			Name:            name,
 			Secret:          secret,
 		}
 		err := msg.ValidateBasic()
@@ -46,6 +57,7 @@ var _ = Describe("MsgClaimKey Tests", func() {
 	It("should fail when encrypted info is not set", func() {
 		msg := types.MsgClaimKey{
 			AttendeeAddress: s1,
+			Name:            name,
 			Secret:          secret,
 			RsaPublicKey:    rsa,
 		}
@@ -57,6 +69,7 @@ var _ = Describe("MsgClaimKey Tests", func() {
 	It("should succeed when everything is set", func() {
 		msg := types.MsgClaimKey{
 			AttendeeAddress: s1,
+			Name:            name,
 			Secret:          secret,
 			RsaPublicKey:    rsa,
 			EncryptedInfo:   []byte{1, 2, 3, 4, 5},

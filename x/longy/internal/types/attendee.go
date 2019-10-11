@@ -11,6 +11,7 @@ import (
 type Attendee struct {
 	ID      string
 	Address sdk.AccAddress
+	Name    string
 
 	Commitment    util.Commitment
 	Claimed       bool
@@ -30,6 +31,7 @@ func NewAttendee(id string) Attendee {
 	return Attendee{
 		ID:      id,
 		Address: addr,
+		Name:    "",
 
 		Commitment:    nil,
 		Claimed:       false,

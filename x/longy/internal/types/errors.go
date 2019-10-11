@@ -81,6 +81,8 @@ const (
 	InvalidShareForScan
 	//EmptySecret is the code for when the secret on a claim key message is empty
 	EmptySecret
+	//EmptyName is the code for when the name on a claim key is empty
+	EmptyName
 	//EmptyRsaKey is the code for when the rsa public key on a claim key message is empty
 	EmptyRsaKey
 	//EmptyEncryptedInfo is the code for when the encrypted info on a claim key message is empty
@@ -219,6 +221,11 @@ func ErrInvalidShareForScan(format string, args ...interface{}) sdk.Error {
 //ErrEmptySecret occurs when the secret on a claim key message is empty
 func ErrEmptySecret(format string, args ...interface{}) sdk.Error {
 	return sdk.NewError(LongyCodeSpace, EmptySecret, format, args...)
+}
+
+//ErrEmptyName occurs when the name on a claim key message is empty
+func ErrEmptyName(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, EmptyName, format, args...)
 }
 
 //ErrEmptyRsaKey occurs when the rsa public key on a claim key message is empty

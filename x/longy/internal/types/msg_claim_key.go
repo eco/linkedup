@@ -9,15 +9,18 @@ var _ sdk.Msg = MsgClaimKey{}
 // MsgClaimKey is used to claim a prior rekey message
 type MsgClaimKey struct {
 	AttendeeAddress sdk.AccAddress `json:"attendeeAddress"`
+	Name            string         `json:"name"`
 	Secret          string         `json:"secret"`
 	RsaPublicKey    string         `json:"rsaPublicKey"`
 	EncryptedInfo   []byte         `json:"encryptedInfo"`
 }
 
 // NewMsgClaimKey in the constructor for `MsgClaimKey`
-func NewMsgClaimKey(address sdk.AccAddress, secret string, rsaPublicKey string, encryptedInfo []byte) MsgClaimKey {
+func NewMsgClaimKey(address sdk.AccAddress, name string, secret string, rsaPublicKey string,
+	encryptedInfo []byte) MsgClaimKey {
 	return MsgClaimKey{
 		AttendeeAddress: address,
+		Name:            name,
 		Secret:          secret,
 		RsaPublicKey:    rsaPublicKey,
 		EncryptedInfo:   encryptedInfo,
@@ -42,6 +45,8 @@ func (msg MsgClaimKey) ValidateBasic() sdk.Error {
 	switch {
 	case msg.AttendeeAddress.Empty():
 		return sdk.ErrInvalidAddress("empty attendee address")
+	case msg.Name == "":
+		return ErrEmptyName("name cannot be empty")
 	case len(msg.Secret) == 0:
 		return ErrEmptySecret("secret cannot be empty")
 	case len(msg.RsaPublicKey) == 0:
