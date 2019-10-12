@@ -26,16 +26,12 @@ func init() {
 	rootCmd.Flags().String("longy-masterkey",
 		"fc613b4dfd6736a7bd268c8a0e74ed0d1c04a959f59dd74ef2874983fd443fca", "hex encoded master private key")
 
-	rootCmd.Flags().String("smtp-server", "smtp.gmail.com:587", "host:port of the smtp server")
-	rootCmd.Flags().String("smtp-username", "testecolongy@gmail.com", "username of the email account")
-	rootCmd.Flags().String("smtp-password", "2019longygame", "password of the email account")
-
 	rootCmd.Flags().String("eventbrite-auth", "", "eventbrite authorization token")
 	rootCmd.Flags().Int("eventbrite-event", 0, "id associated with the eventbrite event")
 
-	rootCmd.Flags().String("aws-dynamo-url", "", "dynamodb url, defaults to using whatever the AWS library picks")
 	rootCmd.Flags().String("aws-content-bucket", "linkedup-user-content", "content bucket for user uploads")
 	rootCmd.Flags().Bool("email-mock", false, "print email URLs instead of emailing")
+	rootCmd.Flags().Bool("localstack", false, "use localstack instead of aws")
 }
 
 var rootCmd = &cobra.Command{
@@ -52,7 +48,8 @@ var rootCmd = &cobra.Command{
 		authToken := viper.GetString("eventbrite-auth")
 		eventID := viper.GetInt("eventbrite-event")
 
-		dynamoURL := viper.GetString("aws-dynamo-url")
+		localstack := viper.GetBool("localstack")
+
 		contentBucket := viper.GetString("aws-content-bucket")
 
 		mockEmail := viper.GetBool("email-mock")
@@ -72,17 +69,19 @@ var rootCmd = &cobra.Command{
 			return err
 		}
 
+		awsCfg := session.Must(session.NewSession())
+
 		/** Mail Client **/
 		mClient, err := mail.NewMockClient()
 		if !mockEmail {
-			mClient, err = mail.NewClient(session.Must(session.NewSession()))
+			mClient, err = mail.NewSESClient(awsCfg, localstack)
 		}
 		if err != nil {
 			return fmt.Errorf("mail client: %s", err)
 		}
 
 		/** Backend DB **/
-		db, err := dbm.NewDatabaseContext(dynamoURL, contentBucket)
+		db, err := dbm.NewDatabaseContextWithCfg(awsCfg, localstack, contentBucket)
 		if err != nil {
 			return fmt.Errorf("dynamo: %s", err)
 		}

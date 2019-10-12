@@ -11,6 +11,7 @@ import (
 	eb "github.com/eco/longy/eventbrite"
 	"github.com/sirupsen/logrus"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/client"
 	"github.com/aws/aws-sdk-go/service/ses"
 )
@@ -43,9 +44,20 @@ func NewMockClient() (client Client, err error) {
 }
 
 // NewClient creates a new email client session wrapper
-func NewClient(cfg client.ConfigProvider) (client Client, err error) {
-	client = sesClient{
-		ses: ses.New(cfg),
+func NewSESClient(cfg client.ConfigProvider, localstack bool) (client Client, err error) {
+	if localstack {
+		client = sesClient{
+			ses: ses.New(
+				cfg,
+				&aws.Config{
+					Endpoint: aws.String("http://localstack:4579"),
+				},
+			),
+		}
+	} else {
+		client = sesClient{
+			ses: ses.New(cfg),
+		}
 	}
 	return
 }

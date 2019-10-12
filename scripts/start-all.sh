@@ -7,4 +7,4 @@ bin/lycli rest-server --chain-id longychain --trust-node --laddr "tcp://0.0.0.0:
 
 # key service
 sleep 8
-bin/ks --aws-dynamo-url "http://dynamodb:8000/" --email-mock
+bin/ks --localstack
