@@ -16,6 +16,6 @@ func AddAttendeeToKeeper(ctx sdk.Context, keeper *longy.Keeper, badgeID string,
 	attendee = types.NewAttendee(badgeID)
 	attendee.Sponsor = sponsor
 	keeper.AccountKeeper().SetAccount(ctx, acc)
-	keeper.SetAttendee(ctx, attendee)
+	keeper.SetAttendee(ctx, &attendee)
 	return
 }
