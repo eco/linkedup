@@ -1,17 +1,47 @@
+# LinkedUp
+[![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
 [![Build Status](https://travis-ci.com/eco/longy.svg?token=QuNAGfYo3kcpqd58kfZs&branch=master)](https://travis-ci.com/eco/longy)
-
-# Longy
-A blockchain based game for SF Blockchain week. The game is run on it's own blockchain using the Cosmos-Sdk.
+> A blockchain based game for SF Blockchain week. The game is run on it's own blockchain using the Cosmos-Sdk.
 
 TODO: explain the game and why there is a "master node"
 
-# Running in Docker
+## Table of Contents
+ - [Background](#background)
+ - [Usage](#usage)
+ - [Contributing](#contributing)
+ - [License](#license)
+
+## Background
+LinkedUp is a networking game built for SF Blockchain Week 2019. The game runs
+on a Cosmos blockchain, and rewards players for establishing social connections
+between each other at the conference.
+
+The game addresses two challenges - player onboarding and wallet installation.
+Players use ephemeral wallets to play the game, and a key escrow service
+provides key recovery as well as facilitating player onboarding. This escrow
+service also provides administrative functions useful for day-of operations.
+These functions should become less necessary as we learn more about how the
+game works in practice.
+
+## Usage
+### Running in Docker
 To get up and running with docker:
 ```
 docker-compose up --build
 ```
 
-# Install and Test
+### Email Functionality
+SES-based email sending functionality depends on AWS API keys. When run deployed
+in AWS these will be provided by the instance role. For development purposes
+you'll need to provide your own. See the
+[linkedup-content](https://github.com/eco/linkedup-content) repository for the
+email templates - they can be installed using:
+```
+aws ses create-template --template "`cat path/to/rekey.json`" --region us-west-2
+```
+
+## Contributing
+### Build and Test
 To build the project:
 ```
 make all
@@ -33,7 +63,7 @@ To lint and test:
 make test
 ```
 
-# Key Service
+### Running the Key Service
 The key service runs alongside `lyd` and `lycli` to facilitate keying accounts and email onboarding. The key service hosts
 two http endpoints
 
@@ -58,15 +88,21 @@ Flags:
       --longy-masterkey string     hex encoded master private key (default "fc613b4dfd6736a7bd268c8a0e74ed0d1c04a959f59dd74ef2874983fd443fca")
       --longy-restservice string   scheme://host:port of the full node rest client (default "http://localhost:1317")
 
-      --smtp-password string       password of the email account (default "2019longygame")
-      --smtp-server string         host:port of the smtp server (default "smtp.gmail.com:587")
-      --smtp-username string       username of the email account (default "testecolongy@gmail.com")
 ```
 
 The configruation can also be set through environment variables. the `-` characters replaced by `_` and all uppercase.  
    i.e `STMP_SERVER` or `EVENTBRITE_AUTH`
 
+#### Email Data Testing
+Running the key service with the `--email-mock` flag will cause email template
+parameters to be logged instead of sent to an email system.
 
+#### Using LocalStack
+Running the key service with the `--localstack` flag will cause AWS-backed
+drivers to look for LocalStack services on the `localstack` host instead. It
+implies `--email-mock`.
+
+#### Key Service API
 1. `/ping [GET]` is a health check. Simply writes a Status 200 along with "pong" in the request body  
 2. `/id/<id> [GET]` is a convenience endpoint to convert an badge id into a determinsistic cosmos address  
 3. `/key [POST]` is the entry point for keying an account.  
@@ -103,7 +139,7 @@ The configruation can also be set through environment variables. the `-` charact
   Status 404: No information found on this attendee  
   Status 401: Incorrect authentication token OR there is not authentication token set for this attendee id. Must start from the `/recover` endpoint above  
 
-## Running database tests
+### Running database tests
 The database tests depend on a local DynamoDB instance running on port 8000.
 To enable the tests, first launch the DynamoDB service:
 ```
@@ -120,12 +156,5 @@ ENABLE_DB_TESTS=true
 make test
 ```
 
-## Email Functionality
-Email sending functionality depends on AWS API keys. When run deployed in AWS
-these will be provided by the instance role. For development purposes you'll
-need to provide your own. See the
-[linkedup-content](https://github.com/eco/linkedup-content) repository for the
-email templates - they can be installed using:
-```
-aws ses create-template --template "`cat path/to/rekey.json`" --region us-west-2
-```
+## License
+MIT
