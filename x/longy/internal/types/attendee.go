@@ -20,6 +20,7 @@ type Attendee struct {
 	RsaPublicKey       string
 	EncryptedInfo      []byte
 	ScanIDs            []string
+	Winnings           []Win
 
 	Rep uint
 }
@@ -44,6 +45,7 @@ func NewAttendee(id string) Attendee {
 }
 
 // NewAttendeeFromGenesis will create an `Attendee` from `GenesisAttendee`
+//nolint:gocritic
 func NewAttendeeFromGenesis(ga GenesisAttendee) Attendee {
 	return NewAttendee(ga.ID)
 }
@@ -58,27 +60,51 @@ func (a *Attendee) AddScanID(id []byte) (added bool) {
 	return false
 }
 
-//Encode encodes a hex byte array
-func Encode(src []byte) string {
-	dst := make([]byte, hex.EncodedLen(len(src)))
-	hex.Encode(dst, src)
-
-	return fmt.Sprintf("%s", dst)
-}
-
-//Decode decodes a string into a hex byte array
-func Decode(src string) []byte {
-
-	decoded, err := hex.DecodeString(src)
-	if err != nil {
-		fmt.Println(err.Error())
+//AddWinning adds the winning to the array
+func (a *Attendee) AddWinning(winning *Win) (added bool) {
+	if winning == nil || winning.Claimed || a.containsWinning(winning) {
+		return false
 	}
-
-	return decoded
+	a.Winnings = append(a.Winnings, *winning)
+	return true
 }
-func contains(s []string, val string) bool {
-	for _, a := range s {
-		if a == val {
+
+//ClaimWinning claims the winning by tier and returns true. Returns false if the win is not there
+func (a *Attendee) ClaimWinning(tier uint) (claimed bool) {
+	for i := range a.Winnings {
+		e := &a.Winnings[i]
+		if e.Tier == tier {
+			if e.Claimed { //already claimed
+				return false
+			}
+			e.Claimed = true
+			return true
+		}
+	}
+	return false
+}
+
+//GetTier returns the tier group that an attendee is in based on their rep value
+func (a *Attendee) GetTier() uint {
+	switch {
+	case a.Rep < Tier1Rep:
+		return Tier0
+	case a.Rep < Tier2Rep:
+		return Tier1
+	case a.Rep < Tier3Rep:
+		return Tier2
+	case a.Rep < Tier4Rep:
+		return Tier3
+	case a.Rep < Tier5Rep:
+		return Tier4
+	default:
+		return Tier5
+	}
+}
+
+func (a *Attendee) containsWinning(won *Win) bool {
+	for _, e := range a.Winnings {
+		if e.Tier == won.Tier {
 			return true
 		}
 	}
@@ -136,4 +162,31 @@ func (a Attendee) IsClaimed() bool {
 // SetClaimed will mark this attendee as claimed
 func (a *Attendee) SetClaimed() {
 	a.Claimed = true
+}
+
+//Encode encodes a hex byte array
+func Encode(src []byte) string {
+	dst := make([]byte, hex.EncodedLen(len(src)))
+	hex.Encode(dst, src)
+
+	return fmt.Sprintf("%s", dst)
+}
+
+//Decode decodes a string into a hex byte array
+func Decode(src string) []byte {
+
+	decoded, err := hex.DecodeString(src)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	return decoded
+}
+func contains(s []string, val string) bool {
+	for _, a := range s {
+		if a == val {
+			return true
+		}
+	}
+	return false
 }

@@ -121,6 +121,97 @@ var _ = Describe("Attendee Keeper Tests", func() {
 					inspectScan(ctx, scan.ID, pointSpon, pointAtt)
 					inspectAttendees(ctx, s1, s2, pointSpon, pointAtt)
 				})
+
+				Context("when attendee is close to switching tiers", func() {
+					var sender, receiver types.Attendee
+					var prize1, prize2 types.Prize
+					BeforeEach(func() {
+						var err sdk.Error
+						sender, receiver, err = keeper.GetAttendees(ctx, s1, s2)
+						Expect(err).To(BeNil())
+
+						sender.Rep = types.Tier1Rep - 1 - types.ScanAttendeeAwardPoints
+						keeper.SetAttendee(ctx, &sender)
+
+						prizes := types.GetGenesisPrizes()
+						for i := range prizes {
+							keeper.SetPrize(ctx, &prizes[i])
+						}
+						prize1 = prizes[0]
+						prize2 = prizes[1]
+					})
+
+					It("should fail to award a prize when attendee does not pass a tier", func() {
+						err := keeper.AwardScanPoints(ctx, scan)
+						Expect(err).To(BeNil())
+						a, ok := keeper.GetAttendee(ctx, s1)
+						Expect(ok).To(BeTrue())
+						Expect(len(a.Winnings)).To(Equal(0))
+					})
+
+					It("should succeed to award a prize when attendee passes a tier", func() {
+						sender.Rep = types.Tier1Rep - 1
+						keeper.SetAttendee(ctx, &sender)
+						receiver.Rep = types.Tier2Rep - 1
+						keeper.SetAttendee(ctx, &receiver)
+
+						err := keeper.AwardScanPoints(ctx, scan)
+						Expect(err).To(BeNil())
+						a, b, err := keeper.GetAttendees(ctx, s1, s2)
+						Expect(err).To(BeNil())
+
+						Expect(len(a.Winnings)).To(Equal(1))
+						Expect(a.Winnings[0].Tier).To(Equal(types.Tier1))
+						Expect(a.Winnings[0].Claimed).To(BeFalse())
+						Expect(a.Rep).To(Equal(types.Tier1Rep))
+
+						Expect(len(b.Winnings)).To(Equal(1))
+						Expect(b.Winnings[0].Tier).To(Equal(types.Tier2))
+						Expect(b.Winnings[0].Claimed).To(BeFalse())
+						Expect(b.Rep).To(Equal(types.Tier2Rep))
+
+						p1, err := keeper.GetPrize(ctx, prize1.GetID())
+						Expect(err).To(BeNil())
+						p2, err := keeper.GetPrize(ctx, prize2.GetID())
+						Expect(err).To(BeNil())
+
+						Expect(p1.Quantity).To(Equal(prize1.Quantity - 1))
+						Expect(p2.Quantity).To(Equal(prize2.Quantity - 1))
+
+					})
+
+					It("should fail to award a prize when attendee passes a tier, but there are no more "+
+						"prizes left", func() {
+						prize1.Quantity = 0
+						keeper.SetPrize(ctx, &prize1)
+
+						sender.Rep = types.Tier1Rep - 1
+						keeper.SetAttendee(ctx, &sender)
+						receiver.Rep = types.Tier2Rep - 1
+						keeper.SetAttendee(ctx, &receiver)
+
+						err := keeper.AwardScanPoints(ctx, scan)
+						Expect(err).To(BeNil())
+						a, b, err := keeper.GetAttendees(ctx, s1, s2)
+						Expect(err).To(BeNil())
+
+						Expect(len(a.Winnings)).To(Equal(0))
+						Expect(a.Rep).To(Equal(types.Tier1Rep))
+
+						Expect(len(b.Winnings)).To(Equal(1))
+						Expect(b.Winnings[0].Tier).To(Equal(types.Tier2))
+						Expect(b.Winnings[0].Claimed).To(BeFalse())
+						Expect(b.Rep).To(Equal(types.Tier2Rep))
+
+						p1, err := keeper.GetPrize(ctx, prize1.GetID())
+						Expect(err).To(BeNil())
+						p2, err := keeper.GetPrize(ctx, prize2.GetID())
+						Expect(err).To(BeNil())
+
+						Expect(p1.Quantity).To(Equal(0))
+						Expect(p2.Quantity).To(Equal(prize2.Quantity - 1))
+					})
+				})
 			})
 		})
 	})
@@ -131,8 +222,8 @@ var _ = Describe("Attendee Keeper Tests", func() {
 func inspectAttendees(ctx sdk.Context, s1 sdk.AccAddress, s2 sdk.AccAddress, p1 uint, p2 uint) {
 	a1, a2, err := keeper.GetAttendees(ctx, s1, s2)
 	Expect(err).To(BeNil())
-	a1.Rep = p1
-	a2.Rep = p2
+	Expect(a1.Rep).To(Equal(p1))
+	Expect(a2.Rep).To(Equal(p2))
 }
 
 //nolint:gocritic

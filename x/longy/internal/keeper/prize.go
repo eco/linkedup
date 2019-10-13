@@ -7,7 +7,7 @@ import (
 
 //GetPrize returns the prize by its id. Returns an error if it cannot find the prize with that id
 //nolint:gocritic
-func (k Keeper) GetPrize(ctx sdk.Context, id []byte) (prize types.GenesisPrize, err sdk.Error) {
+func (k Keeper) GetPrize(ctx sdk.Context, id []byte) (prize types.Prize, err sdk.Error) {
 	bz, e := k.Get(ctx, id)
 	if e != nil {
 		if e.Code() == types.ItemNotFound {
@@ -39,6 +39,6 @@ func (k Keeper) GetPrizes(ctx sdk.Context) (types.GenesisPrizes, sdk.Error) {
 
 //SetPrize puts the prize into the store with its tier turned into the is key
 //nolint:gocritic
-func (k Keeper) SetPrize(ctx sdk.Context, prize *types.GenesisPrize) {
+func (k Keeper) SetPrize(ctx sdk.Context, prize *types.Prize) {
 	k.Set(ctx, prize.GetID(), k.cdc.MustMarshalBinaryBare(*prize))
 }

@@ -17,7 +17,7 @@ var _ = Describe("Prize Keeper Tests", func() {
 	})
 
 	It("should fail when we try to get a prize that doesn't exist", func() {
-		p := types.GenesisPrize{
+		p := types.Prize{
 			Tier: 10,
 		}
 		_, err := keeper.GetPrize(ctx, p.GetID())
@@ -47,10 +47,10 @@ var _ = Describe("Prize Keeper Tests", func() {
 	})
 })
 
-func comparePrizes(expected types.GenesisPrize, actual types.GenesisPrize) {
+func comparePrizes(expected types.Prize, actual types.Prize) {
 	Expect(expected.Tier).To(Equal(actual.Tier))
 	Expect(expected.PrizeText).To(Equal(actual.PrizeText))
 	Expect(expected.Quantity).To(Equal(actual.Quantity))
-	Expect(expected.ScansNeeded).To(Equal(actual.ScansNeeded))
+	Expect(expected.RepNeeded).To(Equal(actual.RepNeeded))
 	Expect(bytes.Compare(expected.GetID(), actual.GetID())).To(Equal(0))
 }
