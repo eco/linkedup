@@ -43,7 +43,7 @@ func NewMockClient() (client Client, err error) {
 	return
 }
 
-// NewClient creates a new email client session wrapper
+// NewSESClient creates a new email client session wrapper backed by Amazon SES
 func NewSESClient(cfg client.ConfigProvider, localstack bool) (client Client, err error) {
 	if localstack {
 		client = sesClient{

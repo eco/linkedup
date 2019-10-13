@@ -31,7 +31,7 @@ func init() {
 
 	rootCmd.Flags().String("aws-content-bucket", "linkedup-user-content", "content bucket for user uploads")
 	rootCmd.Flags().Bool("email-mock", false, "print email URLs instead of emailing")
-	rootCmd.Flags().Bool("localstack", false, "use localstack instead of aws")
+	rootCmd.Flags().Bool("localstack", false, "use localstack instead of aws; implies --email-mock")
 }
 
 var rootCmd = &cobra.Command{
@@ -52,7 +52,7 @@ var rootCmd = &cobra.Command{
 
 		contentBucket := viper.GetString("aws-content-bucket")
 
-		mockEmail := viper.GetBool("email-mock")
+		mockEmail := localstack || viper.GetBool("email-mock")
 
 		longyChainID := viper.GetString("longy-chain-id")
 		longyFullNodeURL := viper.GetString("longy-fullnode")

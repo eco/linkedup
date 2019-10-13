@@ -16,6 +16,10 @@ const (
 	authTableName = "linkedup-keyservice-auth"
 )
 
+var (
+	forceS3PathStyle = true
+)
+
 // DatabaseContext carries context needed to interact with the database.
 type DatabaseContext struct {
 	db *dynamodb.DynamoDB
@@ -49,6 +53,7 @@ func NewDatabaseContextWithCfg(cfg client.ConfigProvider, localstack bool, bucke
 			cfg,
 			&aws.Config{
 				Endpoint: aws.String("http://localstack:4572"),
+				S3ForcePathStyle: &forceS3PathStyle,
 			},
 		)
 	} else {
