@@ -20,6 +20,7 @@ type Attendee struct {
 	RsaPublicKey       string
 	EncryptedInfo      []byte
 	ScanIDs            []string
+	Winnings           []Win
 
 	Rep uint
 }
@@ -59,8 +60,32 @@ func (a *Attendee) AddScanID(id []byte) (added bool) {
 	return false
 }
 
+//AddWinning adds the winning to the array
+func (a *Attendee) AddWinning(winning *Win) (added bool) {
+	if winning == nil || winning.Claimed || a.containsWinning(winning) {
+		return false
+	}
+	a.Winnings = append(a.Winnings, *winning)
+	return true
+}
+
+//ClaimWinning claims the winning by tier and returns true. Returns false if the win is not there
+func (a *Attendee) ClaimWinning(tier uint) (claimed bool) {
+	for i := range a.Winnings {
+		e := &a.Winnings[i]
+		if e.Tier == tier {
+			if e.Claimed { //already claimed
+				return false
+			}
+			e.Claimed = true
+			return true
+		}
+	}
+	return false
+}
+
 //GetTier returns the tier group that an attendee is in based on their rep value
-func (a *Attendee) GetTier() int {
+func (a *Attendee) GetTier() uint {
 	switch {
 	case a.Rep < Tier1Rep:
 		return Tier0
@@ -77,27 +102,9 @@ func (a *Attendee) GetTier() int {
 	}
 }
 
-//Encode encodes a hex byte array
-func Encode(src []byte) string {
-	dst := make([]byte, hex.EncodedLen(len(src)))
-	hex.Encode(dst, src)
-
-	return fmt.Sprintf("%s", dst)
-}
-
-//Decode decodes a string into a hex byte array
-func Decode(src string) []byte {
-
-	decoded, err := hex.DecodeString(src)
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-
-	return decoded
-}
-func contains(s []string, val string) bool {
-	for _, a := range s {
-		if a == val {
+func (a *Attendee) containsWinning(won *Win) bool {
+	for _, e := range a.Winnings {
+		if e.Tier == won.Tier {
 			return true
 		}
 	}
@@ -155,4 +162,31 @@ func (a Attendee) IsClaimed() bool {
 // SetClaimed will mark this attendee as claimed
 func (a *Attendee) SetClaimed() {
 	a.Claimed = true
+}
+
+//Encode encodes a hex byte array
+func Encode(src []byte) string {
+	dst := make([]byte, hex.EncodedLen(len(src)))
+	hex.Encode(dst, src)
+
+	return fmt.Sprintf("%s", dst)
+}
+
+//Decode decodes a string into a hex byte array
+func Decode(src string) []byte {
+
+	decoded, err := hex.DecodeString(src)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	return decoded
+}
+func contains(s []string, val string) bool {
+	for _, a := range s {
+		if a == val {
+			return true
+		}
+	}
+	return false
 }

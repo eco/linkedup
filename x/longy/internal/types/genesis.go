@@ -34,7 +34,13 @@ type GenesisPrizes []Prize
 
 // GetID turns the prize tier into its key, assuming tiers are unique
 func (p *Prize) GetID() []byte {
-	return []byte(strconv.Itoa(p.Tier))
+	return GetPrizeIDByTier(p.Tier)
+}
+
+//GetPrizeIDByTier returns the byte array id for a prize by prefixing its tier
+func GetPrizeIDByTier(tier uint) []byte {
+	b := []byte(strconv.Itoa(int(tier)))
+	return PrizeKey(b)
 }
 
 //GetGenesisPrizes returns the array of prizes that we start the chain with

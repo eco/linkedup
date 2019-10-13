@@ -61,7 +61,7 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, state GenesisState) {
 		account := accountKeeper.NewAccountWithAddress(ctx, attendee.GetAddress())
 		accountKeeper.SetAccount(ctx, account)
 		//attendee.Address = account.GetAddress()
-		k.SetAttendee(ctx, attendee)
+		k.SetAttendee(ctx, &attendee)
 	}
 
 	for i := range state.Prizes {

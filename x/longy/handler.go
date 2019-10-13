@@ -57,7 +57,7 @@ func handleMsgKey(ctx sdk.Context, k Keeper, msg types.MsgKey) sdk.Result {
 
 	// update the commitment so that the attendee must claim against
 	attendee.SetCommitment(msg.Commitment)
-	k.SetAttendee(ctx, attendee)
+	k.SetAttendee(ctx, &attendee)
 
 	return sdk.Result{}
 }
@@ -80,7 +80,10 @@ func handleMsgClaimKey(ctx sdk.Context, k Keeper, msg types.MsgClaimKey) sdk.Res
 	}
 
 	// award rep for the onboarding flow
-	attendee.AddRep(5)
+	err := k.AddRep(ctx, &attendee, types.ClaimBadgeAwardPoints)
+	if err != nil {
+		return err.Result()
+	}
 
 	// add the rsa public key
 	attendee.Name = msg.Name
@@ -91,7 +94,7 @@ func handleMsgClaimKey(ctx sdk.Context, k Keeper, msg types.MsgClaimKey) sdk.Res
 
 	// mark the attendee as claimed
 	attendee.SetClaimed()
-	k.SetAttendee(ctx, attendee)
+	k.SetAttendee(ctx, &attendee)
 
 	return sdk.Result{}
 }

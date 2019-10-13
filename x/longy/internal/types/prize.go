@@ -2,6 +2,7 @@ package types
 
 //nolint:golint
 const (
+	ClaimBadgeAwardPoints uint = 5
 	//ScanAttendeeAwardPoints are the points given when you scan a regular attendee
 	ScanAttendeeAwardPoints uint = 1
 	//ScanSponsorAwardPoints are the points given when you scan a sponsor attendee
@@ -13,16 +14,16 @@ const (
 	ShareSponsorAwardPoints uint = 6
 
 	//Tier is the rep needed to be in that tier level
-	Tier1Rep = 100
-	Tier2Rep = 200
-	Tier3Rep = 300
-	Tier4Rep = 350
-	Tier5Rep = 400
+	Tier1Rep uint = 100
+	Tier2Rep uint = 200
+	Tier3Rep uint = 300
+	Tier4Rep uint = 350
+	Tier5Rep uint = 400
 )
 
 //nolint:golint
 const (
-	Tier0 = iota
+	Tier0 uint = iota
 	Tier1
 	Tier2
 	Tier3
@@ -32,8 +33,15 @@ const (
 
 //Prize is the genesis type for the prizes
 type Prize struct {
-	Tier      int    `json:"tier"`
-	RepNeeded int    `json:"repNeeded"`
+	Tier      uint   `json:"tier"`
+	RepNeeded uint   `json:"repNeeded"`
 	PrizeText string `json:"prizeText"`
 	Quantity  int    `json:"quantity"`
+}
+
+//Win is the type for the prizes that an attendee has earned playing the game
+type Win struct {
+	Tier    uint   `json:"tier"`
+	Name    string `json:"name"`
+	Claimed bool   `json:"claimed"`
 }
