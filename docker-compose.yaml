@@ -1,15 +1,43 @@
 version: "3.7"
+networks:
+  credentials_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: "169.254.170.0/24"
 services:
   chain:
     build: .
     environment:
       EVENTBRITE_AUTH: HPH2Q3QWLVB6K4BQSND3
       EVENTBRITE_EVENT: 74857698391
+      AWS_DEFAULT_REGION: "us-west-2"
+      AWS_CONTAINER_CREDENTIALS_RELATIVE_URI: "/creds"
+      AWS_REGION: "us-west-2"
     ports:
       - 1317:1317
       - 1337:1337
       - 26657:26657
+    depends_on:
+      - ecs-local-endpoints
+    networks:
+      credentials_network:
+        ipv4_address: "169.254.170.3"
   dynamodb:
     image: amazon/dynamodb-local
     ports:
       - 8000:8000
+    networks:
+      credentials_network:
+        ipv4_address: "169.254.170.4"
+  ecs-local-endpoints:
+    image: amazon/amazon-ecs-local-container-endpoints
+    volumes:
+      - /var/run:/var/run
+      - $HOME/.aws/:/home/.aws/
+    environment:
+      HOME: "/home"
+      AWS_PROFILE: "default"
+    networks:
+      credentials_network:
+        ipv4_address: "169.254.170.2"

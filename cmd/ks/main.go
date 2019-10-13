@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	ks "github.com/eco/longy/key-service"
 	eb "github.com/eco/longy/key-service/eventbrite"
@@ -34,8 +33,8 @@ func init() {
 	rootCmd.Flags().String("eventbrite-auth", "", "eventbrite authorization token")
 	rootCmd.Flags().Int("eventbrite-event", 0, "id associated with the eventbrite event")
 
-	rootCmd.Flags().String("aws-region", "us-west-2", "aws region for dynamodb")
-	rootCmd.Flags().String("aws-dynamo-url", "http://localhost:8000", "dynamodb url")
+	rootCmd.Flags().String("aws-dynamo-url", "", "dynamodb url, defaults to using whatever the AWS library picks")
+	rootCmd.Flags().String("aws-content-bucket", "linkedup-user-content", "content bucket for user uploads")
 	rootCmd.Flags().Bool("email-mock", false, "print email URLs instead of emailing")
 }
 
@@ -53,8 +52,8 @@ var rootCmd = &cobra.Command{
 		authToken := viper.GetString("eventbrite-auth")
 		eventID := viper.GetInt("eventbrite-event")
 
-		awsRegion := viper.GetString("aws-region")
 		dynamoURL := viper.GetString("aws-dynamo-url")
+		contentBucket := viper.GetString("aws-content-bucket")
 
 		mockEmail := viper.GetBool("email-mock")
 
@@ -76,16 +75,14 @@ var rootCmd = &cobra.Command{
 		/** Mail Client **/
 		mClient, err := mail.NewMockClient()
 		if !mockEmail {
-			mClient, err = mail.NewClient(session.Must(session.NewSession(&aws.Config{
-				Region: aws.String(awsRegion),
-			})))
+			mClient, err = mail.NewClient(session.Must(session.NewSession()))
 		}
 		if err != nil {
 			return fmt.Errorf("mail client: %s", err)
 		}
 
 		/** Backend DB **/
-		db, err := dbm.NewDatabaseContext(awsRegion, dynamoURL)
+		db, err := dbm.NewDatabaseContext(dynamoURL, contentBucket)
 		if err != nil {
 			return fmt.Errorf("dynamo: %s", err)
 		}

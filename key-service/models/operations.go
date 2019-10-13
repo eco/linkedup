@@ -18,7 +18,7 @@ var log = logrus.WithField("module", "key-storage")
 //
 // The application will crash if unmarshalling fails.
 func getInfoForID(db *DatabaseContext, id int) []byte {
-	result, err := db.DB.GetItem(&dynamodb.GetItemInput{
+	result, err := db.db.GetItem(&dynamodb.GetItemInput{
 		TableName: aws.String(infoTableName),
 		Key: map[string]*dynamodb.AttributeValue{
 			"ID": {
@@ -47,7 +47,7 @@ func getInfoForID(db *DatabaseContext, id int) []byte {
 //
 // The application will crash if unmarshalling fails.
 func getAuthTokenForID(db *DatabaseContext, id int) *storedAuth {
-	result, err := db.DB.GetItem(&dynamodb.GetItemInput{
+	result, err := db.db.GetItem(&dynamodb.GetItemInput{
 		TableName: aws.String(authTableName),
 		Key: map[string]*dynamodb.AttributeValue{
 			"ID": {
@@ -81,7 +81,7 @@ func setInfo(db *DatabaseContext, key *storedInfo) bool {
 		panic(err)
 	}
 
-	_, err = db.DB.PutItem(&dynamodb.PutItemInput{
+	_, err = db.db.PutItem(&dynamodb.PutItemInput{
 		TableName: aws.String("linkedup-keyservice"),
 		Item:      item,
 	})
@@ -105,7 +105,7 @@ func setAuthToken(db *DatabaseContext, key *storedAuth) bool {
 		panic(err)
 	}
 
-	_, err = db.DB.PutItem(&dynamodb.PutItemInput{
+	_, err = db.db.PutItem(&dynamodb.PutItemInput{
 		TableName: aws.String("linkedup-keyservice-auth"),
 		Item:      item,
 	})

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/url"
 	"fmt"
+	"strconv"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	eb "github.com/eco/longy/eventbrite"
@@ -22,7 +23,7 @@ var (
 
 // Client used to send emails
 type Client interface {
-	SendOnboardingEmail(*eb.AttendeeProfile, sdk.AccAddress, string) error
+	SendOnboardingEmail(*eb.AttendeeProfile, sdk.AccAddress, string, string) error
 	SendRecoveryEmail(*eb.AttendeeProfile, int, string) error
 }
 
@@ -51,8 +52,13 @@ func NewClient(cfg client.ConfigProvider) (client Client, err error) {
 
 // SendOnboardingEmail will construct and send the email containing the initial
 // onboarding message and URL with the given secret
-func (c sesClient) SendOnboardingEmail(profile *eb.AttendeeProfile, attendeeAddr sdk.AccAddress, secret string) error {
-	redirectURI, err := makeOnboardingURI(profile, attendeeAddr, secret)
+func (c sesClient) SendOnboardingEmail(
+	profile *eb.AttendeeProfile,
+	attendeeAddr sdk.AccAddress,
+	secret string,
+	imageUploadURL string,
+) error {
+	redirectURI, err := makeOnboardingURI(profile, attendeeAddr, secret, imageUploadURL)
 
 	if err != nil {
 		log.Errorf(
@@ -115,8 +121,13 @@ func (c sesClient) sendEmailWithURL(dest string, url string, template string) (e
 	return
 }
 
-func (c mockClient) SendOnboardingEmail(profile *eb.AttendeeProfile, attendeeAddr sdk.AccAddress, secret string) error {
-	redirectURI, err := makeOnboardingURI(profile, attendeeAddr, secret)
+func (c mockClient) SendOnboardingEmail(
+	profile *eb.AttendeeProfile,
+	attendeeAddr sdk.AccAddress,
+	secret string,
+	imageUploadURL string,
+) error {
+	redirectURI, err := makeOnboardingURI(profile, attendeeAddr, secret, imageUploadURL)
 
 	if err != nil {
 		return err
@@ -145,7 +156,7 @@ func makeRecoveryURI(id int, token string) (string, error) {
 	}
 
 	params := url.Values{}
-	params.Add("id", string(id))
+	params.Add("id", strconv.Itoa(id))
 	params.Add("token", token)
 
 	baseURL.RawQuery = params.Encode()
@@ -153,7 +164,12 @@ func makeRecoveryURI(id int, token string) (string, error) {
 	return baseURL.String(), nil
 }
 
-func makeOnboardingURI(profile *eb.AttendeeProfile, attendeeAddr sdk.AccAddress, secret string) (string, error) {
+func makeOnboardingURI(
+	profile *eb.AttendeeProfile,
+	attendeeAddr sdk.AccAddress,
+	secret string,
+	imageUploadURL string,
+) (string, error) {
 	jsonProfileData, err := json.Marshal(profile)
 	if err != nil {
 		log.WithError(err).Error("attendee profile serialization")
@@ -167,9 +183,10 @@ func makeOnboardingURI(profile *eb.AttendeeProfile, attendeeAddr sdk.AccAddress,
 	}
 
 	params := url.Values{}
-	params.Add("attendee", string(attendeeAddr))
-	params.Add("profile", base64.URLEncoding.EncodeToString(jsonProfileData))
+	params.Add("attendee", attendeeAddr.String())
+	params.Add("profile", base64.StdEncoding.EncodeToString(jsonProfileData))
 	params.Add("secret", secret)
+	params.Add("avatar", imageUploadURL)
 
 	baseURL.RawQuery = params.Encode()
 
