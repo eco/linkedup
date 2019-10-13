@@ -5,10 +5,16 @@ A blockchain based game for SF Blockchain week. The game is run on it's own bloc
 
 TODO: explain the game and why there is a "master node"
 
+# Running in Docker
+To get up and running with docker:
+```
+docker-compose up --build
+```
+
 # Install and Test
 To build the project:
 ```
-make install
+make all
 ```
 
 Before you can run the tests you'll need to set up the runtime environment so
