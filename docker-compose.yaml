@@ -20,8 +20,7 @@ services:
       - "4567-4584:4567-4584"
       - "${PORT_WEB_UI-8080}:${PORT_WEB_UI-8080}"
     environment:
-      - LOCALSTACK_SERVICES=s3,ses,dynamodb
-      - LOCALSTACK_DEBUG=1
+      - LOCALSTACK_SERVICES=s3,dynamodb
       - DOCKER_HOST=unix:///var/run/docker.sock
     volumes:
       - "/tmp/localstack:/tmp/localstack"
