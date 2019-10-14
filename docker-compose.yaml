@@ -1,43 +1,26 @@
 version: "3.7"
-networks:
-  credentials_network:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: "169.254.170.0/24"
 services:
   chain:
     build: .
     environment:
       EVENTBRITE_AUTH: HPH2Q3QWLVB6K4BQSND3
       EVENTBRITE_EVENT: 74857698391
-      AWS_DEFAULT_REGION: "us-west-2"
-      AWS_CONTAINER_CREDENTIALS_RELATIVE_URI: "/creds"
+      AWS_ACCESS_KEY_ID: ignored
+      AWS_SECRET_ACCESS_KEY: ignored
       AWS_REGION: "us-west-2"
     ports:
       - 1317:1317
       - 1337:1337
       - 26657:26657
     depends_on:
-      - ecs-local-endpoints
-    networks:
-      credentials_network:
-        ipv4_address: "169.254.170.3"
-  dynamodb:
-    image: amazon/dynamodb-local
+      - localstack
+  localstack:
+    image: localstack/localstack:latest
     ports:
-      - 8000:8000
-    networks:
-      credentials_network:
-        ipv4_address: "169.254.170.4"
-  ecs-local-endpoints:
-    image: amazon/amazon-ecs-local-container-endpoints
-    volumes:
-      - /var/run:/var/run
-      - $HOME/.aws/:/home/.aws/
+      - "4567-4584:4567-4584"
+      - "${PORT_WEB_UI-8080}:${PORT_WEB_UI-8080}"
     environment:
-      HOME: "/home"
-      AWS_PROFILE: "default"
-    networks:
-      credentials_network:
-        ipv4_address: "169.254.170.2"
+      - LOCALSTACK_SERVICES=s3,dynamodb
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    volumes:
+      - "/tmp/localstack:/tmp/localstack"
