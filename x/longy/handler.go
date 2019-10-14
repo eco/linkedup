@@ -90,8 +90,14 @@ func handleMsgClaimKey(ctx sdk.Context, k Keeper, msg types.MsgClaimKey) sdk.Res
 		return types.ErrInvalidCommitmentReveal("incorrect commitment").Result()
 	}
 
+	award := types.ClaimBadgeAwardPoints
+	if k.HasLiveBonus(ctx) {
+		bonus := k.GetBonus(ctx)
+		award = award * bonus.Multiplier
+	}
+
 	// award rep for the onboarding flow
-	err := k.AddRep(ctx, &attendee, types.ClaimBadgeAwardPoints)
+	err := k.AddRep(ctx, &attendee, award)
 	if err != nil {
 		return err.Result()
 	}

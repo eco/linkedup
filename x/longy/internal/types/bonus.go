@@ -2,11 +2,11 @@ package types
 
 // Bonus -
 type Bonus struct {
-	Multiplier int
+	Multiplier uint
 }
 
 // NewBonus -
-func NewBonus(amt int) Bonus {
+func NewBonus(amt uint) Bonus {
 	return Bonus{
 		Multiplier: amt,
 	}

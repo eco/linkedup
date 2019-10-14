@@ -12,7 +12,7 @@ var _ sdk.Msg = MsgClearBonus{}
 // MsgBonus triggers a bonus period
 type MsgBonus struct {
 	MasterAddress sdk.AccAddress `json:"masterAddress"`
-	Multiplier    int            `json:"multiplier"`
+	Multiplier    uint           `json:"multiplier"`
 }
 
 // Route -
