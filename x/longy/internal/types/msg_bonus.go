@@ -5,6 +5,9 @@ import (
 )
 
 var _ sdk.Msg = MsgBonus{}
+var _ sdk.Msg = MsgClearBonus{}
+
+/** MsgBonus **/
 
 // MsgBonus triggers a bonus period
 type MsgBonus struct {
@@ -41,6 +44,43 @@ func (msg MsgBonus) GetSigners() []sdk.AccAddress {
 
 // GetSignBytes -
 func (msg MsgBonus) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(msg)
+	return sdk.MustSortJSON(bz)
+}
+
+/** MsgClearBonus **/
+
+// MsgClearBonus -
+type MsgClearBonus struct {
+	MasterAddress sdk.AccAddress `json:"masterAddress"`
+}
+
+// Route -
+func (msg MsgClearBonus) Route() string {
+	return RouterKey
+}
+
+// Type -
+func (msg MsgClearBonus) Type() string {
+	return "clear_bonus"
+}
+
+// ValidateBasic -
+func (msg MsgClearBonus) ValidateBasic() sdk.Error {
+	if msg.MasterAddress.Empty() {
+		return sdk.ErrInvalidAddress("empty master address")
+	}
+
+	return nil
+}
+
+// GetSigners -
+func (msg MsgClearBonus) GetSigners() []sdk.AccAddress {
+	return []sdk.AccAddress{msg.MasterAddress}
+}
+
+// GetSignBytes -
+func (msg MsgClearBonus) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }
