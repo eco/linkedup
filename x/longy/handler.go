@@ -45,6 +45,12 @@ func handleMsgKey(ctx sdk.Context, k Keeper, msg types.MsgKey) sdk.Result {
 		return types.ErrAttendeeNotFound("nonexistent attendee").Result()
 	}
 
+	// verify that master key used to sign this message
+	masterAddress := k.GetMasterAddress(ctx)
+	if !masterAddress.Equals(msg.MasterAddress) {
+		return sdk.ErrUnauthorized("incorrect master address that signed this message").Result()
+	}
+
 	// Check that a public key has not already been set. The rekey service should only be able to
 	// submit and alter the public key once
 	if account.GetPubKey() != nil {

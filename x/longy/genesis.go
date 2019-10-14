@@ -23,11 +23,11 @@ func DefaultGenesisState() GenesisState {
 //nolint:gocritic
 func ValidateGenesis(data GenesisState) error {
 	if data.KeyService.Address.Empty() {
-		return types.ErrGenesisKeyServiceAddressEmpty("Re-Key Service address must be set")
+		return types.ErrGenesisKeyServiceAddressEmpty("key service address must be set")
 	}
 
 	if data.Attendees == nil {
-		return types.ErrGenesisAttendeesEmpty("Genesis attendees cannot be empty")
+		return types.ErrGenesisAttendeesEmpty("empty genesis attendees")
 	}
 
 	var seenIds = make(map[string]bool)
@@ -53,6 +53,7 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, state GenesisState) {
 		panic(err)
 	}
 	accountKeeper.SetAccount(ctx, masterAccount)
+	k.SetMasterAddress(ctx, state.KeyService.Address)
 
 	// set the attendees
 	for _, a := range state.Attendees {
