@@ -21,6 +21,10 @@ func NewHandler(keeper Keeper) sdk.Handler {
 			return handleMsgKey(ctx, keeper, msg)
 		case types.MsgClaimKey:
 			return handleMsgClaimKey(ctx, keeper, msg)
+		case types.MsgBonus:
+			return handleBonus(ctx, keeper, msg)
+		case types.MsgClearBonus:
+			return handleClearBonus(ctx, keeper, msg)
 		default:
 			errMsg := fmt.Sprintf("unrecognized %s msg type: %T", RouterKey, msg)
 			return sdk.ErrUnknownRequest(errMsg).Result()
@@ -47,7 +51,9 @@ func handleMsgKey(ctx sdk.Context, k Keeper, msg types.MsgKey) sdk.Result {
 
 	// verify that master key used to sign this message
 	masterAddress := k.GetMasterAddress(ctx)
-	if !masterAddress.Equals(msg.MasterAddress) {
+	if masterAddress.Empty() {
+		return sdk.ErrInternal("master address not set").Result()
+	} else if !masterAddress.Equals(msg.MasterAddress) {
 		return sdk.ErrUnauthorized("incorrect master address that signed this message").Result()
 	}
 
@@ -71,7 +77,6 @@ func handleMsgKey(ctx sdk.Context, k Keeper, msg types.MsgKey) sdk.Result {
 //nolint: unparam, gocritic
 //pull out and fix tests, test for name, and time stamp
 func handleMsgClaimKey(ctx sdk.Context, k Keeper, msg types.MsgClaimKey) sdk.Result {
-
 	// retrieve the attendee and make sure the attendee has not been claimed
 	attendee, ok := k.GetAttendee(ctx, msg.AttendeeAddress)
 	if !ok {
@@ -101,6 +106,42 @@ func handleMsgClaimKey(ctx sdk.Context, k Keeper, msg types.MsgClaimKey) sdk.Res
 	// mark the attendee as claimed
 	attendee.SetClaimed()
 	k.SetAttendee(ctx, &attendee)
+
+	return sdk.Result{}
+}
+
+func handleBonus(ctx sdk.Context, k Keeper, msg types.MsgBonus) sdk.Result {
+	// verify that only the master account can send this message
+	masterAddress := k.GetMasterAddress(ctx)
+	if masterAddress.Empty() {
+		return sdk.ErrInternal("master address not set").Result()
+	} else if !masterAddress.Equals(msg.MasterAddress) {
+		return sdk.ErrUnauthorized("incorrect master address").Result()
+	}
+
+	// check if a bonus is already live
+	if k.HasLiveBonus(ctx) {
+		return sdk.ErrUnauthorized("current bonus must be cleared before setting a new one").Result()
+	}
+
+	// set the current bonus
+	bonus := types.NewBonus(msg.Multiplier)
+	k.SetBonus(ctx, bonus)
+
+	return sdk.Result{}
+}
+
+func handleClearBonus(ctx sdk.Context, k Keeper, msg types.MsgClearBonus) sdk.Result {
+	// verify that only the master account can send this message
+	masterAddress := k.GetMasterAddress(ctx)
+	if masterAddress.Empty() {
+		return sdk.ErrInternal("master address not set").Result()
+	} else if !masterAddress.Equals(msg.MasterAddress) {
+		return sdk.ErrUnauthorized("incorrect master address").Result()
+	}
+
+	// clear the bonus
+	k.ClearBonus(ctx)
 
 	return sdk.Result{}
 }

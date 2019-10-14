@@ -6,7 +6,7 @@ import (
 )
 
 // SetBonus -
-func (k Keeper) SetBonus(ctx sdk.Context, b *types.Bonus) {
+func (k Keeper) SetBonus(ctx sdk.Context, b types.Bonus) {
 	key := types.BonusKey()
 
 	bz, err := k.cdc.MarshalBinaryLengthPrefixed(b)
@@ -41,7 +41,7 @@ func (k Keeper) ClearBonus(ctx sdk.Context) {
 }
 
 // HasBonus -
-func (k Keeper) HasBonus(ctx sdk.Context) bool {
+func (k Keeper) HasLiveBonus(ctx sdk.Context) bool {
 	key := types.BonusKey()
 	return k.Has(ctx, key)
 }
