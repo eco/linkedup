@@ -30,6 +30,12 @@ To get up and running with docker:
 docker-compose up --build
 ```
 
+LocalStack may depend on the presence of a `/tmp/localstack` directory on your
+system. If needed, ensure its presence:
+```
+mkdir -p /tmp/localstack
+```
+
 ### Email Functionality
 SES-based email sending functionality depends on AWS API keys. When run deployed
 in AWS these will be provided by the instance role. For development purposes
