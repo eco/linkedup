@@ -56,13 +56,19 @@ func (k *Keeper) AwardScanPoints(ctx sdk.Context, scan *types.Scan) sdk.Error {
 		return types.ErrScanNotAccepted("scan must be accepted by both parties before awarding points")
 	}
 
+	multiplier := uint(1)
+	bonus := k.GetBonus(ctx)
+	if bonus != nil {
+		multiplier = bonus.Multiplier
+	}
+
 	a1Points := types.ScanAttendeeAwardPoints
 	a2Points := types.ScanAttendeeAwardPoints
 	if a2.Sponsor {
-		a1Points = types.ScanSponsorAwardPoints
+		a1Points = types.ScanSponsorAwardPoints * multiplier
 	}
 	if a1.Sponsor {
-		a2Points = types.ScanSponsorAwardPoints
+		a2Points = types.ScanSponsorAwardPoints * multiplier
 	}
 
 	err = k.AddRep(ctx, &a1, a1Points)
