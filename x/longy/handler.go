@@ -110,6 +110,7 @@ func handleMsgClaimKey(ctx sdk.Context, k Keeper, msg types.MsgClaimKey) sdk.Res
 	return sdk.Result{}
 }
 
+//nolint
 func handleBonus(ctx sdk.Context, k Keeper, msg types.MsgBonus) sdk.Result {
 	// verify that only the master account can send this message
 	masterAddress := k.GetMasterAddress(ctx)
@@ -131,6 +132,7 @@ func handleBonus(ctx sdk.Context, k Keeper, msg types.MsgBonus) sdk.Result {
 	return sdk.Result{}
 }
 
+//nolint
 func handleClearBonus(ctx sdk.Context, k Keeper, msg types.MsgClearBonus) sdk.Result {
 	// verify that only the master account can send this message
 	masterAddress := k.GetMasterAddress(ctx)
