@@ -32,8 +32,14 @@ var (
 	// NewAttendee is the function alias for creating a new attendee
 	NewAttendee = types.NewAttendee
 
-	// NewMsgKey is the function alias for the KeyMsg type
+	// NewMsgKey is the function alias for the MsgKey type
 	NewMsgKey = types.NewMsgKey
+
+	// NewMsgBonus is the function alias for the MsgBonus type
+	NewMsgBonus = types.NewMsgBonus
+
+	// NewMsgClearBonus is the function alias for the MsgBonus type
+	NewMsgClearBonus = types.NewMsgClearBonus
 
 	// NewQuerier is the function alias for creating a new querier
 	NewQuerier = keeper.NewQuerier

@@ -15,6 +15,14 @@ type MsgBonus struct {
 	Multiplier    uint           `json:"multiplier"`
 }
 
+// NewMsgBonus -
+func NewMsgBonus(multiplier uint, masterAddr sdk.AccAddress) MsgBonus {
+	return MsgBonus{
+		MasterAddress: masterAddr,
+		Multiplier:    multiplier,
+	}
+}
+
 // Route -
 func (msg MsgBonus) Route() string {
 	return RouterKey
@@ -53,6 +61,13 @@ func (msg MsgBonus) GetSignBytes() []byte {
 // MsgClearBonus -
 type MsgClearBonus struct {
 	MasterAddress sdk.AccAddress `json:"masterAddress"`
+}
+
+// NewMsgClearBonus -
+func NewMsgClearBonus(masterAddr sdk.AccAddress) MsgClearBonus {
+	return MsgClearBonus{
+		MasterAddress: masterAddr,
+	}
 }
 
 // Route -
