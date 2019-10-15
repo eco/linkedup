@@ -87,6 +87,8 @@ const (
 	EmptyRsaKey
 	//EmptyEncryptedInfo is the code for when the encrypted info on a claim key message is empty
 	EmptyEncryptedInfo
+	//SenderNotRedeemerAcct is the code for when the sender of the MsgRedeem is not the correct account
+	SenderNotRedeemerAcct
 
 	// DefaultError is the code for when a random error occurs that we do not provide a unique code to
 	DefaultError
@@ -233,9 +235,14 @@ func ErrEmptyRsaKey(format string, args ...interface{}) sdk.Error {
 	return sdk.NewError(LongyCodeSpace, EmptyRsaKey, format, args...)
 }
 
-//ErrEmptyEncryptedInfo occurs when  the encrypted info on a claim key message is empty
+//ErrEmptyEncryptedInfo occurs when the encrypted info on a claim key message is empty
 func ErrEmptyEncryptedInfo(format string, args ...interface{}) sdk.Error {
 	return sdk.NewError(LongyCodeSpace, EmptyEncryptedInfo, format, args...)
+}
+
+//ErrSenderNotRedeemerAcct occurs when the sender of the MsgRedeem is not the correct account
+func ErrSenderNotRedeemerAcct(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, SenderNotRedeemerAcct, format, args...)
 }
 
 //ErrDefault occurs when a random error occurs that we do not provide a unique code to
