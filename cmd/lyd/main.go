@@ -57,6 +57,8 @@ func main() {
 		genesis.AddGenesisPrizesCmd(ctx, cdc),
 
 		genesis.AddSetGenesisServiceCmd(ctx, cdc),
+		// AddGenesisRedeemCmd allows the users to add the redeem account that will be used to mark prizes claimed
+		genesis.AddGenesisRedeemCmd(ctx, cdc),
 	)
 
 	server.AddCommands(ctx, cdc, rootCmd, newApp, exportAppStateAndTMValidators)

@@ -55,6 +55,9 @@ type (
 	// GenesisAttendee is the attendee for the genesis file
 	GenesisAttendee = types.GenesisAttendee
 
-	// GenesisKeyService is the re-key service genesis type
-	GenesisKeyService = types.GenesisKeyService
+	// GenesisServiceKey is the genesis type for the service account
+	GenesisServiceKey = types.GenesisServiceKey
+
+	// GenesisRedeemKey is the genesis type for the redeem account
+	GenesisRedeemKey = types.GenesisRedeemKey
 )

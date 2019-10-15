@@ -26,6 +26,9 @@ const (
 	// GenesisKeyServiceAddressEmpty is the code for when the service account address is not set in the genesis file
 	GenesisKeyServiceAddressEmpty
 
+	// GenesisKeyRedeemAddressEmpty is the code for when the redeem address is not set in the genesis file
+	GenesisKeyRedeemAddressEmpty
+
 	// GenesisAttendeesEmpty is the code for when the attendees are not set in the genesis file
 	GenesisAttendeesEmpty
 
@@ -122,6 +125,11 @@ func ErrInsufficientPrivileges(format string, args ...interface{}) sdk.Error {
 // ErrGenesisKeyServiceAddressEmpty occurs when the re-key service address is not set in the genesis file
 func ErrGenesisKeyServiceAddressEmpty(format string, args ...interface{}) sdk.Error {
 	return sdk.NewError(LongyCodeSpace, GenesisKeyServiceAddressEmpty, format, args...)
+}
+
+// ErrGenesisRedeemAddressEmpty occurs when the redeem address is not set in the genesis file
+func ErrGenesisRedeemAddressEmpty(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, GenesisKeyRedeemAddressEmpty, format, args...)
 }
 
 // ErrGenesisAttendeesEmpty occurs when the attendees are not set in the genesis file
