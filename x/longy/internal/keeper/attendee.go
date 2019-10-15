@@ -127,10 +127,16 @@ func (k *Keeper) AwardShareInfoPoints(ctx sdk.Context, scan *types.Scan, senderA
 		return types.ErrScanNotAccepted("scan must be accepted by both parties before awarding points")
 	}
 
+	multiplier := uint(1)
+	bonus := k.GetBonus(ctx)
+	if bonus != nil {
+		multiplier = bonus.Multiplier
+	}
+
 	//give sender points for sharing, check if receiver is a sponsor
 	val := types.ShareAttendeeAwardPoints
 	if receiver.Sponsor {
-		val = types.ShareSponsorAwardPoints
+		val = types.ShareSponsorAwardPoints * multiplier
 	}
 
 	err = k.AddRep(ctx, &sender, val)
