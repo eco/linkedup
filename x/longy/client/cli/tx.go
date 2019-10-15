@@ -120,7 +120,8 @@ func clearBonusCmd(cdc *codec.Codec) *cobra.Command {
 	}
 }
 
-func getMasterAccountFromViper(cliCtx auth.NodeQuerier) (auth.Account, tmcrypto.PrivKey, error) {
+//nolint
+func getMasterAccountFromViper(cliCtx *context.CLIContext) (auth.Account, tmcrypto.PrivKey, error) {
 	accRetriever := auth.NewAccountRetriever(cliCtx)
 
 	keyStr := viper.GetString("private-key")
