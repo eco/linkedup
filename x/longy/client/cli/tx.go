@@ -17,8 +17,8 @@ import (
 )
 
 func init() {
-	longyTxCmd.PersistentFlags().String("private-key", "", "hex-encoded secp256k1 private key of the master account")
-	viper.BindPFlag("private-key", longyTxCmd.PersistentFlags().Lookup("private-key"))
+	longyTxCmd.PersistentFlags().String("private-key", "", "hex-encoded secp256k1 private key of the master account") //nolint
+	viper.BindPFlag("private-key", longyTxCmd.PersistentFlags().Lookup("private-key"))                                //nolint
 }
 
 var longyTxCmd = &cobra.Command{
@@ -30,30 +30,30 @@ var longyTxCmd = &cobra.Command{
 //GetTxCmd returns all of the commands to post transaction to the longy module
 func GetTxCmd(cdc *codec.Codec) *cobra.Command {
 	longyTxCmd.AddCommand(
-		bonusCmd(cdc),
+		createBonusCmd(cdc),
 		clearBonusCmd(cdc),
 	)
 
 	return longyTxCmd
 }
 
-func bonusCmd(cdc *codec.Codec) *cobra.Command {
+func createBonusCmd(cdc *codec.Codec) *cobra.Command {
 	return &cobra.Command{
-		Use:   "bonus <multiplier>",
-		Short: "create a bonus for sponser scans",
+		Use:   "create-bonus <multiplier>",
+		Short: "create a bonus for sponsor scans",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			viper.BindPFlags(cmd.Flags())
+			viper.BindPFlags(cmd.Flags()) //nolint
 			cliCtx := context.NewCLIContext().WithTrustNode(true).WithCodec(cdc)
 			chainID := viper.GetString(client.FlagChainID)
 
 			bonusAmt, err := strconv.Atoi(args[0])
 			if err != nil || bonusAmt <= 0 {
-				return fmt.Errorf("multiplier must be a postive number > 0 in decimal format")
+				return fmt.Errorf("multiplier must be a positive number > 0 in decimal format")
 			}
 
 			/** read in the private key and retrieve the master account */
-			masterAcc, privKey, err := getMasterAccountFromViper(cliCtx)
+			masterAcc, privKey, err := getMasterAccountFromViper(&cliCtx)
 			if err != nil {
 				return fmt.Errorf("master account: %s", err)
 			}
@@ -83,16 +83,16 @@ func bonusCmd(cdc *codec.Codec) *cobra.Command {
 
 func clearBonusCmd(cdc *codec.Codec) *cobra.Command {
 	return &cobra.Command{
-		Use:   "clear",
+		Use:   "clear-bonus",
 		Short: "clear the bonus period",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			viper.BindPFlags(cmd.Flags())
+			viper.BindPFlags(cmd.Flags()) //nolint
 			cliCtx := context.NewCLIContext().WithTrustNode(true).WithCodec(cdc)
 			chainID := viper.GetString(client.FlagChainID)
 
 			/** read in the private key and retrieve the master account */
-			masterAcc, privKey, err := getMasterAccountFromViper(cliCtx)
+			masterAcc, privKey, err := getMasterAccountFromViper(&cliCtx)
 			if err != nil {
 				return fmt.Errorf("master account: %s", err)
 			}
@@ -120,7 +120,7 @@ func clearBonusCmd(cdc *codec.Codec) *cobra.Command {
 	}
 }
 
-func getMasterAccountFromViper(cliCtx context.CLIContext) (auth.Account, tmcrypto.PrivKey, error) {
+func getMasterAccountFromViper(cliCtx *context.CLIContext) (auth.Account, tmcrypto.PrivKey, error) {
 	accRetriever := auth.NewAccountRetriever(cliCtx)
 
 	keyStr := viper.GetString("private-key")

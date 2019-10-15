@@ -6,6 +6,7 @@ import (
 )
 
 // SetBonus -
+//nolint
 func (k Keeper) SetBonus(ctx sdk.Context, b types.Bonus) {
 	key := types.BonusKey()
 
@@ -18,6 +19,7 @@ func (k Keeper) SetBonus(ctx sdk.Context, b types.Bonus) {
 }
 
 // GetBonus -
+//nolint
 func (k Keeper) GetBonus(ctx sdk.Context) *types.Bonus {
 	key := types.BonusKey()
 	bz, _ := k.Get(ctx, key)
@@ -35,12 +37,14 @@ func (k Keeper) GetBonus(ctx sdk.Context) *types.Bonus {
 }
 
 // ClearBonus -
+//nolint
 func (k Keeper) ClearBonus(ctx sdk.Context) {
 	key := types.BonusKey()
 	k.Delete(ctx, key)
 }
 
-// HasBonus -
+// HasLiveBonus -
+//nolint
 func (k Keeper) HasLiveBonus(ctx sdk.Context) bool {
 	key := types.BonusKey()
 	return k.Has(ctx, key)

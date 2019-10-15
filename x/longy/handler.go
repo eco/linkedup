@@ -140,6 +140,10 @@ func handleClearBonus(ctx sdk.Context, k Keeper, msg types.MsgClearBonus) sdk.Re
 		return sdk.ErrUnauthorized("incorrect master address").Result()
 	}
 
+	if !k.HasLiveBonus(ctx) {
+		return types.ErrDefault("no bonus to clear").Result()
+	}
+
 	// clear the bonus
 	k.ClearBonus(ctx)
 
