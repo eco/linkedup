@@ -15,7 +15,7 @@ func AddGenesisRedeemCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "add-redeem-account [address]",
 		Short: "Add redeem account to the genesis.json",
-		Args:  cobra.ExactArgs(2),
+		Args:  cobra.ExactArgs(1),
 		RunE: func(_ *cobra.Command, args []string) error {
 			addr, err := sdk.AccAddressFromBech32(args[0])
 			if err != nil {
