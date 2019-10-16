@@ -17,6 +17,8 @@ func NewHandler(keeper Keeper) sdk.Handler {
 			return handler.HandleMsgQrScan(ctx, keeper, msg)
 		case types.MsgInfo:
 			return handler.HandleMsgInfo(ctx, keeper, msg)
+		case types.MsgRedeem:
+			return handler.HandleMsgRedeem(ctx, keeper, msg)
 		case types.MsgKey:
 			return handleMsgKey(ctx, keeper, msg)
 		case types.MsgClaimKey:

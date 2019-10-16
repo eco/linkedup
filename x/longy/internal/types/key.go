@@ -25,6 +25,8 @@ var (
 	PrizePrefix = []byte{0x2}
 	//MasterKeyPrefix is the prefix for storing the public address of the service account
 	MasterKeyPrefix = []byte{0x3}
+	//RedeemKeyPrefix is the prefix for storing the public address of the redeem account for prizes
+	RedeemKeyPrefix = []byte{0x4}
 	//KeySeparator is the separator between the prefix and the type key
 	KeySeparator = []byte("::")
 )
@@ -47,6 +49,11 @@ func PrizeKey(id []byte) []byte {
 // MasterKey will return the store key for the master key
 func MasterKey() []byte {
 	return MasterKeyPrefix
+}
+
+// RedeemKey will return the store key for the redeem key
+func RedeemKey() []byte {
+	return RedeemKeyPrefix
 }
 
 //nolint:gosec
