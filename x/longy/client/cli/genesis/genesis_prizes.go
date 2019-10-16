@@ -2,6 +2,7 @@ package genesis
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/eco/longy/x/longy"
@@ -44,6 +45,7 @@ func buildPrizeGenesisState(appState map[string]json.RawMessage, cdc *codec.Code
 
 	//get the prizes
 	genesisState.Prizes = types.GetGenesisPrizes()
+	fmt.Printf("adding prizes to genesis : %d\n", len(genesisState.Prizes))
 
 	return genesisState
 }

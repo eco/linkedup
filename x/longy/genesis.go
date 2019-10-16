@@ -60,8 +60,11 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, state GenesisState) {
 	accountKeeper.SetAccount(ctx, masterAccount)
 
 	// set the redeem account
-	redeemAccount := accountKeeper.NewAccountWithAddress(ctx, state.Redeem.Address)
-	accountKeeper.SetAccount(ctx, redeemAccount)
+	//redeemAccount := accountKeeper.NewAccountWithAddress(ctx, state.Redeem.Address)
+	redeemAccount := accountKeeper.GetAccount(ctx, state.Redeem.Address)
+	if redeemAccount == nil {
+		panic(fmt.Errorf("the redeem account does not exist"))
+	}
 	err = k.SetRedeemAccount(ctx, redeemAccount.GetAddress())
 	if err != nil {
 		panic(err)
@@ -81,5 +84,4 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, state GenesisState) {
 	for i := range state.Prizes {
 		k.SetPrize(ctx, &state.Prizes[i])
 	}
-
 }

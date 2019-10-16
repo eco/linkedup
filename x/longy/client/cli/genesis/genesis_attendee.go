@@ -2,6 +2,7 @@ package genesis
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/server"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -50,6 +51,8 @@ func buildAttendeeGenesisState(appState map[string]json.RawMessage, cdc *codec.C
 
 	//get the attendees from eventbrite
 	genesisState.Attendees, err = utils.GetAttendees()
+	fmt.Printf("adding attendees to genesis : %d\n", len(genesisState.Attendees))
+
 	if err != nil {
 		return genesisState, err
 	}

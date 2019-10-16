@@ -2,6 +2,7 @@ package genesis
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/server"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -15,7 +16,7 @@ func AddGenesisRedeemCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "add-redeem-account [address]",
 		Short: "Add redeem account to the genesis.json",
-		Args:  cobra.ExactArgs(2),
+		Args:  cobra.ExactArgs(1),
 		RunE: func(_ *cobra.Command, args []string) error {
 			addr, err := sdk.AccAddressFromBech32(args[0])
 			if err != nil {
@@ -44,7 +45,7 @@ func buildRedeemGenesisState(appState map[string]json.RawMessage, cdc *codec.Cod
 	var (
 		genesisState longy.GenesisState
 	)
-
+	fmt.Printf("adding redeem account : %s\n", addr.String())
 	// un-marshal the current state of the genesis object
 	cdc.MustUnmarshalJSON(appState[longy.ModuleName], &genesisState)
 
