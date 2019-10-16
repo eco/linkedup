@@ -150,7 +150,7 @@ func isMaster(ctx sdk.Context, k Keeper, sender sdk.Address) sdk.Error {
 	masterAddr := k.GetMasterAddress(ctx)
 	if masterAddr.Empty() {
 		return sdk.ErrInternal("master account has not been set")
-	} else if !masetAddr.Equals(sender) {
+	} else if !masterAddr.Equals(sender) {
 		return sdk.ErrUnauthorized("signer is not the master account")
 	}
 
