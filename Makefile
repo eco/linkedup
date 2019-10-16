@@ -2,9 +2,10 @@ GINKGO=ginkgo
 LINT=golangci-lint
 TEST_PATHS=./...
 
-.PHONY: all test init lint test-unit
+.DEFAULT_GOAL := default
+.PHONY: test init lint test-unit clean
 
-install: lyd lycli ks
+all: bin/lyd bin/lycli bin/ks
 
 test: lint test-unit
 
@@ -18,13 +19,11 @@ test-unit:
 
 init:
 	$(MAKE) -C scripts
-lyd:
-	go build -o ./bin/lyd ./cmd/lyd
 
-lycli:
-	go build -o ./bin/lycli ./cmd/lycli
+clean:
+	rm -rf bin/
 
-ks:
-	go build -o ./bin/ks ./cmd/ks
+bin/%: cmd/%/*
+	go build -o $@ ./$<
 
-all: install init
+default: all init

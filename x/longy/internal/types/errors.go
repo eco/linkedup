@@ -26,6 +26,9 @@ const (
 	// GenesisKeyServiceAddressEmpty is the code for when the service account address is not set in the genesis file
 	GenesisKeyServiceAddressEmpty
 
+	// GenesisKeyRedeemAddressEmpty is the code for when the redeem address is not set in the genesis file
+	GenesisKeyRedeemAddressEmpty
+
 	// GenesisAttendeesEmpty is the code for when the attendees are not set in the genesis file
 	GenesisAttendeesEmpty
 
@@ -87,6 +90,8 @@ const (
 	EmptyRsaKey
 	//EmptyEncryptedInfo is the code for when the encrypted info on a claim key message is empty
 	EmptyEncryptedInfo
+	//SenderNotRedeemerAcct is the code for when the sender of the MsgRedeem is not the correct account
+	SenderNotRedeemerAcct
 
 	// DefaultError is the code for when a random error occurs that we do not provide a unique code to
 	DefaultError
@@ -120,6 +125,11 @@ func ErrInsufficientPrivileges(format string, args ...interface{}) sdk.Error {
 // ErrGenesisKeyServiceAddressEmpty occurs when the re-key service address is not set in the genesis file
 func ErrGenesisKeyServiceAddressEmpty(format string, args ...interface{}) sdk.Error {
 	return sdk.NewError(LongyCodeSpace, GenesisKeyServiceAddressEmpty, format, args...)
+}
+
+// ErrGenesisRedeemAddressEmpty occurs when the redeem address is not set in the genesis file
+func ErrGenesisRedeemAddressEmpty(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, GenesisKeyRedeemAddressEmpty, format, args...)
 }
 
 // ErrGenesisAttendeesEmpty occurs when the attendees are not set in the genesis file
@@ -233,9 +243,14 @@ func ErrEmptyRsaKey(format string, args ...interface{}) sdk.Error {
 	return sdk.NewError(LongyCodeSpace, EmptyRsaKey, format, args...)
 }
 
-//ErrEmptyEncryptedInfo occurs when  the encrypted info on a claim key message is empty
+//ErrEmptyEncryptedInfo occurs when the encrypted info on a claim key message is empty
 func ErrEmptyEncryptedInfo(format string, args ...interface{}) sdk.Error {
 	return sdk.NewError(LongyCodeSpace, EmptyEncryptedInfo, format, args...)
+}
+
+//ErrSenderNotRedeemerAcct occurs when the sender of the MsgRedeem is not the correct account
+func ErrSenderNotRedeemerAcct(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, SenderNotRedeemerAcct, format, args...)
 }
 
 //ErrDefault occurs when a random error occurs that we do not provide a unique code to

@@ -23,10 +23,15 @@ type GenesisProfile struct {
 	JobTitle string `json:"job_title"`
 }
 
-// GenesisKeyService is the genesis type for the re-key service
-type GenesisKeyService struct {
+// GenesisServiceKey is the genesis type for the re-key service
+type GenesisServiceKey struct {
 	Address       sdk.AccAddress `json:"address"`
 	crypto.PubKey `json:"pubkey"`
+}
+
+// GenesisRedeemKey is the genesis type for the redeem account
+type GenesisRedeemKey struct {
+	Address sdk.AccAddress `json:"address"`
 }
 
 // GenesisPrizes is the full array of prizes for the event

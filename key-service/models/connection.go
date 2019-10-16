@@ -16,6 +16,10 @@ const (
 	authTableName = "linkedup-keyservice-auth"
 )
 
+var (
+	forceS3PathStyle = true
+)
+
 // DatabaseContext carries context needed to interact with the database.
 type DatabaseContext struct {
 	db *dynamodb.DynamoDB
@@ -26,29 +30,36 @@ type DatabaseContext struct {
 // NewDatabaseContext will establish a session with the backend db.
 //
 // `DatabaseContext` effectively acts as a key-value store for a variety of operations
-func NewDatabaseContext(endpoint string, contentBucket string) (DatabaseContext, error) {
+func NewDatabaseContext(localstack bool, contentBucket string) (DatabaseContext, error) {
 	return NewDatabaseContextWithCfg(
 		session.Must(session.NewSession()),
-		endpoint,
+		localstack,
 		contentBucket,
 	)
 }
 
 // NewDatabaseContextWithCfg constructs a new DatabaseContext, using the given AWS
 // session handle.
-func NewDatabaseContextWithCfg(cfg client.ConfigProvider, endpoint string, bucket string) (DatabaseContext, error) {
+func NewDatabaseContextWithCfg(cfg client.ConfigProvider, localstack bool, bucket string) (DatabaseContext, error) {
 	context := DatabaseContext{}
-	if endpoint == "" {
-		context.db = dynamodb.New(cfg)
-	} else {
+	if localstack {
 		context.db = dynamodb.New(
 			cfg,
 			&aws.Config{
-				Endpoint: aws.String(endpoint),
+				Endpoint: aws.String("http://localstack:4569"),
 			},
 		)
+		context.s3 = s3.New(
+			cfg,
+			&aws.Config{
+				Endpoint: aws.String("http://localstack:4572"),
+				S3ForcePathStyle: &forceS3PathStyle,
+			},
+		)
+	} else {
+		context.db = dynamodb.New(cfg)
+		context.s3 = s3.New(cfg)
 	}
-	context.s3 = s3.New(cfg)
 	context.contentBucket = bucket
 
 	log.Info("establishing session with dynamo")
