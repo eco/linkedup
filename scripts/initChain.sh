@@ -18,10 +18,12 @@ fi
 # creates accounts keys with passwords, adds them to the keys list
 ../bin/lycli keys add alice < $PWD_FILE
 ../bin/lycli keys add bob < $PWD_FILE
+../bin/lycli keys add redeemer < $PWD_FILE
 
 # Add 2 accounts, with coins to the genesis file
 ../bin/lyd add-genesis-account $(../bin/lycli keys show alice -a) 1000longy,100000000stake
 ../bin/lyd add-genesis-account $(../bin/lycli keys show bob -a) 1000longy,100000000stake
+../bin/lyd add-genesis-account $(../bin/lycli keys show redeemer -a) 1000longy,100000000stake
 
 # Set the default master key
 ../bin/lyd set-genesis-service
@@ -32,8 +34,8 @@ fi
 # Generate the genesis prizes from the event
 ../bin/lyd add-genesis-prizes
 
-# Sets the redeem account
-../bin/lyd add-redeem-account $(../bin/lycli keys show alice -a)
+## Sets the redeem account
+../bin/lyd add-redeem-account $(../bin/lycli keys show redeemer -a)
 
 # Configure your CLI to eliminate need for chain-id flag
 ../bin/lycli config chain-id longychain

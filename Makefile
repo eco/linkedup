@@ -23,7 +23,7 @@ init:
 clean:
 	rm -rf bin/
 
-bin/%: cmd/%/*
+bin/%: cmd/%/* $(shell find x/ -type f)
 	go build -o $@ ./$<
 
 default: all init

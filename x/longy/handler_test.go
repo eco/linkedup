@@ -30,12 +30,13 @@ var _ = Describe("Longy Handler Tests", func() {
 		handler = longy.NewHandler(keeper)
 		Expect(handler).ToNot(BeNil())
 
+		redeemer := util.IDToAddress("redeem")
 		genesis := longy.GenesisState{
 			KeyService: types.GenesisServiceKey{
 				Address: masterAddr,
 			},
 			Redeem: types.GenesisRedeemKey{
-				Address: util.IDToAddress("redeem"),
+				Address: redeemer,
 			},
 			Attendees: []types.GenesisAttendee{
 				types.GenesisAttendee{
@@ -43,6 +44,8 @@ var _ = Describe("Longy Handler Tests", func() {
 				},
 			},
 		}
+		r := keeper.AccountKeeper().NewAccountWithAddress(ctx, redeemer)
+		keeper.AccountKeeper().SetAccount(ctx, r)
 
 		// Init from genesis state
 		longy.InitGenesis(ctx, keeper, genesis)
