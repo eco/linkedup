@@ -5,19 +5,19 @@ import (
 	"github.com/eco/longy/x/longy/internal/types"
 )
 
-// GetMasterPublicKey will retrieve the master key set by the module
+// GetMasterAddress will retrieve the master key set by the module
 //nolint:gocritic
-func (k Keeper) GetMasterPublicKey(ctx sdk.Context) sdk.AccAddress {
+func (k Keeper) GetMasterAddress(ctx sdk.Context) sdk.AccAddress {
 	key := types.MasterKey()
 	bz, _ := k.Get(ctx, key)
 
 	return sdk.AccAddress(bz)
 }
 
-// SetMasterPublicKey will set the module's master key
+// SetMasterAddress will set the module's master key
 //nolint:gocritic
-func (k Keeper) SetMasterPublicKey(ctx sdk.Context, publicKey sdk.AccAddress) {
+func (k Keeper) SetMasterAddress(ctx sdk.Context, addr sdk.AccAddress) {
 	key := types.MasterKey()
-	bz := publicKey.Bytes()
+	bz := addr.Bytes()
 	k.Set(ctx, key, bz)
 }

@@ -27,6 +27,8 @@ var (
 	MasterKeyPrefix = []byte{0x3}
 	//RedeemKeyPrefix is the prefix for storing the public address of the redeem account for prizes
 	RedeemKeyPrefix = []byte{0x4}
+	//BonusKeyPrefix is the prefix for retrieving the active bonus
+	BonusKeyPrefix = []byte{0x5}
 	//KeySeparator is the separator between the prefix and the type key
 	KeySeparator = []byte("::")
 )
@@ -54,6 +56,11 @@ func MasterKey() []byte {
 // RedeemKey will return the store key for the redeem key
 func RedeemKey() []byte {
 	return RedeemKeyPrefix
+}
+
+// BonusKey -
+func BonusKey() []byte {
+	return BonusKeyPrefix
 }
 
 //nolint:gosec

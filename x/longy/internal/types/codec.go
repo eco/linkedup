@@ -21,7 +21,10 @@ func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterConcrete(MsgKey{}, RouterKey+"/MsgKey", nil)
 	cdc.RegisterConcrete(MsgRedeem{}, RouterKey+"/MsgRedeem", nil)
 	cdc.RegisterConcrete(MsgClaimKey{}, RouterKey+"/MsgClaimKey", nil)
+	cdc.RegisterConcrete(MsgBonus{}, RouterKey+"/MsgBonus", nil)
+	cdc.RegisterConcrete(MsgClearBonus{}, RouterKey+"/MsgClearBonus", nil)
 
 	// register types
 	cdc.RegisterConcrete(Attendee{}, RouterKey+"/Attendee", nil)
+	cdc.RegisterConcrete(Bonus{}, RouterKey+"/Bonus", nil)
 }

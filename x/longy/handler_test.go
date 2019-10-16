@@ -15,6 +15,7 @@ var _ = Describe("Longy Handler Tests", func() {
 	var handler sdk.Handler
 	var keeper longy.Keeper
 	var addr sdk.AccAddress
+	var masterAddr sdk.AccAddress = util.IDToAddress("master")
 	BeforeEach(func() {
 		/*
 		* Here we setup a test attendee & cosmos account that has a
@@ -32,7 +33,7 @@ var _ = Describe("Longy Handler Tests", func() {
 		redeemer := util.IDToAddress("redeem")
 		genesis := longy.GenesisState{
 			KeyService: types.GenesisServiceKey{
-				Address: util.IDToAddress("master"),
+				Address: masterAddr,
 			},
 			Redeem: types.GenesisRedeemKey{
 				Address: redeemer,
@@ -61,6 +62,7 @@ var _ = Describe("Longy Handler Tests", func() {
 		addr = util.IDToAddress("2")
 		msg := types.MsgKey{
 			AttendeeAddress:      addr,
+			MasterAddress:        masterAddr,
 			NewAttendeePublicKey: nil,
 			Commitment:           nil,
 		}
@@ -89,6 +91,7 @@ var _ = Describe("Longy Handler Tests", func() {
 		/** setup a key against the account **/
 		msg := types.MsgKey{
 			AttendeeAddress:      addr,
+			MasterAddress:        masterAddr,
 			NewAttendeePublicKey: newPub,
 			Commitment:           commitment,
 		}
@@ -118,6 +121,7 @@ var _ = Describe("Longy Handler Tests", func() {
 			/** setup a key against the account **/
 			msg := types.MsgKey{
 				AttendeeAddress:      addr,
+				MasterAddress:        masterAddr,
 				NewAttendeePublicKey: newPub,
 				Commitment:           commitment,
 			}
@@ -128,6 +132,7 @@ var _ = Describe("Longy Handler Tests", func() {
 		It("cannot key again", func() {
 			msg := types.MsgKey{
 				AttendeeAddress:      addr,
+				MasterAddress:        masterAddr,
 				NewAttendeePublicKey: nil,
 				Commitment:           nil,
 			}
