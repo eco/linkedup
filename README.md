@@ -36,6 +36,12 @@ system. If needed, ensure its presence:
 mkdir -p /tmp/localstack
 ```
 
+Make sure to edit `/etc/hosts` to make localstack an alias for 127.0.0.1
+```
+127.0.0.1	localhost
+127.0.0.1	localstack
+255.255.255.255	broadcasthost
+```
 ### Email Functionality
 SES-based email sending functionality depends on AWS API keys. When run deployed
 in AWS these will be provided by the instance role. For development purposes
