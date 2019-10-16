@@ -50,11 +50,8 @@ func handleMsgKey(ctx sdk.Context, k Keeper, msg types.MsgKey) sdk.Result {
 	}
 
 	// verify that master key used to sign this message
-	masterAddress := k.GetMasterAddress(ctx)
-	if masterAddress.Empty() {
-		return sdk.ErrInternal("master address not set").Result()
-	} else if !masterAddress.Equals(msg.MasterAddress) {
-		return sdk.ErrUnauthorized("incorrect master address that signed this message").Result()
+	if err := isMaster(ctx, k, msg.MasterAddress); err != nil {
+		return err.Result()
 	}
 
 	// Check that a public key has not already been set. The rekey service should only be able to
@@ -113,11 +110,8 @@ func handleMsgClaimKey(ctx sdk.Context, k Keeper, msg types.MsgClaimKey) sdk.Res
 //nolint
 func handleBonus(ctx sdk.Context, k Keeper, msg types.MsgBonus) sdk.Result {
 	// verify that only the master account can send this message
-	masterAddress := k.GetMasterAddress(ctx)
-	if masterAddress.Empty() {
-		return sdk.ErrInternal("master address not set").Result()
-	} else if !masterAddress.Equals(msg.MasterAddress) {
-		return sdk.ErrUnauthorized("incorrect master address").Result()
+	if err := isMaster(ctx, k, msg.MasterAddress); err != nil {
+		return err.Result()
 	}
 
 	// check if a bonus is already live
@@ -135,11 +129,8 @@ func handleBonus(ctx sdk.Context, k Keeper, msg types.MsgBonus) sdk.Result {
 //nolint
 func handleClearBonus(ctx sdk.Context, k Keeper, msg types.MsgClearBonus) sdk.Result {
 	// verify that only the master account can send this message
-	masterAddress := k.GetMasterAddress(ctx)
-	if masterAddress.Empty() {
-		return sdk.ErrInternal("master address not set").Result()
-	} else if !masterAddress.Equals(msg.MasterAddress) {
-		return sdk.ErrUnauthorized("incorrect master address").Result()
+	if err := isMaster(ctx, k, msg.MasterAddress); err != nil {
+		return err.Result()
 	}
 
 	if !k.HasLiveBonus(ctx) {
@@ -150,4 +141,18 @@ func handleClearBonus(ctx sdk.Context, k Keeper, msg types.MsgClearBonus) sdk.Re
 	k.ClearBonus(ctx)
 
 	return sdk.Result{}
+}
+
+/** Helper functions **/
+
+//nolint
+func isMaster(ctx sdk.Context, k Keeper, sender sdk.Address) sdk.Error {
+	masterAddr := k.GetMasterAddress(ctx)
+	if masterAddr.Empty() {
+		return sdk.ErrInternal("master account has not been set")
+	} else if !masetAddr.Equals(sender) {
+		return sdk.ErrUnauthorized("signer is not the master account")
+	}
+
+	return nil
 }
