@@ -21,23 +21,23 @@ var (
 type AppModuleBasic struct{}
 
 // Name returns the name of the module
-func (a AppModuleBasic) Name() string {
+func (AppModuleBasic) Name() string {
 	return ModuleName
 }
 
 // RegisterCodec registers module to the codec
-func (a AppModuleBasic) RegisterCodec(cdc *codec.Codec) {
+func (AppModuleBasic) RegisterCodec(cdc *codec.Codec) {
 	RegisterCodec(cdc)
 }
 
 // DefaultGenesis returns the default genesis for this module if any
-func (a AppModuleBasic) DefaultGenesis() json.RawMessage {
+func (AppModuleBasic) DefaultGenesis() json.RawMessage {
 	gen := DefaultGenesisState()
 	return ModuleCdc.MustMarshalJSON(gen)
 }
 
 // ValidateGenesis validates that the json genesis is valid to our module
-func (a AppModuleBasic) ValidateGenesis(data json.RawMessage) error {
+func (AppModuleBasic) ValidateGenesis(data json.RawMessage) error {
 	var gen GenesisState
 	ModuleCdc.MustUnmarshalJSON(data, &gen)
 
@@ -46,17 +46,17 @@ func (a AppModuleBasic) ValidateGenesis(data json.RawMessage) error {
 
 // RegisterRESTRoutes registers our module rest endpoints
 //nolint:gocritic
-func (a AppModuleBasic) RegisterRESTRoutes(ctx context.CLIContext, rtr *mux.Router) {
+func (AppModuleBasic) RegisterRESTRoutes(ctx context.CLIContext, rtr *mux.Router) {
 	rest.RegisterRoutes(ctx, rtr, StoreKey)
 }
 
 // GetTxCmd returns any tx commands from this module to the parent command in the cli
-func (a AppModuleBasic) GetTxCmd(*codec.Codec) *cobra.Command {
+func (AppModuleBasic) GetTxCmd(*codec.Codec) *cobra.Command {
 	return nil
 }
 
 // GetQueryCmd returns any query commands from this module to the parent command in the cli
-func (a AppModuleBasic) GetQueryCmd(*codec.Codec) *cobra.Command {
+func (AppModuleBasic) GetQueryCmd(*codec.Codec) *cobra.Command {
 	return nil
 }
 
@@ -79,7 +79,7 @@ func NewAppModule(keeper Keeper) module.AppModule {
 
 // Route returns the route key for the the appropriate messages
 //nolint:gocritic
-func (am AppModule) Route() string {
+func (AppModule) Route() string {
 	return ModuleName
 }
 
@@ -91,7 +91,7 @@ func (am AppModule) NewHandler() sdk.Handler {
 
 // QuerierRoute returns the key for the router
 //nolint:gocritic
-func (am AppModule) QuerierRoute() string {
+func (AppModule) QuerierRoute() string {
 	return ModuleName
 }
 
@@ -103,18 +103,18 @@ func (am AppModule) NewQuerierHandler() sdk.Querier {
 
 // BeginBlock runs at the beginning of each block
 //nolint:gocritic
-func (am AppModule) BeginBlock(sdk.Context, abci.RequestBeginBlock) {
+func (AppModule) BeginBlock(sdk.Context, abci.RequestBeginBlock) {
 }
 
 // EndBlock runs at the end of each block
 //nolint:gocritic
-func (am AppModule) EndBlock(sdk.Context, abci.RequestEndBlock) []abci.ValidatorUpdate {
+func (AppModule) EndBlock(sdk.Context, abci.RequestEndBlock) []abci.ValidatorUpdate {
 	return []abci.ValidatorUpdate{}
 }
 
 // RegisterInvariants registers the invariants for this module
 //nolint:gocritic
-func (am AppModule) RegisterInvariants(sdk.InvariantRegistry) {
+func (AppModule) RegisterInvariants(sdk.InvariantRegistry) {
 }
 
 // InitGenesis init-genesis
@@ -129,6 +129,7 @@ func (am AppModule) InitGenesis(ctx sdk.Context, data json.RawMessage) []abci.Va
 
 // ExportGenesis export genesis
 // nolint: gocritic
-func (am AppModule) ExportGenesis(ctx sdk.Context) json.RawMessage {
-	return make([]byte, 0)
+func (AppModule) ExportGenesis(ctx sdk.Context) json.RawMessage {
+	//return make([]byte, 0)
+	return nil
 }
