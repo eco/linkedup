@@ -24,7 +24,7 @@ func bonusGetHandler(cliCtx context.CLIContext, storeName string) http.HandlerFu
 		}
 
 		w.WriteHeader(http.StatusOK)
-		w.Write(res)
+		w.Write(res) //nolint
 	}
 }
 
