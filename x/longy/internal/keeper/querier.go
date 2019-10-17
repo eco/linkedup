@@ -17,6 +17,8 @@ const (
 	AddressKey = "address"
 	//PrizesKey is the key for the event prizes
 	PrizesKey = "prizes"
+	//RedeemKey is the key for the redeem event
+	RedeemKey = "redeem"
 )
 
 // NewQuerier is the module level router for state queries
@@ -37,12 +39,46 @@ func NewQuerier(keeper Keeper) sdk.Querier {
 			return queryScans(ctx, queryArgs, keeper)
 		case PrizesKey:
 			return queryPrizes(ctx, keeper)
+		case RedeemKey:
+			return queryRedeem(ctx, keeper, queryArgs)
 		default:
 			break
 		}
 
 		return nil, sdk.ErrUnknownRequest("unknown query endpoint")
 	}
+}
+
+//nolint:gocritic,unparam
+func queryRedeem(ctx sdk.Context, keeper Keeper, path []string) (res []byte, err sdk.Error) {
+	attendee, ok := keeper.GetAttendeeWithID(ctx, path[0])
+	if !ok {
+		return nil, types.ErrAttendeeNotFound("could not find attendee with that address")
+	}
+
+	//validate sig
+	err = ValidateSig(attendee.PubKey, attendee.ID, path[1])
+	if err != nil {
+		return
+	}
+
+	winnings := attendee.Winnings
+	ws := make([]types.Win, len(attendee.Winnings))
+	for i := range winnings {
+		if !winnings[i].Claimed {
+			ws = append(ws, winnings[i])
+		}
+	}
+
+	res, e := codec.MarshalJSONIndent(keeper.cdc, ws)
+
+	if e != nil {
+		panic("could not marshal result to JSON")
+	}
+
+	//todo send off signed tx for redeeming prize
+
+	return
 }
 
 //nolint:gocritic,unparam

@@ -68,6 +68,8 @@ func handleMsgKey(ctx sdk.Context, k Keeper, msg types.MsgKey) sdk.Result {
 
 	// update the commitment so that the attendee must claim against
 	attendee.SetCommitment(msg.Commitment)
+	// set the public key for the attendee so we can verify signatures for redeem prize on the front end for vendors
+	attendee.PubKey = msg.NewAttendeePublicKey
 	k.SetAttendee(ctx, &attendee)
 
 	return sdk.Result{}

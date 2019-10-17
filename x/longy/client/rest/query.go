@@ -13,6 +13,25 @@ import (
 )
 
 //nolint:gocritic
+func redeemHandler(cliCtx context.CLIContext, storeName string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		badgeID := vars[BadgeIDKey]
+		sig := vars[SigKey]
+
+		res, _, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/%s/%s/%s",
+			storeName, keeper.RedeemKey, badgeID, sig), nil)
+
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusNotFound, err.Error())
+			return
+		}
+
+		rest.PostProcessResponse(w, cliCtx, res)
+	}
+}
+
+//nolint:gocritic
 func prizesGetHandler(cliCtx context.CLIContext, storeName string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		res, _, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/%s",
@@ -51,6 +70,7 @@ func attendeeAddressHandler(cliCtx context.CLIContext, storeName string) http.Ha
 
 		res, _, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/%s/%s/%s",
 			storeName, keeper.QueryAttendees, keeper.AddressKey, paramType), nil)
+
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusNotFound, err.Error())
 			return

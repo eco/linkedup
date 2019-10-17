@@ -27,6 +27,7 @@ func (k *Keeper) GetAttendee(ctx sdk.Context, address sdk.AccAddress) (attendee 
 	if err != nil {
 		panic(err)
 	}
+
 	exists = true
 	return
 }

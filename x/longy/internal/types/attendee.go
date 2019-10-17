@@ -5,12 +5,14 @@ import (
 	"fmt"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/eco/longy/util"
+	"github.com/tendermint/tendermint/crypto"
 )
 
 // Attendee encapsulates attendee information
 type Attendee struct {
 	ID      string
 	Address sdk.AccAddress
+	PubKey  crypto.PubKey
 	Name    string
 	//UnixTimeSecClaimed is the unix time in seconds of the block header of when this attendee account was claimed
 	UnixTimeSecClaimed int64

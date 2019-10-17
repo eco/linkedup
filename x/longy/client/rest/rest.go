@@ -13,8 +13,12 @@ const (
 	AttendeeIDKey = "attendee_id"
 	//AddressIDKey is the attribute key for attendee address
 	AddressIDKey = "address_id"
-	//ScanIDKey  is the attribute key for scan id
+	//ScanIDKey is the attribute key for scan id
 	ScanIDKey = "scan_id"
+	//BadgeIDKey is the attribute key for badge id
+	BadgeIDKey = "badge_id"
+	//SigKey is the attribute key for the sig
+	SigKey = "sig"
 )
 
 // RegisterRoutes - Central function to define routes that get registered by the main application
@@ -35,6 +39,13 @@ func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, storeName string) 
 	//longy/prizes
 	r.HandleFunc(fmt.Sprintf("/%s/%s", storeName, keeper.PrizesKey),
 		prizesGetHandler(cliCtx, storeName)).Methods("GET")
+
+	//longy/redeem?badge_id={badge_id}&sig={sig}
+	r.HandleFunc(fmt.Sprintf("/%s/%s", storeName, keeper.RedeemKey),
+		redeemHandler(cliCtx, storeName)).Queries(
+		BadgeIDKey, fmt.Sprintf("{%s}", BadgeIDKey),
+		SigKey, fmt.Sprintf("{%s}", SigKey)).
+		Methods("GET")
 
 	//open endpoint to post transactions directly to full node
 	r.HandleFunc("/longy/txs", rest.BroadcastTxRequest(cliCtx)).Methods("POST")

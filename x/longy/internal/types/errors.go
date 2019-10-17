@@ -92,8 +92,12 @@ const (
 	EmptyEncryptedInfo
 	//SenderNotRedeemerAcct is the code for when the sender of the MsgRedeem is not the correct account
 	SenderNotRedeemerAcct
-	//RedeemSigEmpty is the code for when the redeem signature of a MsgRedeem is empty
-	RedeemSigEmpty
+	//HashingError is the code for when we error on hashing the badge id
+	HashingError
+	//SigDecodeError is the code for when we cannot hex decode the signature
+	SigDecodeError
+	//InvalidSignature is the code for when the signature does not match the message
+	InvalidSignature
 
 	// DefaultError is the code for when a random error occurs that we do not provide a unique code to
 	DefaultError
@@ -255,9 +259,19 @@ func ErrSenderNotRedeemerAcct(format string, args ...interface{}) sdk.Error {
 	return sdk.NewError(LongyCodeSpace, SenderNotRedeemerAcct, format, args...)
 }
 
-//ErrRedeemSigEmpty occurs when the redeem signature of a MsgRedeem is empty
-func ErrRedeemSigEmpty(format string, args ...interface{}) sdk.Error {
-	return sdk.NewError(LongyCodeSpace, RedeemSigEmpty, format, args...)
+//ErrHashingError occurs when the code for when we error on hashing the badge id
+func ErrHashingError(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, HashingError, format, args...)
+}
+
+//ErrSigDecodeError occurs when the code for when we cannot hex decode the signature
+func ErrSigDecodeError(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, SigDecodeError, format, args...)
+}
+
+//ErrInvalidSignature occurs when the code for when the signature does not match the message
+func ErrInvalidSignature(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, InvalidSignature, format, args...)
 }
 
 //ErrDefault occurs when a random error occurs that we do not provide a unique code to
