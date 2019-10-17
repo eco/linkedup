@@ -33,7 +33,7 @@ var _ = Describe("Redeem Handler Tests", func() {
 
 	It("should succeed when the sender is the redeem account and attendee exist", func() {
 		utils.SetRedeemAccount(ctx, keeper, sender)
-		utils.AddAttendeeToKeeper(ctx, &keeper, qr2, false)
+		utils.AddAttendeeToKeeper(ctx, &keeper, qr2, true, false)
 		msg := types.NewMsgRedeem(sender, receiver)
 		result := handler(ctx, msg)
 		Expect(result.Code).To(Equal(sdk.CodeOK))
@@ -41,7 +41,7 @@ var _ = Describe("Redeem Handler Tests", func() {
 
 	It("should succeed to set all attendee winnings to claimed", func() {
 		utils.SetRedeemAccount(ctx, keeper, sender)
-		attendee := utils.AddAttendeeToKeeper(ctx, &keeper, qr2, false)
+		attendee := utils.AddAttendeeToKeeper(ctx, &keeper, qr2, true, false)
 		attendee.Winnings = append(attendee.Winnings, types.Win{
 			Tier:    types.Tier1,
 			Name:    "stuff",

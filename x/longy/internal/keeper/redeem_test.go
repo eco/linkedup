@@ -73,7 +73,7 @@ var _ = Describe("Redeem Keeper Tests", func() {
 		Context("when attendee exists", func() {
 			var a types.Attendee
 			BeforeEach(func() {
-				a = utils.AddAttendeeToKeeper(ctx, &keeper, qr1, false)
+				a = utils.AddAttendeeToKeeper(ctx, &keeper, qr1, true, false)
 
 				prizes := types.GetGenesisPrizes()
 				for i := range prizes {

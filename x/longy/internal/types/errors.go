@@ -173,7 +173,7 @@ func ErrQRCodeInvalid(format string, args ...interface{}) sdk.Error {
 	return sdk.NewError(LongyCodeSpace, QRCodeInvalid, format, args...)
 }
 
-// ErrAttendeeClaimed indicates a attendee that is unclaimed
+// ErrAttendeeClaimed indicates an attendee that is unclaimed
 func ErrAttendeeClaimed(format string, args ...interface{}) sdk.Error {
 	return sdk.NewError(LongyCodeSpace, AttendeeClaimed, format, args...)
 }

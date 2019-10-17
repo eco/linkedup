@@ -48,8 +48,8 @@ var _ = Describe("Attendee Keeper Tests", func() {
 		Context("when attendee's exist but a scan has not been accepted", func() {
 			BeforeEach(func() {
 				BeforeTestRun()
-				utils.AddAttendeeToKeeper(ctx, &keeper, qr1, false)
-				utils.AddAttendeeToKeeper(ctx, &keeper, qr2, false)
+				utils.AddAttendeeToKeeper(ctx, &keeper, qr1, true, false)
+				utils.AddAttendeeToKeeper(ctx, &keeper, qr2, true, false)
 			})
 
 			It("should fail to award scan points", func() {
@@ -107,7 +107,7 @@ var _ = Describe("Attendee Keeper Tests", func() {
 				})
 
 				It("should succeed to award share info points to attendee and sponsor", func() {
-					utils.AddAttendeeToKeeper(ctx, &keeper, qr2, true)
+					utils.AddAttendeeToKeeper(ctx, &keeper, qr2, true, true)
 
 					err := keeper.AwardShareInfoPoints(ctx, scan, s1, s2)
 					Expect(err).To(BeNil())
