@@ -40,6 +40,10 @@ func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, storeName string) 
 	r.HandleFunc(fmt.Sprintf("/%s/%s", storeName, keeper.PrizesKey),
 		prizesGetHandler(cliCtx, storeName)).Methods("GET")
 
+	//longy/bonus
+	r.HandleFunc(fmt.Sprintf("/%s/%s", storeName, keeper.QueryBonus),
+		bonusGetHandler(cliCtx, storeName)).Methods("GET")
+
 	//longy/redeem?badge_id={badge_id}&sig={sig}
 	r.HandleFunc(fmt.Sprintf("/%s/%s", storeName, keeper.RedeemKey),
 		redeemHandler(cliCtx, storeName)).Queries(

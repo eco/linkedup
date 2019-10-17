@@ -13,6 +13,8 @@ const (
 	QueryAttendees = "attendees"
 	//QueryScans is the key for scan gets
 	QueryScans = "scans"
+	//QueryBonus is the key for checking for the current bonus
+	QueryBonus = "bonus"
 	//AddressKey is the key for attendee gets by address
 	AddressKey = "address"
 	//PrizesKey is the key for the event prizes
@@ -39,6 +41,8 @@ func NewQuerier(keeper Keeper) sdk.Querier {
 			return queryScans(ctx, queryArgs, keeper)
 		case PrizesKey:
 			return queryPrizes(ctx, keeper)
+		case QueryBonus:
+			return queryBonus(ctx, keeper)
 		case RedeemKey:
 			return queryRedeem(ctx, keeper, queryArgs)
 		default:
@@ -94,6 +98,21 @@ func queryPrizes(ctx sdk.Context, keeper Keeper) (res []byte, err sdk.Error) {
 	}
 
 	return
+}
+
+//nolint:gocritic,unparam
+func queryBonus(ctx sdk.Context, keeper Keeper) ([]byte, sdk.Error) {
+	bonus := keeper.GetBonus(ctx)
+	if bonus == nil {
+		return nil, nil
+	}
+
+	res, err := codec.MarshalJSONIndent(keeper.cdc, bonus)
+	if err != nil {
+		panic(fmt.Sprintf("json marshal bonus: %s", err))
+	}
+
+	return res, nil
 }
 
 //nolint:gocritic,unparam
