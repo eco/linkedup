@@ -92,6 +92,8 @@ const (
 	EmptyEncryptedInfo
 	//SenderNotRedeemerAcct is the code for when the sender of the MsgRedeem is not the correct account
 	SenderNotRedeemerAcct
+	//RedeemSigEmpty is the code for when the redeem signature of a MsgRedeem is empty
+	RedeemSigEmpty
 
 	// DefaultError is the code for when a random error occurs that we do not provide a unique code to
 	DefaultError
@@ -251,6 +253,11 @@ func ErrEmptyEncryptedInfo(format string, args ...interface{}) sdk.Error {
 //ErrSenderNotRedeemerAcct occurs when the sender of the MsgRedeem is not the correct account
 func ErrSenderNotRedeemerAcct(format string, args ...interface{}) sdk.Error {
 	return sdk.NewError(LongyCodeSpace, SenderNotRedeemerAcct, format, args...)
+}
+
+//ErrRedeemSigEmpty occurs when the redeem signature of a MsgRedeem is empty
+func ErrRedeemSigEmpty(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, RedeemSigEmpty, format, args...)
 }
 
 //ErrDefault occurs when a random error occurs that we do not provide a unique code to

@@ -11,7 +11,7 @@ import (
 const (
 	//AttendeeIDKey is the attribute key for attendee id
 	AttendeeIDKey = "attendee_id"
-	//AddressIDKey is the attribute key for atttendee address
+	//AddressIDKey is the attribute key for attendee address
 	AddressIDKey = "address_id"
 	//ScanIDKey  is the attribute key for scan id
 	ScanIDKey = "scan_id"
