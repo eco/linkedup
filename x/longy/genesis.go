@@ -50,6 +50,7 @@ func ValidateGenesis(data GenesisState) error {
 func InitGenesis(ctx sdk.Context, k keeper.Keeper, state GenesisState) {
 	// create and set of all the attendees and cosmos accounts
 	accountKeeper := k.AccountKeeper()
+	coinKeeper := k.CoinKeeper()
 
 	// set the master service account
 	masterAccount := accountKeeper.NewAccountWithAddress(ctx, state.KeyService.Address)
@@ -72,11 +73,20 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, state GenesisState) {
 	}
 
 	// set the attendees
+	amount := sdk.NewInt(5000)
+	coins := sdk.Coins{sdk.Coin{
+		Denom:  ModuleName,
+		Amount: amount,
+	}}
 	for _, a := range state.Attendees {
 		attendee := types.NewAttendeeFromGenesis(a)
 
 		account := accountKeeper.NewAccountWithAddress(ctx, attendee.GetAddress())
 		accountKeeper.SetAccount(ctx, account)
+		_, e := coinKeeper.AddCoins(ctx, account.GetAddress(), coins)
+		if e != nil {
+			panic(e)
+		}
 		//attendee.Address = account.GetAddress()
 		k.SetAttendee(ctx, &attendee)
 	}
