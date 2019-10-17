@@ -193,6 +193,7 @@ func NewLongyApp(
 		app.cdc,
 		keys[longy.StoreKey],
 		app.AccountKeeper,
+		app.BankKeeper,
 	)
 
 	app.mm = module.NewManager(

@@ -4,6 +4,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/eco/longy/x/longy/internal/types"
 )
 
@@ -12,15 +13,18 @@ type Keeper struct {
 	contextStoreKey sdk.StoreKey
 
 	accountKeeper auth.AccountKeeper
+	coinKeeper    bank.Keeper
 	cdc           *codec.Codec
 }
 
 // NewKeeper is a creator for `Keeper`
 //nolint:gocritic
-func NewKeeper(cdc *codec.Codec, longyStoreKey sdk.StoreKey, accKeeper auth.AccountKeeper) Keeper {
+func NewKeeper(cdc *codec.Codec, longyStoreKey sdk.StoreKey, accKeeper auth.AccountKeeper,
+	coinKeeper bank.Keeper) Keeper {
 	return Keeper{
 		contextStoreKey: longyStoreKey,
 		accountKeeper:   accKeeper,
+		coinKeeper:      coinKeeper,
 		cdc:             cdc,
 	}
 }
@@ -29,6 +33,12 @@ func NewKeeper(cdc *codec.Codec, longyStoreKey sdk.StoreKey, accKeeper auth.Acco
 //nolint: gocritic
 func (k Keeper) AccountKeeper() auth.AccountKeeper {
 	return k.accountKeeper
+}
+
+// CoinKeeper returns the module's bank keeper
+//nolint: gocritic
+func (k Keeper) CoinKeeper() bank.Keeper {
+	return k.coinKeeper
 }
 
 // Set sets the key value pair in the store
