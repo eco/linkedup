@@ -2,15 +2,31 @@ package rest
 
 import (
 	"fmt"
-	"github.com/eco/longy/x/longy/internal/keeper"
-	"net/http"
-
 	"github.com/cosmos/cosmos-sdk/client/context"
-
 	"github.com/cosmos/cosmos-sdk/types/rest"
-
+	"github.com/eco/longy/x/longy/internal/keeper"
 	"github.com/gorilla/mux"
+	"net/http"
 )
+
+//nolint:gocritic
+func bonusGetHandler(cliCtx context.CLIContext, storeName string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		res, _, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/%s",
+			storeName, keeper.QueryBonus), nil)
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
+			return
+		} else if res == nil {
+			// no bonus found
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Write(res) //nolint
+	}
+}
 
 //nolint:gocritic
 func prizesGetHandler(cliCtx context.CLIContext, storeName string) http.HandlerFunc {
