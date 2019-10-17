@@ -2,7 +2,7 @@ package types
 
 // Bonus -
 type Bonus struct {
-	Multiplier uint
+	Multiplier uint `json:"multiplier"`
 }
 
 // NewBonus -
