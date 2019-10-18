@@ -41,6 +41,20 @@ func (k Keeper) CoinKeeper() bank.Keeper {
 	return k.coinKeeper
 }
 
+/** Helper functions **/
+
+//nolint
+func (k Keeper) IsMaster(ctx sdk.Context, sender sdk.Address) sdk.Error {
+	masterAddr := k.GetMasterAddress(ctx)
+	if masterAddr.Empty() {
+		return sdk.ErrInternal("master account has not been set")
+	} else if !masterAddr.Equals(sender) {
+		return sdk.ErrUnauthorized("signer is not the master account")
+	}
+
+	return nil
+}
+
 // Set sets the key value pair in the store
 //nolint:gocritic
 func (k Keeper) Set(ctx sdk.Context, key []byte, value []byte) {

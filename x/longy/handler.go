@@ -52,7 +52,7 @@ func handleMsgKey(ctx sdk.Context, k Keeper, msg types.MsgKey) sdk.Result {
 	}
 
 	// verify that master key used to sign this message
-	if err := isMaster(ctx, k, msg.MasterAddress); err != nil {
+	if err := k.IsMaster(ctx, msg.MasterAddress); err != nil {
 		return err.Result()
 	}
 
@@ -114,7 +114,7 @@ func handleMsgClaimKey(ctx sdk.Context, k Keeper, msg types.MsgClaimKey) sdk.Res
 //nolint
 func handleBonus(ctx sdk.Context, k Keeper, msg types.MsgBonus) sdk.Result {
 	// verify that only the master account can send this message
-	if err := isMaster(ctx, k, msg.MasterAddress); err != nil {
+	if err := k.IsMaster(ctx, msg.MasterAddress); err != nil {
 		return err.Result()
 	}
 
@@ -133,7 +133,7 @@ func handleBonus(ctx sdk.Context, k Keeper, msg types.MsgBonus) sdk.Result {
 //nolint
 func handleClearBonus(ctx sdk.Context, k Keeper, msg types.MsgClearBonus) sdk.Result {
 	// verify that only the master account can send this message
-	if err := isMaster(ctx, k, msg.MasterAddress); err != nil {
+	if err := k.IsMaster(ctx, msg.MasterAddress); err != nil {
 		return err.Result()
 	}
 
@@ -145,18 +145,4 @@ func handleClearBonus(ctx sdk.Context, k Keeper, msg types.MsgClearBonus) sdk.Re
 	k.ClearBonus(ctx)
 
 	return sdk.Result{}
-}
-
-/** Helper functions **/
-
-//nolint
-func isMaster(ctx sdk.Context, k Keeper, sender sdk.Address) sdk.Error {
-	masterAddr := k.GetMasterAddress(ctx)
-	if masterAddr.Empty() {
-		return sdk.ErrInternal("master account has not been set")
-	} else if !masterAddr.Equals(sender) {
-		return sdk.ErrUnauthorized("signer is not the master account")
-	}
-
-	return nil
 }

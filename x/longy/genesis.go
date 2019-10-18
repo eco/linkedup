@@ -28,7 +28,7 @@ func ValidateGenesis(data GenesisState) error {
 	}
 
 	if data.Redeem.Address.Empty() {
-		return types.ErrGenesisRedeemAddressEmpty("Redeem address must be set")
+		return types.ErrGenesisRedeemAddressEmpty("Signer address must be set")
 	}
 
 	if data.Attendees == nil {
@@ -62,7 +62,7 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, state GenesisState) {
 	k.SetMasterAddress(ctx, state.KeyService.Address)
 
 	// set the redeem account
-	//redeemAccount := accountKeeper.NewAccountWithAddress(ctx, state.Redeem.Address)
+	//redeemAccount := accountKeeper.NewAccountWithAddress(ctx, state.Signer.Address)
 	redeemAccount := accountKeeper.GetAccount(ctx, state.Redeem.Address)
 	if redeemAccount == nil {
 		panic(fmt.Errorf("the redeem account does not exist"))

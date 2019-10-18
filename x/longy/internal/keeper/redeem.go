@@ -43,7 +43,7 @@ func (k Keeper) IsRedeemAccount(ctx sdk.Context, addr sdk.Address) bool {
 //RedeemPrizes sets all of the prizes for an attendee to claimed = true
 //nolint:gocritic
 func (k *Keeper) RedeemPrizes(ctx sdk.Context, attendeeAddr sdk.AccAddress) sdk.Error {
-	//get the address for the scanned qr code
+	//get the AccAddress for the scanned qr code
 	attendee, ok := k.GetAttendee(ctx, attendeeAddr)
 	if !ok {
 		return types.ErrAttendeeNotFound("cannot find the attendee")

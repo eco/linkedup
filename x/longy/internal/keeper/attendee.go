@@ -14,7 +14,7 @@ func (k *Keeper) GetAttendeeWithID(ctx sdk.Context, id string) (types.Attendee, 
 	return k.GetAttendee(ctx, address)
 }
 
-// GetAttendee will retrieve the attendee via `address`
+// GetAttendee will retrieve the attendee via `AccAddress`
 //nolint:gocritic
 func (k *Keeper) GetAttendee(ctx sdk.Context, address sdk.AccAddress) (attendee types.Attendee, exists bool) {
 	key := types.AttendeeKey(address)
@@ -32,7 +32,7 @@ func (k *Keeper) GetAttendee(ctx sdk.Context, address sdk.AccAddress) (attendee 
 	return
 }
 
-// SetAttendee will set the attendee `a` to the store using it's address
+// SetAttendee will set the attendee `a` to the store using it's AccAddress
 //nolint:gocritic
 func (k *Keeper) SetAttendee(ctx sdk.Context, a *types.Attendee) {
 	addr := a.GetAddress()

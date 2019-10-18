@@ -9,7 +9,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("Redeem Keeper Tests", func() {
+var _ = Describe("Signer Keeper Tests", func() {
 	var s1, s2 sdk.AccAddress
 	const (
 		qr1 = "1234"
@@ -22,13 +22,13 @@ var _ = Describe("Redeem Keeper Tests", func() {
 		s2 = util.IDToAddress(qr2)
 	})
 
-	It("should fail to set an empty address", func() {
+	It("should fail to set an empty AccAddress", func() {
 		err := keeper.SetRedeemAccount(ctx, sdk.AccAddress{})
 		Expect(err).To(Not(BeNil()))
 		Expect(err.Code()).To(Equal(sdk.CodeInvalidAddress))
 	})
 
-	It("should fail to set a valid address for an account that doesn't exist", func() {
+	It("should fail to set a valid AccAddress for an account that doesn't exist", func() {
 		err := keeper.SetRedeemAccount(ctx, s1)
 		Expect(err).To(Not(BeNil()))
 		Expect(err.Code()).To(Equal(sdk.CodeUnknownAddress))
@@ -46,7 +46,7 @@ var _ = Describe("Redeem Keeper Tests", func() {
 		Expect(err).To(BeNil())
 	})
 
-	It("should fail to is redeem account when passed the wrong address", func() {
+	It("should fail to is redeem account when passed the wrong AccAddress", func() {
 		utils.SetRedeemAccount(ctx, keeper, s1)
 
 		acc := keeper.AccountKeeper().NewAccountWithAddress(ctx, s2)

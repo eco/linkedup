@@ -57,7 +57,7 @@ func NewQuerier(keeper Keeper) sdk.Querier {
 func queryRedeem(ctx sdk.Context, keeper Keeper, path []string) (res []byte, err sdk.Error) {
 	attendee, ok := keeper.GetAttendeeWithID(ctx, path[0])
 	if !ok {
-		return nil, types.ErrAttendeeNotFound("could not find attendee with that address")
+		return nil, types.ErrAttendeeNotFound("could not find attendee with that AccAddress")
 	}
 
 	//validate sig
@@ -121,7 +121,7 @@ func queryAttendees(ctx sdk.Context, path []string, keeper Keeper) (res []byte, 
 	attendee, ok := keeper.GetAttendeeWithID(ctx, path[0])
 
 	if !ok {
-		return nil, types.ErrAttendeeNotFound("could not find attendee with that address")
+		return nil, types.ErrAttendeeNotFound("could not find attendee with that AccAddress")
 	}
 
 	res, e := codec.MarshalJSONIndent(keeper.cdc, attendee)
@@ -137,13 +137,13 @@ func queryAttendeesByAddr(ctx sdk.Context, path []string,
 	keeper Keeper) (res []byte, err sdk.Error) {
 	addr, e := sdk.AccAddressFromBech32(path[0])
 	if e != nil {
-		return nil, sdk.ErrInvalidAddress(fmt.Sprintf("cannot turn param into cosmos address : %s", path[0]))
+		return nil, sdk.ErrInvalidAddress(fmt.Sprintf("cannot turn param into cosmos AccAddress : %s", path[0]))
 	}
 
 	attendee, ok := keeper.GetAttendee(ctx, addr)
 
 	if !ok {
-		return nil, types.ErrAttendeeNotFound("could not find attendee with that address")
+		return nil, types.ErrAttendeeNotFound("could not find attendee with that AccAddress")
 	}
 
 	res, e = codec.MarshalJSONIndent(keeper.cdc, attendee)
