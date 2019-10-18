@@ -9,7 +9,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("Signer Keeper Tests", func() {
+var _ = Describe("Redeem Keeper Tests", func() {
 	var s1, s2 sdk.AccAddress
 	const (
 		qr1 = "1234"

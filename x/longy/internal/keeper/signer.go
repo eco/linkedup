@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/context"
@@ -9,20 +10,18 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 	"github.com/tendermint/tendermint/crypto"
-	"github.com/tendermint/tendermint/crypto/secp256k1"
-	"os"
 	"sync"
 )
 
 //Signer is the signer for posting redeem tx
 type Signer struct {
 	AccAddress sdk.AccAddress
-	PrivKey    secp256k1.PrivKeySecp256k1
+	PrivKey    crypto.PrivKey
 	seqLock    *sync.Mutex
 }
 
 //NewSigner is the constructor for signer
-func NewSigner(accAddress sdk.AccAddress, privKey secp256k1.PrivKeySecp256k1) *Signer {
+func NewSigner(accAddress sdk.AccAddress, privKey crypto.PrivKey) *Signer {
 	return &Signer{
 		AccAddress: accAddress,
 		PrivKey:    privKey,
@@ -33,8 +32,12 @@ func NewSigner(accAddress sdk.AccAddress, privKey secp256k1.PrivKeySecp256k1) *S
 // SendTx calls the test handler with a message.
 func (s *Signer) SendTx(cliContext *context.CLIContext, cdc *codec.Codec, msg sdk.Msg) (res sdk.Result) {
 	s.seqLock.Lock()
-	txBldr := s.senderTxContext(cliContext, cdc)
-	err := s.completeAndBroadcastTxCLI(*cliContext, txBldr, []sdk.Msg{msg})
+	txBldr, err := s.senderTxContext(cliContext, cdc)
+	if err != nil {
+		//res = parseResponse(err.Error())
+		fmt.Println(err)
+	}
+	err = s.completeAndBroadcastTxCLI(*cliContext, txBldr, []sdk.Msg{msg})
 	s.seqLock.Unlock()
 	if err != nil {
 		//res = parseResponse(err.Error())
@@ -45,11 +48,18 @@ func (s *Signer) SendTx(cliContext *context.CLIContext, cdc *codec.Codec, msg sd
 }
 
 // SenderTxContext creates a new TxBuilder
-func (s *Signer) senderTxContext(cliContext *context.CLIContext, cdc *codec.Codec) auth.TxBuilder {
+func (s *Signer) senderTxContext(cliContext *context.CLIContext, cdc *codec.Codec) (auth.TxBuilder, error) {
 	cliContext.FromAddress = s.AccAddress
 	cliContext.BroadcastMode = client.BroadcastSync
 	txEncoder := utils.GetTxEncoder(cdc)
-	return auth.NewTxBuilderFromCLI().WithTxEncoder(txEncoder)
+	txBuilder := auth.NewTxBuilderFromCLI().WithTxEncoder(txEncoder)
+
+	num, seq, err := auth.NewAccountRetriever(cliContext).GetAccountNumberSequence(s.AccAddress)
+	if err != nil {
+		return txBuilder, err
+	}
+
+	return txBuilder.WithAccountNumber(num).WithSequence(seq), nil
 }
 
 // nolint[hugeParam]
@@ -63,22 +73,8 @@ func (s *Signer) completeAndBroadcastTxCLI(cliContext context.CLIContext, txBldr
 		return err
 	}
 
-	if txBldr.SimulateAndExecute() || cliContext.Simulate {
-		txBldr, err = utils.EnrichWithGas(txBldr, cliContext, msgs)
-		if err != nil {
-			return err
-		}
-
-		gasEst := utils.GasEstimateResponse{GasEstimate: txBldr.Gas()}
-		_, _ = fmt.Fprintf(os.Stderr, "%s\n", gasEst.String())
-	}
-
-	if cliContext.Simulate {
-		return nil
-	}
-
 	// build and sign the transaction
-	txBytes, err := buildAndSign(txBldr, s.PrivKey, msgs)
+	txBytes, err := s.buildAndSign(cliContext.Codec, txBldr, msgs)
 	if err != nil {
 		return err
 	}
@@ -95,13 +91,14 @@ func (s *Signer) completeAndBroadcastTxCLI(cliContext context.CLIContext, txBldr
 
 //nolint[hugeParam]
 // Function signature taken from the Cosmos SDK.
-func buildAndSign(bldr auth.TxBuilder, priv crypto.PrivKey, msgs []sdk.Msg) ([]byte, error) {
+func (s *Signer) buildAndSign(cdc *codec.Codec, bldr auth.TxBuilder, msgs []sdk.Msg) ([]byte, error) {
 	msg, err := bldr.BuildSignMsg(msgs)
 	if err != nil {
 		return nil, err
 	}
-
-	sig, err := makeSignature(priv, msg)
+	b, _ := json.Marshal(msg)
+	fmt.Println(string(b))
+	sig, err := makeSignature(s.PrivKey, msg)
 	if err != nil {
 		return nil, err
 	}

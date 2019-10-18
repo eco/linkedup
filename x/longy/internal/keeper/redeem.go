@@ -58,14 +58,14 @@ func (k *Keeper) RedeemPrizes(ctx sdk.Context, attendeeAddr sdk.AccAddress) sdk.
 	return nil
 }
 
-//ValidateSig validates that the hex encoded sig is the signed sha512(badgeId) by the corresponding private key
-func ValidateSig(key crypto.PubKey, badgeID string, sig string) sdk.Error {
+//ValidateSig validates that the hex encoded sig is the signed sha512(address) by the corresponding private key
+func ValidateSig(key crypto.PubKey, address string, sig string) sdk.Error {
 	if key == nil {
 		return types.ErrInvalidSignature("public key cannot be empty")
 	}
-	hash, e := Hash([]byte(badgeID))
+	hash, e := Hash([]byte(address))
 	if e != nil {
-		return types.ErrHashingError("error on hashing badge id")
+		return types.ErrHashingError("error on hashing address")
 	}
 	sigBytes, e := hex.DecodeString(sig)
 	if e != nil {

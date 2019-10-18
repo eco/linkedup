@@ -44,11 +44,10 @@ func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, storeName string) 
 	r.HandleFunc(fmt.Sprintf("/%s/%s", storeName, keeper.QueryBonus),
 		bonusGetHandler(cliCtx, storeName)).Methods("GET")
 
-	//longy/redeem?badge_id={badge_id}&sig={sig}
+	//longy/redeem?address_id={address_id}&sig={sig}
 	r.HandleFunc(fmt.Sprintf("/%s/%s", storeName, keeper.RedeemKey),
-		redeemHandler(cliCtx, storeName)).Queries(
-		BadgeIDKey, fmt.Sprintf("{%s}", BadgeIDKey),
-		SigKey, fmt.Sprintf("{%s}", SigKey)).
+		redeemHandler(cliCtx, storeName)).
+		Queries(AddressIDKey, fmt.Sprintf("{%s}", AddressIDKey), SigKey, fmt.Sprintf("{%s}", SigKey)).
 		Methods("GET")
 
 	//open endpoint to post transactions directly to full node

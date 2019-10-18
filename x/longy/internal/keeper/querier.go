@@ -55,13 +55,17 @@ func NewQuerier(keeper Keeper) sdk.Querier {
 
 //nolint:gocritic,unparam
 func queryRedeem(ctx sdk.Context, keeper Keeper, path []string) (res []byte, err sdk.Error) {
-	attendee, ok := keeper.GetAttendeeWithID(ctx, path[0])
+	addr, e := sdk.AccAddressFromBech32(path[0])
+	if e != nil {
+		return nil, sdk.ErrInvalidAddress(fmt.Sprintf("cannot turn param into cosmos AccAddress : %s", path[0]))
+	}
+	attendee, ok := keeper.GetAttendee(ctx, addr)
 	if !ok {
 		return nil, types.ErrAttendeeNotFound("could not find attendee with that AccAddress")
 	}
 
 	//validate sig
-	err = ValidateSig(attendee.PubKey, attendee.ID, path[1])
+	err = ValidateSig(attendee.PubKey, path[0], path[1])
 	if err != nil {
 		return
 	}
@@ -74,15 +78,13 @@ func queryRedeem(ctx sdk.Context, keeper Keeper, path []string) (res []byte, err
 		}
 	}
 
-	res, e := codec.MarshalJSONIndent(keeper.cdc, ws)
+	res, e = codec.MarshalJSONIndent(keeper.cdc, ws)
 
 	if e != nil {
 		panic("could not marshal result to JSON")
 	}
 
-	//todo send off signed tx for redeeming prize
-
-	return
+	return res, nil
 }
 
 //nolint:gocritic,unparam
