@@ -69,12 +69,11 @@ type AppModule struct {
 
 // NewAppModule creates a new AppModule object
 // nolint: gocritic
-func NewAppModule(keeper Keeper) module.AppModule {
-
-	return module.NewGenesisOnlyAppModule(AppModule{
+func NewAppModule(keeper Keeper) AppModule {
+	return AppModule{
 		AppModuleBasic: AppModuleBasic{},
 		keeper:         keeper,
-	})
+	}
 }
 
 // Route returns the route key for the the appropriate messages
