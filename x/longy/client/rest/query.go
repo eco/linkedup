@@ -28,7 +28,7 @@ func redeemHandler(cliCtx context.CLIContext, storeName string) http.HandlerFunc
 		addressID := vars[AddressIDKey]
 		sig := vars[SigKey]
 
-		res, _, _ := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/%s/%s/%s",
+		res, _, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/%s/%s/%s",
 			storeName, keeper.RedeemKey, addressID, sig), nil)
 
 		if err != nil {
