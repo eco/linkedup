@@ -94,21 +94,21 @@ func queryRedeem(ctx sdk.Context, keeper Keeper, path []string) (res []byte, err
 }
 
 //nolint:gocritic,unparam
-func leaderBoard(ctx sdk.Context, keeper Keeper) (res []byte, err sdk.Error) {
+func leaderBoard(ctx sdk.Context, keeper Keeper) (res []byte, err sdk.Error) { //test this
 	attendees := keeper.GetAllAttendees(ctx)
 	countAll := len(attendees)
 
 	sort.Slice(attendees, func(i, j int) bool { return attendees[i].Rep > attendees[j].Rep })
 
-	var lb *LeaderBoard
-	min := LeaderBoardCount
-	if countAll < LeaderBoardCount {
+	var lb *types.LeaderBoard
+	min := types.LeaderBoardCount
+	if countAll < types.LeaderBoardCount {
 		min = countAll
 	}
-	top := make([]types.Attendee, min, LeaderBoardCount)
+	top := make([]types.Attendee, min, types.LeaderBoardCount)
 	copy(top, attendees)
 
-	lb = NewLeaderBoard(countAll, top)
+	lb = types.NewLeaderBoard(countAll, top)
 
 	res, e := json.Marshal(lb)
 	if e != nil {
