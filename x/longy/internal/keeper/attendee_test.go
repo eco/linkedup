@@ -45,6 +45,11 @@ var _ = Describe("Attendee Keeper Tests", func() {
 			Expect(err.Code()).To(Equal(types.AttendeeNotFound))
 		})
 
+		It("should fail to return any attendees", func() {
+			attendees := keeper.GetAllAttendees(ctx)
+			Expect(len(attendees)).To(Equal(0))
+		})
+
 		Context("when attendee's exist but a scan has not been accepted", func() {
 			BeforeEach(func() {
 				BeforeTestRun()
@@ -212,6 +217,26 @@ var _ = Describe("Attendee Keeper Tests", func() {
 						Expect(p2.Quantity).To(Equal(prize2.Quantity - 1))
 					})
 				})
+			})
+		})
+
+		Context("when attendees exist exist", func() {
+			BeforeEach(func() {
+				utils.AddAttendeeToKeeper(ctx, &keeper, qr1, true, false)
+				utils.AddAttendeeToKeeper(ctx, &keeper, qr2, true, false)
+			})
+
+			It("should succeed to return all attendees", func() {
+				attendees := keeper.GetAllAttendees(ctx)
+				Expect(len(attendees)).To(Equal(2))
+			})
+
+			It("should succeed to return all attendees and ignore other key-vals in store", func() {
+				keeper.Set(ctx, []byte("somekey"), []byte("somevalue"))
+				utils.SetRedeemAccount(ctx, keeper, util.IDToAddress("111111"))
+				utils.AddAttendeeToKeeper(ctx, &keeper, "111111", true, false)
+				attendees := keeper.GetAllAttendees(ctx)
+				Expect(len(attendees)).To(Equal(3))
 			})
 		})
 	})

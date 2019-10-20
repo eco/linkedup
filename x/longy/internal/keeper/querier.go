@@ -1,11 +1,13 @@
 package keeper
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/eco/longy/x/longy/internal/types"
 	abci "github.com/tendermint/tendermint/abci/types"
+	"sort"
 )
 
 const (
@@ -19,6 +21,8 @@ const (
 	AddressKey = "address"
 	//PrizesKey is the key for the event prizes
 	PrizesKey = "prizes"
+	//LeaderKey is the key for the leader board
+	LeaderKey = "leader"
 	//RedeemKey is the key for the redeem event
 	RedeemKey = "redeem"
 )
@@ -43,6 +47,8 @@ func NewQuerier(keeper Keeper) sdk.Querier {
 			return queryPrizes(ctx, keeper)
 		case QueryBonus:
 			return queryBonus(ctx, keeper)
+		case LeaderKey:
+			return leaderBoard(ctx, keeper)
 		case RedeemKey:
 			return queryRedeem(ctx, keeper, queryArgs)
 		default:
@@ -85,6 +91,31 @@ func queryRedeem(ctx sdk.Context, keeper Keeper, path []string) (res []byte, err
 	}
 
 	return res, nil
+}
+
+//nolint:gocritic,unparam
+func leaderBoard(ctx sdk.Context, keeper Keeper) (res []byte, err sdk.Error) {
+	attendees := keeper.GetAllAttendees(ctx)
+	countAll := len(attendees)
+
+	sort.Slice(attendees, func(i, j int) bool { return attendees[i].Rep > attendees[j].Rep })
+
+	var lb *LeaderBoard
+	min := LeaderBoardCount
+	if countAll < LeaderBoardCount {
+		min = countAll
+	}
+	top := make([]types.Attendee, min, LeaderBoardCount)
+	copy(top, attendees)
+
+	lb = NewLeaderBoard(countAll, top)
+
+	res, e := json.Marshal(lb)
+	if e != nil {
+		panic("could not marshal result to JSON")
+	}
+
+	return
 }
 
 //nolint:gocritic,unparam
