@@ -18,7 +18,7 @@ func (k Keeper) GetPrize(ctx sdk.Context, id []byte) (prize types.Prize, err sdk
 		return
 	}
 
-	k.cdc.MustUnmarshalBinaryBare(bz, &prize)
+	k.Cdc.MustUnmarshalBinaryBare(bz, &prize)
 	return
 }
 
@@ -40,5 +40,5 @@ func (k Keeper) GetPrizes(ctx sdk.Context) (types.GenesisPrizes, sdk.Error) {
 //SetPrize puts the prize into the store with its tier turned into the is key
 //nolint:gocritic
 func (k Keeper) SetPrize(ctx sdk.Context, prize *types.Prize) {
-	k.Set(ctx, prize.GetID(), k.cdc.MustMarshalBinaryBare(*prize))
+	k.Set(ctx, prize.GetID(), k.Cdc.MustMarshalBinaryBare(*prize))
 }

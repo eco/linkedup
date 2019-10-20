@@ -23,7 +23,7 @@ func (k *Keeper) GetAttendee(ctx sdk.Context, address sdk.AccAddress) (attendee 
 		return
 	}
 
-	err := k.cdc.UnmarshalBinaryLengthPrefixed(bz, &attendee)
+	err := k.Cdc.UnmarshalBinaryLengthPrefixed(bz, &attendee)
 	if err != nil {
 		panic(err)
 	}
@@ -46,7 +46,7 @@ func (k *Keeper) GetAllAttendees(ctx sdk.Context) (attendees []types.Attendee) {
 				continue
 			}
 
-			err := k.cdc.UnmarshalBinaryLengthPrefixed(bz, &attendee)
+			err := k.Cdc.UnmarshalBinaryLengthPrefixed(bz, &attendee)
 			if err != nil {
 				continue
 			}
@@ -63,7 +63,7 @@ func (k *Keeper) SetAttendee(ctx sdk.Context, a *types.Attendee) {
 	addr := a.GetAddress()
 	key := types.AttendeeKey(addr)
 
-	bz, err := k.cdc.MarshalBinaryLengthPrefixed(a)
+	bz, err := k.Cdc.MarshalBinaryLengthPrefixed(a)
 	if err != nil {
 		panic(err)
 	}

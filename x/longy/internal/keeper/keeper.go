@@ -14,7 +14,7 @@ type Keeper struct {
 
 	accountKeeper auth.AccountKeeper
 	coinKeeper    bank.Keeper
-	cdc           *codec.Codec
+	Cdc           *codec.Codec
 }
 
 // NewKeeper is a creator for `Keeper`
@@ -25,7 +25,7 @@ func NewKeeper(cdc *codec.Codec, longyStoreKey sdk.StoreKey, accKeeper auth.Acco
 		contextStoreKey: longyStoreKey,
 		accountKeeper:   accKeeper,
 		coinKeeper:      coinKeeper,
-		cdc:             cdc,
+		Cdc:             cdc,
 	}
 }
 

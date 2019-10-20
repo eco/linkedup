@@ -2,6 +2,7 @@ package longy
 
 import (
 	"github.com/eco/longy/x/longy/internal/keeper"
+	"github.com/eco/longy/x/longy/internal/querier"
 	"github.com/eco/longy/x/longy/internal/types"
 )
 
@@ -42,7 +43,7 @@ var (
 	NewMsgClearBonus = types.NewMsgClearBonus
 
 	// NewQuerier is the function alias for creating a new querier
-	NewQuerier = keeper.NewQuerier
+	NewQuerier = querier.NewQuerier
 )
 
 type (
