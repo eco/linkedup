@@ -36,9 +36,9 @@ func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, storeName string) 
 	r.HandleFunc(fmt.Sprintf("/%s/%s", storeName, querier.LeaderKey),
 		query.LeaderBoardHandler(cliCtx, storeName)).Methods("GET")
 
-	//longy/redeem?address_id={address_id}
-	r.HandleFunc(fmt.Sprintf("/%s/%s", storeName, querier.RedeemKey),
-		query.RedeemHandler(cliCtx, storeName)).
+	//longy/winnings?address_id={address_id}
+	r.HandleFunc(fmt.Sprintf("/%s/%s", storeName, querier.WinningsKey),
+		query.WinningsHandler(cliCtx, storeName)).
 		Queries(query.AddressIDKey, fmt.Sprintf("{%s}", query.AddressIDKey)).Methods("GET")
 
 	//open endpoint to post transactions directly to full node

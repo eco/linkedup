@@ -22,15 +22,15 @@ import (
 //	signer = keeper.NewSigner(addr, key)
 //}
 
-//RedeemHandler responds to redeem prize queries for which prizes haven't been claimed yet for an attendee
+//WinningsHandler responds to winning prize queries for which prizes haven't been claimed yet for an attendee
 //nolint:gocritic
-func RedeemHandler(cliCtx context.CLIContext, storeName string) http.HandlerFunc {
+func WinningsHandler(cliCtx context.CLIContext, storeName string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		addressID := vars[AddressIDKey]
 
 		res, _, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/%s/%s",
-			storeName, querier.RedeemKey, addressID), nil)
+			storeName, querier.WinningsKey, addressID), nil)
 
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusNotFound, err.Error())

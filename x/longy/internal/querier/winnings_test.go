@@ -11,10 +11,10 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 )
 
-var _ = Describe("Redeem Querier Tests", func() {
+var _ = Describe("Winnings Querier Tests", func() {
 
-	var getRedeem = func(addr string) ([]types.Win, sdk.Error) {
-		res, err := querier(ctx, []string{q.RedeemKey, addr}, abci.RequestQuery{})
+	var getWinnings = func(addr string) ([]types.Win, sdk.Error) {
+		res, err := querier(ctx, []string{q.WinningsKey, addr}, abci.RequestQuery{})
 		if err != nil {
 			return nil, err
 		}
@@ -28,14 +28,14 @@ var _ = Describe("Redeem Querier Tests", func() {
 	})
 
 	It("should fail when address is empty string", func() {
-		winnings, err := getRedeem(sdk.AccAddress{}.String())
+		winnings, err := getWinnings(sdk.AccAddress{}.String())
 		Expect(err).To(Not(BeNil()))
 		Expect(err.Code()).To(Equal(types.AttendeeNotFound))
 		Expect(len(winnings)).To(Equal(0))
 	})
 
 	It("should fail when address is not bech32", func() {
-		winnings, err := getRedeem("asdfBbbb")
+		winnings, err := getWinnings("asdfBbbb")
 		Expect(err).To(Not(BeNil()))
 		Expect(err.Code()).To(Equal(sdk.CodeInvalidAddress))
 		Expect(len(winnings)).To(Equal(0))
@@ -43,7 +43,7 @@ var _ = Describe("Redeem Querier Tests", func() {
 
 	It("should fail when attendee doesn't exist for address", func() {
 		sender = util.IDToAddress(qr1)
-		winnings, err := getRedeem(sender.String())
+		winnings, err := getWinnings(sender.String())
 		Expect(err).To(Not(BeNil()))
 		Expect(err.Code()).To(Equal(types.AttendeeNotFound))
 		Expect(len(winnings)).To(Equal(0))
@@ -51,7 +51,7 @@ var _ = Describe("Redeem Querier Tests", func() {
 
 	It("should return an empty array for an attendee that has no winnings", func() {
 		attendee := utils.AddAttendeeToKeeper(ctx, &keeper, qr1, true, false)
-		winnings, err := getRedeem(attendee.Address.String())
+		winnings, err := getWinnings(attendee.Address.String())
 		Expect(err).To(BeNil())
 		Expect(len(winnings)).To(Equal(0))
 	})
@@ -77,7 +77,7 @@ var _ = Describe("Redeem Querier Tests", func() {
 			Expect(a.Winnings[0].Claimed).To(BeFalse())
 			Expect(a.Winnings[1].Claimed).To(BeFalse())
 
-			winnings, err := getRedeem(a.Address.String())
+			winnings, err := getWinnings(a.Address.String())
 			Expect(err).To(BeNil())
 			Expect(len(winnings)).To(Equal(2))
 			compare(a.Winnings[0], winnings[0])
@@ -100,7 +100,7 @@ var _ = Describe("Redeem Querier Tests", func() {
 			a.Winnings[0].Claimed = true
 			keeper.SetAttendee(ctx, &a)
 
-			winnings, err := getRedeem(a.Address.String())
+			winnings, err := getWinnings(a.Address.String())
 			Expect(err).To(BeNil())
 			Expect(len(winnings)).To(Equal(1))
 			compare(a.Winnings[1], winnings[0])

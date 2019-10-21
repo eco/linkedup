@@ -19,8 +19,8 @@ const (
 	PrizesKey = "prizes"
 	//LeaderKey is the key for the leader board
 	LeaderKey = "leader"
-	//RedeemKey is the key for the redeem event
-	RedeemKey = "redeem"
+	//WinningsKey is the key for getting the unclaimed prizes of an attendee
+	WinningsKey = "winnings"
 )
 
 // NewQuerier is the module level router for state queries
@@ -45,8 +45,8 @@ func NewQuerier(keeper keeper.Keeper) sdk.Querier {
 			return queryBonus(ctx, keeper)
 		case LeaderKey:
 			return leaderBoard(ctx, keeper)
-		case RedeemKey:
-			return queryRedeem(ctx, keeper, queryArgs)
+		case WinningsKey:
+			return queryWinnings(ctx, keeper, queryArgs)
 		default:
 			break
 		}

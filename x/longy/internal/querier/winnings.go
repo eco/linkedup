@@ -9,7 +9,7 @@ import (
 )
 
 //nolint:gocritic,unparam
-func queryRedeem(ctx sdk.Context, k keeper.Keeper, path []string) (res []byte, err sdk.Error) {
+func queryWinnings(ctx sdk.Context, k keeper.Keeper, path []string) (res []byte, err sdk.Error) {
 	addr, e := sdk.AccAddressFromBech32(path[0])
 	if e != nil {
 		return nil, sdk.ErrInvalidAddress(fmt.Sprintf("cannot turn param into cosmos AccAddress : %s", path[0]))
