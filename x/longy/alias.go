@@ -64,7 +64,4 @@ type (
 
 	// GenesisServiceKey is the genesis type for the service account
 	GenesisServiceKey = types.GenesisServiceKey
-
-	// GenesisRedeemKey is the genesis type for the redeem account
-	GenesisRedeemKey = types.GenesisRedeemKey
 )

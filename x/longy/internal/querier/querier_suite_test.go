@@ -19,6 +19,12 @@ var ctx sdk.Context
 var keeper longy.Keeper
 var querier sdk.Querier
 
+const (
+	qr1 = "1234"
+)
+
+var sender sdk.AccAddress
+
 // BeforeTestRun sets up common data needed by all querier tests.
 func BeforeTestRun() {
 	simApp, ctx = sim.CreateTestApp(true)

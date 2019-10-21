@@ -30,27 +30,30 @@ func NewSigner(accAddress sdk.AccAddress, privKey crypto.PrivKey) *Signer {
 }
 
 // SendTx calls the test handler with a message.
-func (s *Signer) SendTx(cliContext *context.CLIContext, cdc *codec.Codec, msg sdk.Msg) (res sdk.Result) {
+func (s *Signer) SendTx(cliContext *context.CLIContext, cdc *codec.Codec, msg sdk.Msg) error {
 	s.seqLock.Lock()
 	txBldr, err := s.senderTxContext(cliContext, cdc)
 	if err != nil {
 		//res = parseResponse(err.Error())
-		fmt.Println(err)
+		//fmt.Println(err)
+		return err
 	}
 	err = s.completeAndBroadcastTxCLI(*cliContext, txBldr, []sdk.Msg{msg})
 	s.seqLock.Unlock()
 	if err != nil {
 		//res = parseResponse(err.Error())
-		fmt.Println(err)
+		//fmt.Println(err)
+		return err
 	}
 
-	return
+	return nil
 }
 
 // SenderTxContext creates a new TxBuilder
 func (s *Signer) senderTxContext(cliContext *context.CLIContext, cdc *codec.Codec) (auth.TxBuilder, error) {
 	cliContext.FromAddress = s.AccAddress
-	cliContext.BroadcastMode = client.BroadcastSync
+	//cliContext.BroadcastMode = client.BroadcastSync//todo switch back to this setting
+	cliContext.BroadcastMode = client.BroadcastBlock
 	txEncoder := utils.GetTxEncoder(cdc)
 	txBuilder := auth.NewTxBuilderFromCLI().WithTxEncoder(txEncoder)
 
@@ -83,6 +86,10 @@ func (s *Signer) completeAndBroadcastTxCLI(cliContext context.CLIContext, txBldr
 	res, err := cliContext.BroadcastTxCommit(txBytes)
 	if err != nil {
 		return err
+	}
+
+	if sdk.CodeType(res.Code) != sdk.CodeOK {
+		return fmt.Errorf(res.RawLog)
 	}
 
 	err = cliContext.PrintOutput(res)

@@ -34,9 +34,6 @@ fi
 # Generate the genesis prizes from the event
 ../bin/lyd add-genesis-prizes
 
-## Sets the redeem account
-../bin/lyd add-redeem-account $(../bin/lycli keys show redeemer -a)
-
 # Configure your CLI to eliminate need for chain-id flag
 ../bin/lycli config chain-id longychain
 ../bin/lycli config output json

@@ -10,8 +10,8 @@ import (
 // HandleMsgRedeem processes MsgRedeem message in order to set an attendee's winnings as claimed
 //nolint:gocritic
 func HandleMsgRedeem(ctx sdk.Context, k keeper.Keeper, msg types.MsgRedeem) sdk.Result {
-	if !k.IsRedeemAccount(ctx, msg.Sender) {
-		return types.ErrSenderNotRedeemerAcct("sender account is not the redeem account set").Result()
+	if !k.IsMasterAccount(ctx, msg.Sender) {
+		return types.ErrInsufficientPrivileges("only the service account can call this").Result()
 	}
 
 	err := k.RedeemPrizes(ctx, msg.Attendee)

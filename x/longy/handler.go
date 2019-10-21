@@ -52,8 +52,8 @@ func handleMsgKey(ctx sdk.Context, k Keeper, msg types.MsgKey) sdk.Result {
 	}
 
 	// verify that master key used to sign this message
-	if err := k.IsMaster(ctx, msg.MasterAddress); err != nil {
-		return err.Result()
+	if !k.IsMasterAccount(ctx, msg.MasterAddress) {
+		return types.ErrInsufficientPrivileges("only the service account can call this").Result()
 	}
 
 	// Check that a public key has not already been set. The rekey service should only be able to
@@ -114,8 +114,8 @@ func handleMsgClaimKey(ctx sdk.Context, k Keeper, msg types.MsgClaimKey) sdk.Res
 //nolint
 func handleBonus(ctx sdk.Context, k Keeper, msg types.MsgBonus) sdk.Result {
 	// verify that only the master account can send this message
-	if err := k.IsMaster(ctx, msg.MasterAddress); err != nil {
-		return err.Result()
+	if !k.IsMasterAccount(ctx, msg.MasterAddress) {
+		return types.ErrInsufficientPrivileges("only the service account can call this").Result()
 	}
 
 	// check if a bonus is already live
@@ -133,8 +133,8 @@ func handleBonus(ctx sdk.Context, k Keeper, msg types.MsgBonus) sdk.Result {
 //nolint
 func handleClearBonus(ctx sdk.Context, k Keeper, msg types.MsgClearBonus) sdk.Result {
 	// verify that only the master account can send this message
-	if err := k.IsMaster(ctx, msg.MasterAddress); err != nil {
-		return err.Result()
+	if !k.IsMasterAccount(ctx, msg.MasterAddress) {
+		return types.ErrInsufficientPrivileges("only the service account can call this").Result()
 	}
 
 	if !k.HasLiveBonus(ctx) {

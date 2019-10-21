@@ -18,51 +18,56 @@ var _ = Describe("Redeem Handler Tests", func() {
 		receiver = util.IDToAddress(qr2)
 	})
 
-	It("should fail when the sender is not the redeem account", func() {
+	It("should fail when the sender is not the master account", func() {
 		msg := types.NewMsgRedeem(sender, sender)
 		result := handler(ctx, msg)
-		Expect(result.Code).To(Equal(types.SenderNotRedeemerAcct))
+		Expect(result.Code).To(Equal(types.InsufficientPrivileges))
 	})
 
-	It("should fail when the sender is the redeem account, but attendee doesn't exist", func() {
-		utils.SetRedeemAccount(ctx, keeper, sender)
-		msg := types.NewMsgRedeem(sender, receiver)
-		result := handler(ctx, msg)
-		Expect(result.Code).To(Equal(types.AttendeeNotFound))
-	})
-
-	It("should succeed when the sender is the redeem account and attendee exist", func() {
-		utils.SetRedeemAccount(ctx, keeper, sender)
-		utils.AddAttendeeToKeeper(ctx, &keeper, qr2, true, false)
-		msg := types.NewMsgRedeem(sender, receiver)
-		result := handler(ctx, msg)
-		Expect(result.Code).To(Equal(sdk.CodeOK))
-	})
-
-	It("should succeed to set all attendee winnings to claimed", func() {
-		utils.SetRedeemAccount(ctx, keeper, sender)
-		attendee := utils.AddAttendeeToKeeper(ctx, &keeper, qr2, true, false)
-		attendee.Winnings = append(attendee.Winnings, types.Win{
-			Tier:    types.Tier1,
-			Name:    "stuff",
-			Claimed: false,
+	Context("when master account set", func() {
+		BeforeEach(func() {
+			utils.SetMasterAccount(ctx, keeper, sender)
 		})
 
-		attendee.Winnings = append(attendee.Winnings, types.Win{
-			Tier:    types.Tier2,
-			Name:    "stuff",
-			Claimed: false,
+		It("should fail when the sender is the master account, but attendee doesn't exist", func() {
+			msg := types.NewMsgRedeem(sender, receiver)
+			result := handler(ctx, msg)
+			Expect(result.Code).To(Equal(types.AttendeeNotFound))
 		})
-		keeper.SetAttendee(ctx, &attendee)
-		msg := types.NewMsgRedeem(sender, receiver)
-		result := handler(ctx, msg)
-		Expect(result.Code).To(Equal(sdk.CodeOK))
 
-		attendee, exists := keeper.GetAttendee(ctx, attendee.Address)
-		Expect(exists).To(BeTrue())
-		Expect(len(attendee.Winnings)).To(Equal(2))
-		for _, w := range attendee.Winnings {
-			Expect(w.Claimed).To(BeTrue())
-		}
+		It("should succeed when the sender is the master account and attendee exist", func() {
+			utils.SetMasterAccount(ctx, keeper, sender)
+			utils.AddAttendeeToKeeper(ctx, &keeper, qr2, true, false)
+			msg := types.NewMsgRedeem(sender, receiver)
+			result := handler(ctx, msg)
+			Expect(result.Code).To(Equal(sdk.CodeOK))
+		})
+
+		It("should succeed to set all attendee winnings to claimed", func() {
+			utils.SetMasterAccount(ctx, keeper, sender)
+			attendee := utils.AddAttendeeToKeeper(ctx, &keeper, qr2, true, false)
+			attendee.Winnings = append(attendee.Winnings, types.Win{
+				Tier:    types.Tier1,
+				Name:    "stuff",
+				Claimed: false,
+			})
+
+			attendee.Winnings = append(attendee.Winnings, types.Win{
+				Tier:    types.Tier2,
+				Name:    "stuff",
+				Claimed: false,
+			})
+			keeper.SetAttendee(ctx, &attendee)
+			msg := types.NewMsgRedeem(sender, receiver)
+			result := handler(ctx, msg)
+			Expect(result.Code).To(Equal(sdk.CodeOK))
+
+			attendee, exists := keeper.GetAttendee(ctx, attendee.Address)
+			Expect(exists).To(BeTrue())
+			Expect(len(attendee.Winnings)).To(Equal(2))
+			for _, w := range attendee.Winnings {
+				Expect(w.Claimed).To(BeTrue())
+			}
+		})
 	})
 })

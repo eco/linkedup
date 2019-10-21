@@ -50,9 +50,9 @@ func buildRedeemGenesisState(appState map[string]json.RawMessage, cdc *codec.Cod
 	cdc.MustUnmarshalJSON(appState[longy.ModuleName], &genesisState)
 
 	//get the prizes
-	genesisState.Redeem = longy.GenesisRedeemKey{
-		Address: addr,
-	}
+	//genesisState.Redeem = longy.GenesisRedeemKey{
+	//	Address: addr,
+	//}
 
 	return genesisState
 }
