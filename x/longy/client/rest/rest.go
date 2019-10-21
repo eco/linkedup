@@ -9,32 +9,19 @@ import (
 	"github.com/gorilla/mux"
 )
 
-const (
-	//AttendeeIDKey is the attribute key for attendee id
-	AttendeeIDKey = "attendee_id"
-	//AddressIDKey is the attribute key for attendee address
-	AddressIDKey = "address_id"
-	//ScanIDKey is the attribute key for scan id
-	ScanIDKey = "scan_id"
-	//BadgeIDKey is the attribute key for badge id
-	BadgeIDKey = "badge_id"
-	//SigKey is the attribute key for the sig
-	SigKey = "sig"
-)
-
 // RegisterRoutes - Central function to define routes that get registered by the main application
 //nolint:gocritic
 func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, storeName string) {
 	//longy/attendees/{attendee_id}
-	r.HandleFunc(fmt.Sprintf("/%s/%s/{%s}", storeName, querier.QueryAttendees, AttendeeIDKey),
+	r.HandleFunc(fmt.Sprintf("/%s/%s/{%s}", storeName, querier.QueryAttendees, query.AttendeeIDKey),
 		attendeeHandler(cliCtx, storeName)).Methods("GET")
 
 	//longy/attendees/address/{address_id}
 	r.HandleFunc(fmt.Sprintf("/%s/%s/%s/{%s}", storeName, querier.QueryAttendees, querier.AddressKey,
-		AddressIDKey), attendeeAddressHandler(cliCtx, storeName)).Methods("GET")
+		query.AddressIDKey), attendeeAddressHandler(cliCtx, storeName)).Methods("GET")
 
 	//longy/scans/{scan_id}
-	r.HandleFunc(fmt.Sprintf("/%s/%s/{%s}", storeName, querier.QueryScans, ScanIDKey),
+	r.HandleFunc(fmt.Sprintf("/%s/%s/{%s}", storeName, querier.QueryScans, query.ScanIDKey),
 		scanGetHandler(cliCtx, storeName)).Methods("GET")
 
 	//longy/prizes
@@ -49,11 +36,10 @@ func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, storeName string) 
 	r.HandleFunc(fmt.Sprintf("/%s/%s", storeName, querier.LeaderKey),
 		query.LeaderBoardHandler(cliCtx, storeName)).Methods("GET")
 
-	//longy/redeem?address_id={address_id}&sig={sig}
+	//longy/redeem?address_id={address_id}
 	r.HandleFunc(fmt.Sprintf("/%s/%s", storeName, querier.RedeemKey),
-		redeemHandler(cliCtx, storeName)).
-		Queries(AddressIDKey, fmt.Sprintf("{%s}", AddressIDKey), SigKey, fmt.Sprintf("{%s}", SigKey)).
-		Methods("GET")
+		query.RedeemHandler(cliCtx, storeName)).
+		Queries(query.AddressIDKey, fmt.Sprintf("{%s}", query.AddressIDKey)).Methods("GET")
 
 	//open endpoint to post transactions directly to full node
 	r.HandleFunc("/longy/txs", rest.BroadcastTxRequest(cliCtx)).Methods("POST")
