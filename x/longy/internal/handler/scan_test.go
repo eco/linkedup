@@ -25,9 +25,18 @@ var _ = Describe("Scan Handler Tests", func() {
 		Expect(result.Code).To(Equal(types.AttendeeNotFound))
 	})
 
+	It("should fail if the badge hasn't been claimed", func() {
+		//add sender to keeper
+		utils.AddAttendeeToKeeper(ctx, &keeper, qr1, false, false)
+
+		msg := types.NewMsgQrScan(sender, qr1, nil)
+		result := handler(ctx, msg)
+		Expect(result.Code).To(Equal(types.AttendeeClaimed))
+	})
+
 	It("should fail if the sender is trying to scan themselves", func() {
 		//add sender to keeper
-		utils.AddAttendeeToKeeper(ctx, &keeper, qr1, false)
+		utils.AddAttendeeToKeeper(ctx, &keeper, qr1, true, false)
 
 		msg := types.NewMsgQrScan(sender, qr1, nil)
 		result := handler(ctx, msg)
@@ -203,9 +212,9 @@ func inspectScan(s1 sdk.AccAddress, s2 sdk.AccAddress, p1 uint, p2 uint, accepte
 func createScan(qr1 string, qr2 string,
 	s1 sdk.AccAddress, s2 sdk.AccAddress, data []byte, sponsor bool) {
 	//add sender to keeper
-	utils.AddAttendeeToKeeper(ctx, &keeper, qr1, sponsor)
+	utils.AddAttendeeToKeeper(ctx, &keeper, qr1, true, sponsor)
 	//add scanned to keeper
-	utils.AddAttendeeToKeeper(ctx, &keeper, qr2, false)
+	utils.AddAttendeeToKeeper(ctx, &keeper, qr2, true, false)
 
 	msg := types.NewMsgQrScan(s1, qr2, data)
 	result := handler(ctx, msg)

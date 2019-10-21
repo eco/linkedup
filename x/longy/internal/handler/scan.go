@@ -15,6 +15,10 @@ func HandleMsgQrScan(ctx sdk.Context, k keeper.Keeper, msg types.MsgScanQr) sdk.
 	if !ok {
 		return types.ErrAttendeeNotFound("cannot find the attendee").Result()
 	}
+
+	if !attendee.Claimed {
+		return types.ErrAttendeeClaimed("attendee badge not claimed").Result()
+	}
 	//get the id for the scan event
 	id, err := types.GenScanID(msg.Sender, attendee.Address)
 	if err != nil {

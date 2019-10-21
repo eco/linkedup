@@ -113,19 +113,20 @@ var _ = Describe("Longy Handler Tests", func() {
 
 	var _ = Context("with an attendee that has keyed", func() {
 		var secret string
+		var keyMsg types.MsgKey
 		BeforeEach(func() {
 			s, commitment := util.CreateCommitment()
 			secret = s
 			newPub := tmcrypto.GenPrivKey().PubKey()
 
 			/** setup a key against the account **/
-			msg := types.MsgKey{
+			keyMsg = types.MsgKey{
 				AttendeeAddress:      addr,
 				MasterAddress:        masterAddr,
 				NewAttendeePublicKey: newPub,
 				Commitment:           commitment,
 			}
-			res := handler(ctx, msg)
+			res := handler(ctx, keyMsg)
 			Expect(res.IsOK()).Should(BeTrue())
 		})
 
@@ -163,6 +164,7 @@ var _ = Describe("Longy Handler Tests", func() {
 			a, ok := keeper.GetAttendee(ctx, addr)
 			Expect(ok).Should(BeTrue())
 			Expect(a.IsClaimed()).Should(BeTrue())
+			Expect(a.PubKey.Equals(keyMsg.NewAttendeePublicKey)).Should(BeTrue())
 
 			Expect(a.GetRep()).To(Equal(uint(5)))
 		})

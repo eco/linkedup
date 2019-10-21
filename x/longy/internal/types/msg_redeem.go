@@ -8,15 +8,15 @@ var _ sdk.Msg = MsgRedeem{}
 
 // MsgRedeem is used to claim prizes by the booth operators
 type MsgRedeem struct {
-	Sender    sdk.AccAddress `json:"sender"`    //Standard for all messages
-	ScannedQR string         `json:"scannedQR"` //the string representation of the other attendee's QR badge
+	Sender   sdk.AccAddress `json:"sender"`   //Standard for all messages
+	Attendee sdk.AccAddress `json:"attendee"` //the hex address of the attendee
 }
 
 // NewMsgRedeem in the constructor for `MsgRedeem`
-func NewMsgRedeem(sender sdk.AccAddress, scannedQr string) MsgRedeem {
+func NewMsgRedeem(sender sdk.AccAddress, addr sdk.AccAddress) MsgRedeem {
 	return MsgRedeem{
-		Sender:    sender,
-		ScannedQR: scannedQr,
+		Sender:   sender,
+		Attendee: addr,
 	}
 }
 
@@ -29,7 +29,7 @@ func (msg MsgRedeem) Route() string {
 // Type is the message type
 //nolint:gocritic
 func (msg MsgRedeem) Type() string {
-	return "claim_prize"
+	return "redeem_prizes"
 }
 
 // ValidateBasic performs sanity checks on the message
@@ -39,8 +39,8 @@ func (msg MsgRedeem) ValidateBasic() sdk.Error {
 		return sdk.ErrInvalidAddress(msg.Sender.String())
 	}
 
-	if !ValidQrCode(msg.ScannedQR) {
-		return ErrQRCodeInvalid("message QR code is invalid, should be a string of a positive integer")
+	if msg.Attendee.Empty() {
+		return sdk.ErrInvalidAddress(msg.Attendee.String())
 	}
 
 	return nil

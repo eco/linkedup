@@ -14,7 +14,7 @@ func HandleMsgRedeem(ctx sdk.Context, k keeper.Keeper, msg types.MsgRedeem) sdk.
 		return types.ErrSenderNotRedeemerAcct("sender account is not the redeem account set").Result()
 	}
 
-	err := k.RedeemPrizes(ctx, msg.ScannedQR)
+	err := k.RedeemPrizes(ctx, msg.Attendee)
 	if err != nil {
 		return err.Result()
 	}

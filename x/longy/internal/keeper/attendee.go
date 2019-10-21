@@ -14,7 +14,7 @@ func (k *Keeper) GetAttendeeWithID(ctx sdk.Context, id string) (types.Attendee, 
 	return k.GetAttendee(ctx, address)
 }
 
-// GetAttendee will retrieve the attendee via `address`
+// GetAttendee will retrieve the attendee via `AccAddress`
 //nolint:gocritic
 func (k *Keeper) GetAttendee(ctx sdk.Context, address sdk.AccAddress) (attendee types.Attendee, exists bool) {
 	key := types.AttendeeKey(address)
@@ -23,21 +23,47 @@ func (k *Keeper) GetAttendee(ctx sdk.Context, address sdk.AccAddress) (attendee 
 		return
 	}
 
-	err := k.cdc.UnmarshalBinaryLengthPrefixed(bz, &attendee)
+	err := k.Cdc.UnmarshalBinaryLengthPrefixed(bz, &attendee)
 	if err != nil {
 		panic(err)
 	}
+
 	exists = true
 	return
 }
 
-// SetAttendee will set the attendee `a` to the store using it's address
+//GetAllAttendees fetches all the attendees from the kvStore and returns them
+//nolint:gocritic
+func (k *Keeper) GetAllAttendees(ctx sdk.Context) (attendees []types.Attendee) {
+	it := k.KVStore(ctx).Iterator(nil, nil)
+	defer it.Close()
+	for ; it.Valid(); it.Next() {
+		key := it.Key()
+		if types.IsAttendeeKey(key) {
+			var attendee types.Attendee
+			bz, _ := k.Get(ctx, key)
+			if bz == nil {
+				continue
+			}
+
+			err := k.Cdc.UnmarshalBinaryLengthPrefixed(bz, &attendee)
+			if err != nil {
+				continue
+			}
+			attendees = append(attendees, attendee)
+		}
+	}
+
+	return
+}
+
+// SetAttendee will set the attendee `a` to the store using it's AccAddress
 //nolint:gocritic
 func (k *Keeper) SetAttendee(ctx sdk.Context, a *types.Attendee) {
 	addr := a.GetAddress()
 	key := types.AttendeeKey(addr)
 
-	bz, err := k.cdc.MarshalBinaryLengthPrefixed(a)
+	bz, err := k.Cdc.MarshalBinaryLengthPrefixed(a)
 	if err != nil {
 		panic(err)
 	}

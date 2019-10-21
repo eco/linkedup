@@ -22,13 +22,13 @@ var _ = Describe("Redeem Keeper Tests", func() {
 		s2 = util.IDToAddress(qr2)
 	})
 
-	It("should fail to set an empty address", func() {
+	It("should fail to set an empty AccAddress", func() {
 		err := keeper.SetRedeemAccount(ctx, sdk.AccAddress{})
 		Expect(err).To(Not(BeNil()))
 		Expect(err.Code()).To(Equal(sdk.CodeInvalidAddress))
 	})
 
-	It("should fail to set a valid address for an account that doesn't exist", func() {
+	It("should fail to set a valid AccAddress for an account that doesn't exist", func() {
 		err := keeper.SetRedeemAccount(ctx, s1)
 		Expect(err).To(Not(BeNil()))
 		Expect(err.Code()).To(Equal(sdk.CodeUnknownAddress))
@@ -46,7 +46,7 @@ var _ = Describe("Redeem Keeper Tests", func() {
 		Expect(err).To(BeNil())
 	})
 
-	It("should fail to is redeem account when passed the wrong address", func() {
+	It("should fail to is redeem account when passed the wrong AccAddress", func() {
 		utils.SetRedeemAccount(ctx, keeper, s1)
 
 		acc := keeper.AccountKeeper().NewAccountWithAddress(ctx, s2)
@@ -65,7 +65,7 @@ var _ = Describe("Redeem Keeper Tests", func() {
 	Context("when attendees don't exist", func() {
 
 		It("should fail fail to claim prizes", func() {
-			err := keeper.RedeemPrizes(ctx, qr1)
+			err := keeper.RedeemPrizes(ctx, s1)
 			Expect(err).To(Not(BeNil()))
 			Expect(err.Code()).To(Equal(types.AttendeeNotFound))
 		})
@@ -73,7 +73,7 @@ var _ = Describe("Redeem Keeper Tests", func() {
 		Context("when attendee exists", func() {
 			var a types.Attendee
 			BeforeEach(func() {
-				a = utils.AddAttendeeToKeeper(ctx, &keeper, qr1, false)
+				a = utils.AddAttendeeToKeeper(ctx, &keeper, qr1, true, false)
 
 				prizes := types.GetGenesisPrizes()
 				for i := range prizes {
@@ -83,7 +83,7 @@ var _ = Describe("Redeem Keeper Tests", func() {
 
 			It("should succeed when no prizes for attendee", func() {
 				Expect(len(a.Winnings)).To(Equal(0))
-				err := keeper.RedeemPrizes(ctx, qr1)
+				err := keeper.RedeemPrizes(ctx, s1)
 				Expect(err).To(BeNil())
 			})
 
@@ -99,7 +99,7 @@ var _ = Describe("Redeem Keeper Tests", func() {
 				Expect(a.Winnings[0].Claimed).To(BeFalse())
 				Expect(a.Winnings[1].Claimed).To(BeFalse())
 
-				err = keeper.RedeemPrizes(ctx, qr1)
+				err = keeper.RedeemPrizes(ctx, s1)
 				Expect(err).To(BeNil())
 
 				a, exists = keeper.GetAttendee(ctx, a.Address)
@@ -125,7 +125,7 @@ var _ = Describe("Redeem Keeper Tests", func() {
 				Expect(added).To(BeTrue())
 				keeper.SetAttendee(ctx, &a)
 
-				err := keeper.RedeemPrizes(ctx, qr1)
+				err := keeper.RedeemPrizes(ctx, s1)
 				Expect(err).To(BeNil())
 				var exists bool
 				a, exists = keeper.GetAttendee(ctx, a.Address)

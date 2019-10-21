@@ -6,7 +6,7 @@ echo "Installing ginko and gomega"
 go get github.com/onsi/ginkgo/ginkgo
 go get github.com/onsi/gomega/...
 
-requiredVersion="v1.18.0"
+requiredVersion="v1.21.0"
 needsInstall=0
 #installing the linter
 if ! [ -x "$(command -v golangci-lint)" ]; then

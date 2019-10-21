@@ -4,41 +4,56 @@ import (
 	"fmt"
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/x/auth/client/rest"
-	"github.com/eco/longy/x/longy/internal/keeper"
+	"github.com/eco/longy/x/longy/client/rest/query"
+	"github.com/eco/longy/x/longy/internal/querier"
 	"github.com/gorilla/mux"
 )
 
 const (
 	//AttendeeIDKey is the attribute key for attendee id
 	AttendeeIDKey = "attendee_id"
-	//AddressIDKey is the attribute key for atttendee address
+	//AddressIDKey is the attribute key for attendee address
 	AddressIDKey = "address_id"
-	//ScanIDKey  is the attribute key for scan id
+	//ScanIDKey is the attribute key for scan id
 	ScanIDKey = "scan_id"
+	//BadgeIDKey is the attribute key for badge id
+	BadgeIDKey = "badge_id"
+	//SigKey is the attribute key for the sig
+	SigKey = "sig"
 )
 
 // RegisterRoutes - Central function to define routes that get registered by the main application
 //nolint:gocritic
 func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, storeName string) {
 	//longy/attendees/{attendee_id}
-	r.HandleFunc(fmt.Sprintf("/%s/%s/{%s}", storeName, keeper.QueryAttendees, AttendeeIDKey),
+	r.HandleFunc(fmt.Sprintf("/%s/%s/{%s}", storeName, querier.QueryAttendees, AttendeeIDKey),
 		attendeeHandler(cliCtx, storeName)).Methods("GET")
 
 	//longy/attendees/address/{address_id}
-	r.HandleFunc(fmt.Sprintf("/%s/%s/%s/{%s}", storeName, keeper.QueryAttendees, keeper.AddressKey,
+	r.HandleFunc(fmt.Sprintf("/%s/%s/%s/{%s}", storeName, querier.QueryAttendees, querier.AddressKey,
 		AddressIDKey), attendeeAddressHandler(cliCtx, storeName)).Methods("GET")
 
 	//longy/scans/{scan_id}
-	r.HandleFunc(fmt.Sprintf("/%s/%s/{%s}", storeName, keeper.QueryScans, ScanIDKey),
+	r.HandleFunc(fmt.Sprintf("/%s/%s/{%s}", storeName, querier.QueryScans, ScanIDKey),
 		scanGetHandler(cliCtx, storeName)).Methods("GET")
 
 	//longy/prizes
-	r.HandleFunc(fmt.Sprintf("/%s/%s", storeName, keeper.PrizesKey),
+	r.HandleFunc(fmt.Sprintf("/%s/%s", storeName, querier.PrizesKey),
 		prizesGetHandler(cliCtx, storeName)).Methods("GET")
 
 	//longy/bonus
-	r.HandleFunc(fmt.Sprintf("/%s/%s", storeName, keeper.QueryBonus),
+	r.HandleFunc(fmt.Sprintf("/%s/%s", storeName, querier.QueryBonus),
 		bonusGetHandler(cliCtx, storeName)).Methods("GET")
+
+	//longy/leader
+	r.HandleFunc(fmt.Sprintf("/%s/%s", storeName, querier.LeaderKey),
+		query.LeaderBoardHandler(cliCtx, storeName)).Methods("GET")
+
+	//longy/redeem?address_id={address_id}&sig={sig}
+	r.HandleFunc(fmt.Sprintf("/%s/%s", storeName, querier.RedeemKey),
+		redeemHandler(cliCtx, storeName)).
+		Queries(AddressIDKey, fmt.Sprintf("{%s}", AddressIDKey), SigKey, fmt.Sprintf("{%s}", SigKey)).
+		Methods("GET")
 
 	//open endpoint to post transactions directly to full node
 	r.HandleFunc("/longy/txs", rest.BroadcastTxRequest(cliCtx)).Methods("POST")

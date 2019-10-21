@@ -28,7 +28,7 @@ var _ = Describe("Info Handler Tests", func() {
 
 	Context("when sender exists", func() {
 		BeforeEach(func() {
-			utils.AddAttendeeToKeeper(ctx, &keeper, qr1, false)
+			utils.AddAttendeeToKeeper(ctx, &keeper, qr1, true, false)
 		})
 
 		It("should fail when receiver attendee doesn't exist", func() {
@@ -39,7 +39,7 @@ var _ = Describe("Info Handler Tests", func() {
 
 		Context("when both sender and receiver exist", func() {
 			BeforeEach(func() {
-				utils.AddAttendeeToKeeper(ctx, &keeper, qr2, false)
+				utils.AddAttendeeToKeeper(ctx, &keeper, qr2, true, false)
 			})
 
 			It("should fail when there is no scan for them", func() {

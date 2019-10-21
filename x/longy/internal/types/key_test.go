@@ -1,14 +1,44 @@
-package types
+package types_test
 
 import (
-	"github.com/stretchr/testify/require"
-	"testing"
+	"bytes"
+	"github.com/eco/longy/util"
+	"github.com/eco/longy/x/longy/internal/types"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
-func TestPrefixKey(t *testing.T) {
-	prefix := []byte("foo")
-	key := []byte("bar")
+var _ = Describe("Key Tests", func() {
+	BeforeEach(func() {
+	})
 
-	prefixedKey := prefixKey(prefix, key)
-	require.Equal(t, prefixedKey, []byte("foo::bar"))
-}
+	It("should prefix two arrays", func() {
+		prefix := []byte("foo")
+		key := []byte("bar")
+
+		prefixedKey := types.PrefixKey(prefix, key)
+		Expect(bytes.Compare(prefixedKey, []byte("foo::bar"))).To(Equal(0))
+	})
+
+	It("should return false when key is nil or empty", func() {
+
+		Expect(types.IsAttendeeKey(nil)).To(BeFalse())
+		Expect(types.IsAttendeeKey([]byte{})).To(BeFalse())
+	})
+
+	It("should return false when key is not of attendee type", func() {
+		key := types.MasterKey()
+
+		Expect(types.IsAttendeeKey(key)).To(BeFalse())
+
+		key = types.PrizeKey([]byte("stuff"))
+		Expect(types.IsAttendeeKey(key)).To(BeFalse())
+	})
+
+	It("should return true when key is of attendee type", func() {
+		s1 := util.IDToAddress("asdf")
+		key := types.AttendeeKey(s1)
+
+		Expect(types.IsAttendeeKey(key)).To(BeTrue())
+	})
+})

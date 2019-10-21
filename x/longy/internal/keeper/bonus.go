@@ -10,7 +10,7 @@ import (
 func (k Keeper) SetBonus(ctx sdk.Context, b types.Bonus) {
 	key := types.BonusKey()
 
-	bz, err := k.cdc.MarshalBinaryLengthPrefixed(b)
+	bz, err := k.Cdc.MarshalBinaryLengthPrefixed(b)
 	if err != nil {
 		panic(err)
 	}
@@ -28,7 +28,7 @@ func (k Keeper) GetBonus(ctx sdk.Context) *types.Bonus {
 	}
 
 	var b types.Bonus
-	err := k.cdc.UnmarshalBinaryLengthPrefixed(bz, &b)
+	err := k.Cdc.UnmarshalBinaryLengthPrefixed(bz, &b)
 	if err != nil {
 		panic(err)
 	}

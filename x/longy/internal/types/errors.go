@@ -92,6 +92,12 @@ const (
 	EmptyEncryptedInfo
 	//SenderNotRedeemerAcct is the code for when the sender of the MsgRedeem is not the correct account
 	SenderNotRedeemerAcct
+	//HashingError is the code for when we error on hashing the badge id
+	HashingError
+	//SigDecodeError is the code for when we cannot hex decode the signature
+	SigDecodeError
+	//InvalidSignature is the code for when the signature does not match the message
+	InvalidSignature
 
 	// DefaultError is the code for when a random error occurs that we do not provide a unique code to
 	DefaultError
@@ -167,7 +173,7 @@ func ErrQRCodeInvalid(format string, args ...interface{}) sdk.Error {
 	return sdk.NewError(LongyCodeSpace, QRCodeInvalid, format, args...)
 }
 
-// ErrAttendeeClaimed indicates a attendee that is unclaimed
+// ErrAttendeeClaimed indicates an attendee that is unclaimed
 func ErrAttendeeClaimed(format string, args ...interface{}) sdk.Error {
 	return sdk.NewError(LongyCodeSpace, AttendeeClaimed, format, args...)
 }
@@ -251,6 +257,21 @@ func ErrEmptyEncryptedInfo(format string, args ...interface{}) sdk.Error {
 //ErrSenderNotRedeemerAcct occurs when the sender of the MsgRedeem is not the correct account
 func ErrSenderNotRedeemerAcct(format string, args ...interface{}) sdk.Error {
 	return sdk.NewError(LongyCodeSpace, SenderNotRedeemerAcct, format, args...)
+}
+
+//ErrHashingError occurs when the code for when we error on hashing the badge id
+func ErrHashingError(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, HashingError, format, args...)
+}
+
+//ErrSigDecodeError occurs when the code for when we cannot hex decode the signature
+func ErrSigDecodeError(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, SigDecodeError, format, args...)
+}
+
+//ErrInvalidSignature occurs when the code for when the signature does not match the message
+func ErrInvalidSignature(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, InvalidSignature, format, args...)
 }
 
 //ErrDefault occurs when a random error occurs that we do not provide a unique code to

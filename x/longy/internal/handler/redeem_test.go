@@ -19,29 +19,29 @@ var _ = Describe("Redeem Handler Tests", func() {
 	})
 
 	It("should fail when the sender is not the redeem account", func() {
-		msg := types.NewMsgRedeem(sender, qr1)
+		msg := types.NewMsgRedeem(sender, sender)
 		result := handler(ctx, msg)
 		Expect(result.Code).To(Equal(types.SenderNotRedeemerAcct))
 	})
 
 	It("should fail when the sender is the redeem account, but attendee doesn't exist", func() {
 		utils.SetRedeemAccount(ctx, keeper, sender)
-		msg := types.NewMsgRedeem(sender, qr1)
+		msg := types.NewMsgRedeem(sender, receiver)
 		result := handler(ctx, msg)
 		Expect(result.Code).To(Equal(types.AttendeeNotFound))
 	})
 
 	It("should succeed when the sender is the redeem account and attendee exist", func() {
 		utils.SetRedeemAccount(ctx, keeper, sender)
-		utils.AddAttendeeToKeeper(ctx, &keeper, qr2, false)
-		msg := types.NewMsgRedeem(sender, qr2)
+		utils.AddAttendeeToKeeper(ctx, &keeper, qr2, true, false)
+		msg := types.NewMsgRedeem(sender, receiver)
 		result := handler(ctx, msg)
 		Expect(result.Code).To(Equal(sdk.CodeOK))
 	})
 
 	It("should succeed to set all attendee winnings to claimed", func() {
 		utils.SetRedeemAccount(ctx, keeper, sender)
-		attendee := utils.AddAttendeeToKeeper(ctx, &keeper, qr2, false)
+		attendee := utils.AddAttendeeToKeeper(ctx, &keeper, qr2, true, false)
 		attendee.Winnings = append(attendee.Winnings, types.Win{
 			Tier:    types.Tier1,
 			Name:    "stuff",
@@ -54,7 +54,7 @@ var _ = Describe("Redeem Handler Tests", func() {
 			Claimed: false,
 		})
 		keeper.SetAttendee(ctx, &attendee)
-		msg := types.NewMsgRedeem(sender, qr2)
+		msg := types.NewMsgRedeem(sender, receiver)
 		result := handler(ctx, msg)
 		Expect(result.Code).To(Equal(sdk.CodeOK))
 

@@ -202,11 +202,11 @@ func NewLongyApp(
 		genutil.NewAppModule(app.accountKeeper, app.stakingKeeper, app.BaseApp.DeliverTx),
 		auth.NewAppModule(app.accountKeeper),
 		bank.NewAppModule(app.bankKeeper, app.accountKeeper),
+		longy.NewAppModule(app.longyKeeper),
 		supply.NewAppModule(app.supplyKeeper, app.accountKeeper),
 		distr.NewAppModule(app.distrKeeper, app.supplyKeeper),
 		slashing.NewAppModule(app.slashingKeeper, app.stakingKeeper),
 		staking.NewAppModule(app.stakingKeeper, app.distrKeeper, app.accountKeeper, app.supplyKeeper),
-		longy.NewAppModule(app.longyKeeper),
 	)
 
 	app.mm.SetOrderBeginBlockers(distr.ModuleName, slashing.ModuleName)
@@ -229,12 +229,6 @@ func NewLongyApp(
 
 	// register all module routes and module queriers
 	app.mm.RegisterRoutes(app.Router(), app.QueryRouter())
-	app.Router().AddRoute("longy", longy.NewHandler(app.longyKeeper))
-	app.QueryRouter().AddRoute("longy", longy.NewQuerier(app.longyKeeper))
-
-	// initialize stores
-	app.MountKVStores(keys)
-	app.MountTransientStores(tkeys)
 
 	// The initChainer handles translating the genesis.json file into initial state for the network
 	app.SetInitChainer(app.InitChainer)
@@ -249,6 +243,10 @@ func NewLongyApp(
 			auth.DefaultSigVerificationGasConsumer,
 		),
 	)
+
+	// initialize stores
+	app.MountKVStores(keys)
+	app.MountTransientStores(tkeys)
 
 	err := app.LoadLatestVersion(app.keys[bam.MainStoreKey])
 	if err != nil {

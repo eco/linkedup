@@ -35,17 +35,17 @@ var (
 
 // AttendeeKey will construct the appropriate key for the attendee with `id`
 func AttendeeKey(addr sdk.AccAddress) []byte {
-	return prefixKey(AttendeePrefix, addr[:])
+	return PrefixKey(AttendeePrefix, addr[:])
 }
 
 //ScanKey returns the prefixed key for managing scans in the store
 func ScanKey(id []byte) []byte {
-	return prefixKey(ScanPrefix, id)
+	return PrefixKey(ScanPrefix, id)
 }
 
 //PrizeKey returns the prefixed key for managing prizes in the store
 func PrizeKey(id []byte) []byte {
-	return prefixKey(PrizePrefix, id)
+	return PrefixKey(PrizePrefix, id)
 }
 
 // MasterKey will return the store key for the master key
@@ -63,8 +63,19 @@ func BonusKey() []byte {
 	return BonusKeyPrefix
 }
 
+//IsAttendeeKey checks the key to see if its for an attendee by checking it starts with the AttendeePrefix
+func IsAttendeeKey(key []byte) bool {
+	l := len(AttendeePrefix)
+	if len(key) < l {
+		return false
+	}
+
+	return bytes.Equal(key[:l], AttendeePrefix)
+}
+
+//PrefixKey adds prifix bits to the key
 //nolint:gosec
-func prefixKey(pre []byte, key []byte) []byte {
+func PrefixKey(pre []byte, key []byte) []byte {
 	buf := new(bytes.Buffer)
 	buf.Write(Prefix(pre))
 	buf.Write(key)
