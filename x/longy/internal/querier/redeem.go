@@ -19,14 +19,14 @@ func queryRedeem(ctx sdk.Context, k keeper.Keeper, path []string) (res []byte, e
 		return nil, types.ErrAttendeeNotFound("could not find attendee with that AccAddress")
 	}
 
-	//validate sig
-	err = keeper.ValidateSig(attendee.PubKey, path[0], path[1])
-	if err != nil {
-		return
-	}
+	////validate sig
+	//err = keeper.ValidateSig(attendee.PubKey, path[0], path[1])
+	//if err != nil {
+	//	return
+	//}
 
 	winnings := attendee.Winnings
-	ws := make([]types.Win, len(attendee.Winnings))
+	ws := make([]types.Win, 0, len(attendee.Winnings))
 	for i := range winnings {
 		if !winnings[i].Claimed {
 			ws = append(ws, winnings[i])
