@@ -29,11 +29,6 @@ type GenesisServiceKey struct {
 	crypto.PubKey `json:"pubkey"`
 }
 
-// GenesisRedeemKey is the genesis type for the redeem account
-type GenesisRedeemKey struct {
-	Address sdk.AccAddress `json:"address"`
-}
-
 // GenesisPrizes is the full array of prizes for the event
 type GenesisPrizes []Prize
 

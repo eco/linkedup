@@ -14,14 +14,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-//var signer *keeper.Signer
-//
-//func init() {
-//	key := tmcrypto.GenPrivKeySecp256k1([]byte("master"))
-//	addr := sdk.AccAddress(key.PubKey().Address())
-//	signer = keeper.NewSigner(addr, key)
-//}
-
 //WinningsHandler responds to winning prize queries for which prizes haven't been claimed yet for an attendee
 //nolint:gocritic
 func WinningsHandler(cliCtx context.CLIContext, storeName string) http.HandlerFunc {
@@ -38,13 +30,5 @@ func WinningsHandler(cliCtx context.CLIContext, storeName string) http.HandlerFu
 		}
 
 		rest.PostProcessResponse(w, cliCtx, res)
-
-		//addr, _ := sdk.AccAddressFromBech32(addressID) //err checked in query
-		//
-		//msg := types.MsgRedeem{
-		//	Sender:   signer.AccAddress,
-		//	Attendee: addr,
-		//}
-		//signer.SendTx(&cliCtx, cliCtx.Codec, msg)
 	}
 }

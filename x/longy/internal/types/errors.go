@@ -26,9 +26,6 @@ const (
 	// GenesisKeyServiceAddressEmpty is the code for when the service account address is not set in the genesis file
 	GenesisKeyServiceAddressEmpty
 
-	// GenesisKeyRedeemAddressEmpty is the code for when the redeem address is not set in the genesis file
-	GenesisKeyRedeemAddressEmpty
-
 	// GenesisAttendeesEmpty is the code for when the attendees are not set in the genesis file
 	GenesisAttendeesEmpty
 
@@ -98,6 +95,8 @@ const (
 	SigDecodeError
 	//InvalidSignature is the code for when the signature does not match the message
 	InvalidSignature
+	//MasterAccountNotSet is the code for when the master account has not been set
+	MasterAccountNotSet
 
 	// DefaultError is the code for when a random error occurs that we do not provide a unique code to
 	DefaultError
@@ -131,11 +130,6 @@ func ErrInsufficientPrivileges(format string, args ...interface{}) sdk.Error {
 // ErrGenesisKeyServiceAddressEmpty occurs when the re-key service address is not set in the genesis file
 func ErrGenesisKeyServiceAddressEmpty(format string, args ...interface{}) sdk.Error {
 	return sdk.NewError(LongyCodeSpace, GenesisKeyServiceAddressEmpty, format, args...)
-}
-
-// ErrGenesisRedeemAddressEmpty occurs when the redeem address is not set in the genesis file
-func ErrGenesisRedeemAddressEmpty(format string, args ...interface{}) sdk.Error {
-	return sdk.NewError(LongyCodeSpace, GenesisKeyRedeemAddressEmpty, format, args...)
 }
 
 // ErrGenesisAttendeesEmpty occurs when the attendees are not set in the genesis file
@@ -272,6 +266,11 @@ func ErrSigDecodeError(format string, args ...interface{}) sdk.Error {
 //ErrInvalidSignature occurs when the code for when the signature does not match the message
 func ErrInvalidSignature(format string, args ...interface{}) sdk.Error {
 	return sdk.NewError(LongyCodeSpace, InvalidSignature, format, args...)
+}
+
+//ErrMasterAccountNotSet occurs when the master account has not been set
+func ErrMasterAccountNotSet(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, MasterAccountNotSet, format, args...)
 }
 
 //ErrDefault occurs when a random error occurs that we do not provide a unique code to

@@ -35,9 +35,6 @@ var _ = Describe("Longy Handler Tests", func() {
 			KeyService: types.GenesisServiceKey{
 				Address: masterAddr,
 			},
-			Redeem: types.GenesisRedeemKey{
-				Address: redeemer,
-			},
 			Attendees: []types.GenesisAttendee{
 				types.GenesisAttendee{
 					ID: "1",

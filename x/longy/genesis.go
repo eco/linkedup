@@ -10,14 +10,13 @@ import (
 // GenesisState is the genesis struct for the longy module
 type GenesisState struct {
 	KeyService GenesisServiceKey `json:"key_service"`
-	Redeem     GenesisRedeemKey  `json:"redeem"`
 	Attendees  GenesisAttendees  `json:"attendees"`
 	Prizes     GenesisPrizes     `json:"prizes"`
 }
 
 // DefaultGenesisState returns the default genesis struct for the longy module
 func DefaultGenesisState() GenesisState {
-	return GenesisState{KeyService: GenesisServiceKey{}, Redeem: GenesisRedeemKey{}, Attendees: GenesisAttendees{}}
+	return GenesisState{KeyService: GenesisServiceKey{}, Attendees: GenesisAttendees{}}
 }
 
 // ValidateGenesis validates that the passed genesis state is valid
@@ -25,10 +24,6 @@ func DefaultGenesisState() GenesisState {
 func ValidateGenesis(data GenesisState) error {
 	if data.KeyService.Address.Empty() {
 		return types.ErrGenesisKeyServiceAddressEmpty("key service address must be set")
-	}
-
-	if data.Redeem.Address.Empty() {
-		return types.ErrGenesisRedeemAddressEmpty("Signer address must be set")
 	}
 
 	if data.Attendees == nil {
@@ -54,20 +49,15 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, state GenesisState) {
 
 	// set the master service account
 	masterAccount := accountKeeper.NewAccountWithAddress(ctx, state.KeyService.Address)
+	if masterAccount == nil {
+		panic(types.ErrMasterAccountNotSet("master account must be set in genesis"))
+	}
 	err := masterAccount.SetPubKey(state.KeyService.PubKey) //nolint
 	if err != nil {
 		panic(err)
 	}
 	accountKeeper.SetAccount(ctx, masterAccount)
-	k.SetMasterAddress(ctx, state.KeyService.Address)
-
-	// set the redeem account
-	//redeemAccount := accountKeeper.NewAccountWithAddress(ctx, state.Signer.Address)
-	redeemAccount := accountKeeper.GetAccount(ctx, state.Redeem.Address)
-	if redeemAccount == nil {
-		panic(fmt.Errorf("the redeem account does not exist"))
-	}
-	err = k.SetRedeemAccount(ctx, redeemAccount.GetAddress())
+	err = k.SetMasterAddress(ctx, state.KeyService.Address)
 	if err != nil {
 		panic(err)
 	}

@@ -10,7 +10,7 @@ import (
 )
 
 var _ = Describe("Redeem Keeper Tests", func() {
-	var s1, s2 sdk.AccAddress
+	var s1 sdk.AccAddress
 	const (
 		qr1 = "1234"
 		qr2 = "asdf"
@@ -19,47 +19,6 @@ var _ = Describe("Redeem Keeper Tests", func() {
 		BeforeTestRun()
 
 		s1 = util.IDToAddress(qr1)
-		s2 = util.IDToAddress(qr2)
-	})
-
-	It("should fail to set an empty AccAddress", func() {
-		err := keeper.SetRedeemAccount(ctx, sdk.AccAddress{})
-		Expect(err).To(Not(BeNil()))
-		Expect(err.Code()).To(Equal(sdk.CodeInvalidAddress))
-	})
-
-	It("should fail to set a valid AccAddress for an account that doesn't exist", func() {
-		err := keeper.SetRedeemAccount(ctx, s1)
-		Expect(err).To(Not(BeNil()))
-		Expect(err.Code()).To(Equal(sdk.CodeUnknownAddress))
-	})
-
-	It("should fail to return a redeem account when its not set", func() {
-		is := keeper.IsRedeemAccount(ctx, s1)
-		Expect(is).To(Equal(false))
-	})
-
-	It("should succeed to set a redeem account", func() {
-		acc := keeper.AccountKeeper().NewAccountWithAddress(ctx, s1)
-		keeper.AccountKeeper().SetAccount(ctx, acc)
-		err := keeper.SetRedeemAccount(ctx, s1)
-		Expect(err).To(BeNil())
-	})
-
-	It("should fail to is redeem account when passed the wrong AccAddress", func() {
-		utils.SetRedeemAccount(ctx, keeper, s1)
-
-		acc := keeper.AccountKeeper().NewAccountWithAddress(ctx, s2)
-		keeper.AccountKeeper().SetAccount(ctx, acc)
-		is := keeper.IsRedeemAccount(ctx, s2)
-		Expect(is).To(BeFalse())
-	})
-
-	It("should succeed to return a redeem account when set", func() {
-		utils.SetRedeemAccount(ctx, keeper, s1)
-
-		is := keeper.IsRedeemAccount(ctx, s1)
-		Expect(is).To(BeTrue())
 	})
 
 	Context("when attendees don't exist", func() {

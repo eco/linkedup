@@ -23,12 +23,12 @@ func AddAttendeeToKeeper(ctx sdk.Context, keeper *longy.Keeper, badgeID string, 
 	return
 }
 
-//SetRedeemAccount creates and sets an account to be the redeemer
+//SetMasterAccount creates and sets an account to be the redeemer
 //nolint:gocritic
-func SetRedeemAccount(ctx sdk.Context, k longy.Keeper, addresses sdk.AccAddress) exported.Account {
+func SetMasterAccount(ctx sdk.Context, k longy.Keeper, addresses sdk.AccAddress) exported.Account {
 	acc := k.AccountKeeper().NewAccountWithAddress(ctx, addresses)
 	k.AccountKeeper().SetAccount(ctx, acc)
-	err := k.SetRedeemAccount(ctx, addresses)
+	err := k.SetMasterAddress(ctx, addresses)
 	gomega.Expect(err).To(gomega.BeNil())
 	return acc
 }

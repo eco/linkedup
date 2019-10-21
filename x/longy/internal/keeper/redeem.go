@@ -3,42 +3,10 @@ package keeper
 import (
 	"crypto/sha512"
 	"encoding/hex"
-	"fmt"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/eco/longy/x/longy/internal/types"
 	"github.com/tendermint/tendermint/crypto"
 )
-
-//SetRedeemAccount sets the redeem account from the genesis file
-//nolint:gocritic
-func (k Keeper) SetRedeemAccount(ctx sdk.Context, addr sdk.AccAddress) sdk.Error {
-	if addr.Empty() {
-		return sdk.ErrInvalidAddress(addr.String())
-	}
-
-	account := k.accountKeeper.GetAccount(ctx, addr)
-	if account == nil {
-		return sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", addr))
-	}
-
-	key := types.RedeemKey()
-	bz := addr.Bytes()
-	k.Set(ctx, key, bz)
-
-	return nil
-}
-
-//IsRedeemAccount returns true if the the account passed in is the redeemer account
-//nolint:gocritic
-func (k Keeper) IsRedeemAccount(ctx sdk.Context, addr sdk.Address) bool {
-	key := types.RedeemKey()
-	bz, err := k.Get(ctx, key)
-	if err != nil {
-		return false
-	}
-	redeemer := sdk.AccAddress(bz)
-	return redeemer.Equals(addr)
-}
 
 //RedeemPrizes sets all of the prizes for an attendee to claimed = true
 //nolint:gocritic
