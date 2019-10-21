@@ -4,12 +4,10 @@ import (
 	"encoding/json"
 	"github.com/cosmos/cosmos-sdk/client/context"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/types/rest"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/eco/longy/x/longy/internal/keeper"
 	"github.com/eco/longy/x/longy/internal/types"
 	tmcrypto "github.com/tendermint/tendermint/crypto/secp256k1"
-	"io/ioutil"
 	"net/http"
 )
 
@@ -32,17 +30,11 @@ func init() {
 func ClaimHandler(cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var claim Claim
-		//var i interface{}
-
-		body, err := ioutil.ReadAll(r.Body)
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		err = json.Unmarshal(body, &claim)
-		if err != nil {
-			respondWithError(w, http.StatusBadRequest, err.Error())
+		decoder := json.NewDecoder(r.Body)
+		//nolint:errcheck
+		defer r.Body.Close()
+		if err := decoder.Decode(&claim); err != nil {
+			respondWithError(w, http.StatusBadRequest, "Invalid Payload, missing address and sig")
 			return
 		}
 
