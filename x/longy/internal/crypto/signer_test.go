@@ -1,25 +1,25 @@
-package keeper_test
+package crypto_test
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	k "github.com/eco/longy/x/longy/internal/keeper"
+	"github.com/eco/longy/x/longy/internal/crypto"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/tendermint/tendermint/crypto"
-	tmcrypto "github.com/tendermint/tendermint/crypto/secp256k1"
+	tmCrypto "github.com/tendermint/tendermint/crypto"
+	secp "github.com/tendermint/tendermint/crypto/secp256k1"
 )
 
 var _ = Describe("Signer Keeper Tests", func() {
-	var key crypto.PrivKey
+	var key tmCrypto.PrivKey
 	BeforeEach(func() {
 		BeforeTestRun()
 
-		key = tmcrypto.GenPrivKeySecp256k1([]byte("master"))
+		key = secp.GenPrivKeySecp256k1([]byte("master"))
 	})
 
 	It("should fail to set an empty AccAddress", func() {
 		addr := sdk.AccAddress(key.PubKey().Address())
-		signer := k.NewSigner(addr, key)
+		signer := crypto.NewSigner(addr, key)
 
 		msg := []byte("asdfasdfas")
 		sig, err := signer.PrivKey.Sign(msg)

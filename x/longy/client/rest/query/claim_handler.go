@@ -5,7 +5,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/context"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/eco/longy/x/longy/internal/keeper"
+	"github.com/eco/longy/x/longy/internal/crypto"
 	"github.com/eco/longy/x/longy/internal/types"
 	tmcrypto "github.com/tendermint/tendermint/crypto/secp256k1"
 	"net/http"
@@ -17,12 +17,12 @@ type Claim struct {
 	Sig     string `json:"sig"`
 }
 
-var signer *keeper.Signer
+var signer *crypto.Signer
 
 func init() {
 	key := tmcrypto.GenPrivKeySecp256k1([]byte("master"))
 	addr := sdk.AccAddress(key.PubKey().Address())
-	signer = keeper.NewSigner(addr, key)
+	signer = crypto.NewSigner(addr, key)
 }
 
 //ClaimHandler handles the REST POST to claim the attendee's prizes
@@ -56,7 +56,7 @@ func ClaimHandler(cliCtx context.CLIContext) http.HandlerFunc {
 			return
 		}
 
-		err = keeper.ValidateSig(acc.GetPubKey(), acc.GetAddress().String(), claim.Sig)
+		err = crypto.ValidateSig(acc.GetPubKey(), acc.GetAddress().String(), claim.Sig)
 		if err != nil {
 			respondWithError(w, http.StatusBadRequest, err.Error())
 			return
