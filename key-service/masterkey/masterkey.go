@@ -30,7 +30,10 @@ var (
 	// ErrAlreadyKeyed denotes that this address has already been key'd
 	ErrAlreadyKeyed = errors.New("account already key'ed")
 
-	// ErrTxSubmission
+	// ErrInternal -
+	ErrInternal = errors.New("internal err")
+
+	// ErrTxSubmission -
 	ErrTxSubmission = errors.New("unable to complete tx submission")
 )
 
@@ -101,7 +104,7 @@ func (mk *MasterKey) SendKeyTransaction(
 
 	// create and broadcast the transaction
 	keyMsg := longy.NewMsgKey(attendeeAddr, mk.address, newPublicKey, commitment)
-	tx, err := mk.createKeyTx(keyMsg)
+	tx := mk.createKeyTx(keyMsg)
 	res, err := mk.broadcastTx(*tx)
 	if err != nil { // nolint
 		log.WithError(err).Info("failed transaction submission")
@@ -162,7 +165,7 @@ func (mk *MasterKey) broadcastTx(tx auth.StdTx) (*sdk.TxResponse, error) {
 }
 
 //nolint
-func (mk *MasterKey) createKeyTx(keyMsg longy.MsgKey) (*auth.StdTx, error) {
+func (mk *MasterKey) createKeyTx(keyMsg longy.MsgKey) *auth.StdTx {
 	msgs := []sdk.Msg{keyMsg}
 
 	nilFee := auth.NewStdFee(50000, sdk.NewCoins(sdk.NewInt64Coin("longy", 0)))
@@ -171,12 +174,12 @@ func (mk *MasterKey) createKeyTx(keyMsg longy.MsgKey) (*auth.StdTx, error) {
 	// sign the message with the master private key
 	sig, err := mk.privKey.Sign(signBytes)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 	stdSig := auth.StdSignature{PubKey: mk.pubKey, Signature: sig}
 	tx := auth.NewStdTx(msgs, nilFee, []auth.StdSignature{stdSig}, "")
 
-	return &tx, nil
+	return &tx
 }
 
 func parseAccountFromBody(body io.ReadCloser) (auth.Account, error) {
