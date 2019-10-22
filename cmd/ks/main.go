@@ -20,7 +20,6 @@ func init() {
 
 	rootCmd.Flags().String("longy-chain-id", "longychain", "chain-id of the running longy game")
 	rootCmd.Flags().String("longy-restservice", "http://localhost:1317", "scheme://host:port of the full node rest client")
-	rootCmd.Flags().String("longy-fullnode", "tcp://localhost:26657", "tcp://host:port the full node for tx submission")
 
 	// using "master" as the seed
 	rootCmd.Flags().String("longy-masterkey",
@@ -55,7 +54,6 @@ var rootCmd = &cobra.Command{
 		mockEmail := localstack || viper.GetBool("email-mock")
 
 		longyChainID := viper.GetString("longy-chain-id")
-		longyFullNodeURL := viper.GetString("longy-fullnode")
 		longyRestURL := viper.GetString("longy-restservice")
 
 		key, err := util.Secp256k1FromHex(viper.GetString("longy-masterkey"))
@@ -87,7 +85,7 @@ var rootCmd = &cobra.Command{
 		}
 
 		/** Master key session **/
-		mKey, err := mk.NewMasterKey(key, longyRestURL, longyFullNodeURL, longyChainID)
+		mKey, err := mk.NewMasterKey(key, longyRestURL, longyChainID)
 		if err != nil {
 			return fmt.Errorf("master key: %s", err)
 		}

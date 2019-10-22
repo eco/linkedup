@@ -81,25 +81,21 @@ two http endpoints
 
 The usage for the key service is shown below
 ```
-key service for the longest chain game
-
 Usage:
   ks [flags]
 
 Flags:
-      --port int                   port to bind the rekey service (default 1337)
+      --port int                    port to bind the rekey service (default 1337)
+      --longy-chain-id string       chain-id of the running longy game (default "longychain")
+      --longy-masterkey string      hex encoded master private key (default "fc613b4dfd6736a7bd268c8a0e74ed0d1c04a959f59dd74ef2874983fd443fca")
+      --longy-restservice string    scheme://host:port of the full node rest client (default "http://localhost:1317")
 
-      --aws-dynamo-url string      dynamodb url (default "http://localhost:8000")
-      --aws-region string          aws region for dynamodb (default "us-west-1")
+      --eventbrite-auth string      eventbrite authorization token
+      --eventbrite-event int        id associated with the eventbrite event
 
-      --eventbrite-auth string     eventbrite authorization token
-      --eventbrite-event int       id associated with the eventbrite event
-
-      --longy-chain-id string      chain-id of the running longy game (default "longychain")
-      --longy-fullnode string      tcp://host:port the full node for tx submission (default "tcp://localhost:26657")
-      --longy-masterkey string     hex encoded master private key (default "fc613b4dfd6736a7bd268c8a0e74ed0d1c04a959f59dd74ef2874983fd443fca")
-      --longy-restservice string   scheme://host:port of the full node rest client (default "http://localhost:1317")
-
+      --aws-content-bucket string   content bucket for user uploads (default "linkedup-user-content")
+      --email-mock                  print email URLs instead of emailing
+      --localstack                  use localstack instead of aws; implies --email-mock
 ```
 
 The configruation can also be set through environment variables. the `-` characters replaced by `_` and all uppercase.  
@@ -131,9 +127,9 @@ implies `--email-mock`.
   Status 401: The attendee has already keyed their account  
   Status 404: The attendee id was not found in the eventbrite event  
   Status 503: Another external component outside of the key service went wrong. (i.e email / backend storage / etc)  
-    - The logs will contain information about what went wrong
+    - The logs will contain information about what went wrong  
   Status 500: Something internal went wrong. (i.e marshalling data)  
-    - The logs will contain information about what went wrong
+    - The logs will contain information about what went wrong  
 
 4. `/recover [POST]` will start the process of recovering an account  
   Request Body:  
@@ -143,7 +139,7 @@ implies `--email-mock`.
   Status 400: Bad request body. Check the error response  
   Status 404: The attendee for the corresponding id was not found in eventbrite  
   Status 503: Another external component outside the service is down. Backend storage or email  
-    - Check the logs
+    - Check the logs  
 
 5. `/recover/<id>/<authtoken> [GET]` will retrieve complete attendee information that is stored  
 

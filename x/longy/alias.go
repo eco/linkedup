@@ -53,10 +53,13 @@ type (
 	// Attendee is the type alias for Attendee
 	Attendee = types.Attendee
 
+	// MsgKey is the type alias for MsgKey
+	MsgKey = types.MsgKey
+
 	// GenesisAttendees is the array of attendees for the genesis file
 	GenesisAttendees = types.GenesisAttendees
 
-	//GenesisPrizes is the array of prizes for the event
+	// GenesisPrizes is the array of prizes for the event
 	GenesisPrizes = types.GenesisPrizes
 
 	// GenesisAttendee is the attendee for the genesis file
