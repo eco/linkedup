@@ -32,10 +32,10 @@ func registerKey(
 	db *models.DatabaseContext,
 	mc mail.Client) {
 
-	r.HandleFunc("/key", key(eb, mk, db, mc)).Methods("POST")
-	r.HandleFunc("/recover", keyRecover(db, eb, mc)).Methods("POST")
+	r.HandleFunc("/key", key(eb, mk, db, mc)).Methods(http.MethodPost, http.MethodOptions)
+	r.HandleFunc("/recover", keyRecover(db, eb, mc)).Methods(http.MethodPost, http.MethodOptions)
 
-	r.HandleFunc("/recover/{id}/{token}", keyGetter(db)).Methods("GET")
+	r.HandleFunc("/recover/{id}/{token}", keyGetter(db)).Methods(http.MethodGet, http.MethodOptions)
 }
 
 // All core logic is implemented here. If there are plans to expand this service,

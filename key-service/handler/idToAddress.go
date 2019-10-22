@@ -9,7 +9,7 @@ import (
 // registerIDToAddress provides an deterministic converter from id to a
 // cosmos address
 func registerIDToAddress(r *mux.Router) {
-	r.HandleFunc("/id/{id}", idToAddress()).Methods("GET")
+	r.HandleFunc("/id/{id}", idToAddress()).Methods(http.MethodGet, http.MethodOptions)
 }
 
 func idToAddress() http.HandlerFunc {
