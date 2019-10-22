@@ -10,6 +10,10 @@ import (
 	"net/http"
 )
 
+const (
+	LinkedUpHttps = "https://linkedup.sfbw.io/"
+)
+
 // RegisterRoutes - Central function to define routes that get registered by the main application
 //nolint:gocritic
 func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, storeName string) {
@@ -56,7 +60,7 @@ func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, storeName string) 
 //CorsMiddleware adds the CORS header to all the requests
 func CorsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Origin", LinkedUpHttps)
 		next.ServeHTTP(w, r)
 	})
 }

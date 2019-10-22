@@ -8,7 +8,7 @@ import (
 var _ http.HandlerFunc = ping
 
 func registerPing(r *mux.Router) {
-	r.HandleFunc("/ping", ping).Methods("GET")
+	r.HandleFunc("/ping", ping).Methods(http.MethodGet, http.MethodOptions)
 }
 
 func ping(w http.ResponseWriter, r *http.Request) {
