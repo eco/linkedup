@@ -6,10 +6,20 @@ import (
 	"strconv"
 )
 
+const (
+	//TicketSponsorNameLowerCase is the sponsors ticket type
+	TicketSponsorNameLowerCase = "sponsors"
+	//TicketSpeakerCescNameLowerCase is the cesc speakers ticket type
+	TicketSpeakerCescNameLowerCase = "cesc speakers"
+	//TicketSpeakerEpicenterNameLowerCase is the epicenter speakers ticket type
+	TicketSpeakerEpicenterNameLowerCase = "epicenter speakers"
+)
+
 // GenesisAttendee is the attendee structure in the genesis file
 type GenesisAttendee struct {
-	ID      string         `json:"id"`
-	Profile GenesisProfile `json:"profile"` //gets the full info of the account
+	ID              string         `json:"id"`
+	TicketClassName string         `json:"ticket_class_name"`
+	Profile         GenesisProfile `json:"profile"` //gets the full info of the account
 }
 
 // GenesisAttendees is the full array of attendees to initialize
