@@ -1,10 +1,10 @@
 package masterkey
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
@@ -14,6 +14,7 @@ import (
 	"github.com/sirupsen/logrus"
 	tmcrypto "github.com/tendermint/tendermint/crypto"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"sync"
 	"time"
@@ -22,8 +23,15 @@ import (
 var log = logrus.WithField("module", "masterkey")
 
 var (
+	netClient = &http.Client{
+		Timeout: 10 * time.Second,
+	}
+
 	// ErrAlreadyKeyed denotes that this address has already been key'd
 	ErrAlreadyKeyed = errors.New("account already key'ed")
+
+	// ErrTxSubmission
+	ErrTxSubmission = errors.New("unable to complete tx submission")
 )
 
 // MasterKey encapslates the master key for the longy game
@@ -33,32 +41,24 @@ type MasterKey struct {
 	address sdk.AccAddress
 
 	chainID string
+	restURL string
 
 	accNum      uint64
 	sequenceNum uint64
 	seqLock     *sync.Mutex
 
-	cdc         *codec.Codec
-	longyCliCtx context.CLIContext
+	cdc *codec.Codec
 }
 
 // NewMasterKey is the constructor for `Key`. A new secp256k1 is generated if empty.
 // The `chainID` is used when generating RekeyTransactions to prevent cross-chain replay attacks
-func NewMasterKey(privateKey tmcrypto.PrivKey, restURL, fullNodeURL string, chainID string) (MasterKey, error) {
-	cliCtx := context.NewCLIContext().WithNodeURI(fullNodeURL).WithTrustNode(true)
-	_, err := cliCtx.Client.Health()
-	if err != nil {
-		return MasterKey{}, fmt.Errorf("unable to establish connection with the full node")
-	}
+func NewMasterKey(privateKey tmcrypto.PrivKey, restURL, chainID string) (MasterKey, error) {
 
 	// retrieve details about the master account from the rest endpoint
 	sdkAddr := sdk.AccAddress(privateKey.PubKey().Address())
 	reqURL := restURL + fmt.Sprintf("/auth/accounts/%s", sdkAddr)
 	log.Infof("retrieving service key info from %s", reqURL)
 
-	netClient := &http.Client{
-		Timeout: 5 * time.Second,
-	}
 	resp, err := netClient.Get(reqURL)
 	if err != nil {
 		return MasterKey{}, fmt.Errorf("unable to establish connection to the rest service: %s", err)
@@ -74,13 +74,13 @@ func NewMasterKey(privateKey tmcrypto.PrivKey, restURL, fullNodeURL string, chai
 		address: sdkAddr,
 
 		chainID: chainID,
+		restURL: restURL,
 
 		accNum:      account.GetAccountNumber(),
 		sequenceNum: account.GetSequence(),
 		seqLock:     &sync.Mutex{},
 
-		cdc:         longyApp.MakeCodec(),
-		longyCliCtx: cliCtx,
+		cdc: longyApp.MakeCodec(),
 	}
 
 	_ = resp.Body.Close()
@@ -96,34 +96,26 @@ func (mk *MasterKey) SendKeyTransaction(
 	commitment util.Commitment,
 ) error {
 
-	var (
-		res sdk.TxResponse
-
-		txBytes []byte
-		err     error
-	)
-
 	/** Block until we submit the transaction **/
 	mk.seqLock.Lock()
 
-	// construct bytes and send to the full node
-	txBytes, err = mk.createTxBytes(attendeeAddr, commitment, newPublicKey)
-	if err == nil {
-		res, err = mk.longyCliCtx.BroadcastTxCommit(txBytes)
-		if err != nil { // nolint
-			log.WithError(err).Info("failed transaction submission")
-		} else {
-			if res.Code != 0 {
-				if res.Code == uint32(longy.CodeAttendeeKeyed) {
-					err = ErrAlreadyKeyed
-				} else {
-					log.WithField("raw_log", res.RawLog).Info("failed tx response")
-					err = fmt.Errorf("failed tx")
-				}
+	// create and broadcast the transaction
+	keyMsg := longy.NewMsgKey(attendeeAddr, mk.address, newPublicKey, commitment)
+	tx, err := mk.createKeyTx(keyMsg)
+	res, err := mk.broadcastTx(*tx)
+	if err != nil { // nolint
+		log.WithError(err).Info("failed transaction submission")
+	} else {
+		if res.Code != 0 {
+			if res.Code == uint32(longy.CodeAttendeeKeyed) {
+				err = ErrAlreadyKeyed
+			} else {
+				log.WithField("raw_log", res.RawLog).Info("failed tx response")
+				err = fmt.Errorf("failed tx")
 			}
-
-			mk.sequenceNum++
 		}
+
+		mk.sequenceNum++
 	}
 
 	mk.seqLock.Unlock()
@@ -131,14 +123,47 @@ func (mk *MasterKey) SendKeyTransaction(
 	return err
 }
 
-func (mk *MasterKey) createTxBytes(
-	attendeeAddr sdk.AccAddress,
-	commitment util.Commitment,
-	newPublicKey tmcrypto.PubKey,
-) ([]byte, error) {
-	msgs := []sdk.Msg{
-		longy.NewMsgKey(attendeeAddr, mk.address, newPublicKey, commitment),
+//nolint
+func (mk *MasterKey) broadcastTx(tx auth.StdTx) (*sdk.TxResponse, error) {
+	reqURL := mk.restURL + "/longy/txs"
+
+	body := struct {
+		Tx   auth.StdTx `json:"tx"`
+		Mode string     `json:"mode"`
+	}{Tx: tx, Mode: "block"}
+
+	bz, err := mk.cdc.MarshalJSON(body)
+	if err != nil {
+		log.WithError(err).Error("marshal tx body")
+		return nil, err
 	}
+
+	resp, err := netClient.Post(reqURL, "application/json", bytes.NewReader(bz))
+	if err != nil {
+		log.WithError(err).Error("http tx submission")
+		return nil, err
+	} else if resp.Status == "500" {
+		return nil, ErrTxSubmission
+	}
+	bz, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.WithError(err).Error("reading from tx submission resp body")
+		panic(err)
+	}
+
+	var res sdk.TxResponse
+	err = mk.cdc.UnmarshalJSON(bz, &res)
+	if err != nil {
+		// key-service is broken at this point. What is the right sequence number?
+		panic(err)
+	}
+
+	return &res, nil
+}
+
+//nolint
+func (mk *MasterKey) createKeyTx(keyMsg longy.MsgKey) (*auth.StdTx, error) {
+	msgs := []sdk.Msg{keyMsg}
 
 	nilFee := auth.NewStdFee(50000, sdk.NewCoins(sdk.NewInt64Coin("longy", 0)))
 	signBytes := auth.StdSignBytes(mk.chainID, mk.accNum, mk.sequenceNum, nilFee, msgs, "")
@@ -151,7 +176,7 @@ func (mk *MasterKey) createTxBytes(
 	stdSig := auth.StdSignature{PubKey: mk.pubKey, Signature: sig}
 	tx := auth.NewStdTx(msgs, nilFee, []auth.StdSignature{stdSig}, "")
 
-	return auth.DefaultTxEncoder(mk.cdc)(tx)
+	return &tx, nil
 }
 
 func parseAccountFromBody(body io.ReadCloser) (auth.Account, error) {

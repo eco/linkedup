@@ -112,9 +112,9 @@ func key(eb *ebSession.Session,
 			}
 			return
 		}
+		log.Infof("keyed badge id: %d", body.AttendeeID)
 
 		imageUploadURL, err := db.GetImageUploadURL(strconv.Itoa(body.AttendeeID))
-
 		if err != nil {
 			http.Error(
 				w,
