@@ -95,6 +95,8 @@ const (
 	SigDecodeError
 	//InvalidSignature is the code for when the signature does not match the message
 	InvalidSignature
+	//InvalidPublicKey is the code for when the public key for a sig verification is empty or missing
+	InvalidPublicKey
 	//MasterAccountNotSet is the code for when the master account has not been set
 	MasterAccountNotSet
 
@@ -266,6 +268,11 @@ func ErrSigDecodeError(format string, args ...interface{}) sdk.Error {
 //ErrInvalidSignature occurs when the code for when the signature does not match the message
 func ErrInvalidSignature(format string, args ...interface{}) sdk.Error {
 	return sdk.NewError(LongyCodeSpace, InvalidSignature, format, args...)
+}
+
+//ErrInvalidPublicKey occurs when the code for when the public key for a sig verification is empty or missing
+func ErrInvalidPublicKey(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, InvalidPublicKey, format, args...)
 }
 
 //ErrMasterAccountNotSet occurs when the master account has not been set
