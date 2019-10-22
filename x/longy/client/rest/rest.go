@@ -11,7 +11,8 @@ import (
 )
 
 const (
-	LinkedUpHttps = "https://linkedup.sfbw.io/"
+	//LinkedUpHTTPS CORS endpoint for the linked up client
+	LinkedUpHTTPS = "https://linkedup.sfbw.io/"
 )
 
 // RegisterRoutes - Central function to define routes that get registered by the main application
@@ -60,7 +61,7 @@ func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, storeName string) 
 //CorsMiddleware adds the CORS header to all the requests
 func CorsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", LinkedUpHttps)
+		w.Header().Set("Access-Control-Allow-Origin", LinkedUpHTTPS)
 		next.ServeHTTP(w, r)
 	})
 }
