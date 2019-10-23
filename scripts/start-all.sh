@@ -14,5 +14,4 @@ aws --endpoint-url=http://localstack:4572 s3 sync scripts/prize-imagery s3://lin
 # key service
 sleep 8
 bin/ks --localstack
-#bin/ks --longy-restservice="https://chain.linkedup.sfbw.io"
 
