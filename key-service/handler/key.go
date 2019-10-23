@@ -30,10 +30,11 @@ func registerKey(
 	eb *ebSession.Session,
 	mk *masterkey.MasterKey,
 	db *models.DatabaseContext,
-	mc mail.Client) {
+	mc mail.Client,
+	clientURL string) {
 
-	r.HandleFunc("/key", key(eb, mk, db, mc)).Methods(http.MethodPost, http.MethodOptions)
-	r.HandleFunc("/recover", keyRecover(db, eb, mc)).Methods(http.MethodPost, http.MethodOptions)
+	r.HandleFunc("/key", key(eb, mk, db, mc, clientURL)).Methods(http.MethodPost, http.MethodOptions)
+	r.HandleFunc("/recover", keyRecover(db, eb, mc, clientURL)).Methods(http.MethodPost, http.MethodOptions)
 
 	r.HandleFunc("/recover/{id}/{token}", keyGetter(db)).Methods(http.MethodGet, http.MethodOptions)
 }
@@ -44,7 +45,8 @@ func registerKey(
 func key(eb *ebSession.Session,
 	mk *masterkey.MasterKey,
 	db *models.DatabaseContext,
-	mc mail.Client) http.HandlerFunc {
+	mc mail.Client,
+	clientURL string) http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 
@@ -124,7 +126,7 @@ func key(eb *ebSession.Session,
 		}
 
 		/** Send the redirect **/
-		err = mc.SendOnboardingEmail(profile, attendeeAddress, secret, imageUploadURL)
+		err = mc.SendOnboardingEmail(clientURL, profile, attendeeAddress, secret, imageUploadURL)
 		if err != nil {
 			http.Error(w, "email error. try again", http.StatusInternalServerError)
 		}
@@ -133,7 +135,7 @@ func key(eb *ebSession.Session,
 	}
 }
 
-func keyRecover(db *models.DatabaseContext, eb *ebSession.Session, mc mail.Client) http.HandlerFunc {
+func keyRecover(db *models.DatabaseContext, eb *ebSession.Session, mc mail.Client, clientURL string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		/** Read the attendee id from the body **/
 		body, err := ioutil.ReadAll(r.Body)
@@ -161,7 +163,7 @@ func keyRecover(db *models.DatabaseContext, eb *ebSession.Session, mc mail.Clien
 			return
 		}
 
-		if err := mc.SendRecoveryEmail(profile, id, token); err != nil {
+		if err := mc.SendRecoveryEmail(clientURL, profile, id, token); err != nil {
 			http.Error(w, "key service down", http.StatusServiceUnavailable)
 			return
 		}

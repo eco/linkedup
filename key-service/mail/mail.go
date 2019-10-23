@@ -24,8 +24,8 @@ var (
 
 // Client used to send emails
 type Client interface {
-	SendOnboardingEmail(*eb.AttendeeProfile, sdk.AccAddress, string, string) error
-	SendRecoveryEmail(*eb.AttendeeProfile, int, string) error
+	SendOnboardingEmail(string, *eb.AttendeeProfile, sdk.AccAddress, string, string) error
+	SendRecoveryEmail(string, *eb.AttendeeProfile, int, string) error
 }
 
 type sesClient struct {
@@ -65,12 +65,13 @@ func NewSESClient(cfg client.ConfigProvider, localstack bool) (client Client, er
 // SendOnboardingEmail will construct and send the email containing the initial
 // onboarding message and URL with the given secret
 func (c sesClient) SendOnboardingEmail(
+	clientURL string,
 	profile *eb.AttendeeProfile,
 	attendeeAddr sdk.AccAddress,
 	secret string,
 	imageUploadURL string,
 ) error {
-	redirectURI, err := makeOnboardingURI(profile, attendeeAddr, secret, imageUploadURL)
+	redirectURI, err := makeOnboardingURI(clientURL, profile, attendeeAddr, secret, imageUploadURL)
 
 	if err != nil {
 		log.Errorf(
@@ -97,8 +98,8 @@ func (c sesClient) SendOnboardingEmail(
 
 // SendRecoveryEmail will construct and send the email containing the account
 // recovery message and URL with the given secret
-func (c sesClient) SendRecoveryEmail(profile *eb.AttendeeProfile, id int, token string) error {
-	redirectURI, err := makeRecoveryURI(id, token)
+func (c sesClient) SendRecoveryEmail(clientURL string, profile *eb.AttendeeProfile, id int, token string) error {
+	redirectURI, err := makeRecoveryURI(clientURL, id, token)
 
 	if err != nil {
 		return err
@@ -134,12 +135,13 @@ func (c sesClient) sendEmailWithURL(dest string, url string, template string) (e
 }
 
 func (c mockClient) SendOnboardingEmail(
+	clientURL string,
 	profile *eb.AttendeeProfile,
 	attendeeAddr sdk.AccAddress,
 	secret string,
 	imageUploadURL string,
 ) error {
-	redirectURI, err := makeOnboardingURI(profile, attendeeAddr, secret, imageUploadURL)
+	redirectURI, err := makeOnboardingURI(clientURL, profile, attendeeAddr, secret, imageUploadURL)
 
 	if err != nil {
 		return err
@@ -149,8 +151,8 @@ func (c mockClient) SendOnboardingEmail(
 	return nil
 }
 
-func (c mockClient) SendRecoveryEmail(profile *eb.AttendeeProfile, id int, token string) error {
-	redirectURI, err := makeRecoveryURI(id, token)
+func (c mockClient) SendRecoveryEmail(restApiURL string, profile *eb.AttendeeProfile, id int, token string) error {
+	redirectURI, err := makeRecoveryURI(restApiURL, id, token)
 
 	if err != nil {
 		return err
@@ -160,9 +162,10 @@ func (c mockClient) SendRecoveryEmail(profile *eb.AttendeeProfile, id int, token
 	return nil
 }
 
-func makeRecoveryURI(id int, token string) (string, error) {
+func makeRecoveryURI(clientURL string, id int, token string) (string, error) {
 	//baseURL, err := url.Parse("http://localhost:5000/recover")
-	baseURL, err := url.Parse("https://chain.linkedup.sfbw.io/recover")
+
+	baseURL, err := url.Parse(fmt.Sprintf("%s/recover", clientURL))
 
 	if err != nil {
 		return "", err
@@ -178,6 +181,7 @@ func makeRecoveryURI(id int, token string) (string, error) {
 }
 
 func makeOnboardingURI(
+	clientURL string,
 	profile *eb.AttendeeProfile,
 	attendeeAddr sdk.AccAddress,
 	secret string,
@@ -189,7 +193,7 @@ func makeOnboardingURI(
 		return "", err
 	}
 
-	baseURL, err := url.Parse("https://linkedup.sfbw.io/claim")
+	baseURL, err := url.Parse(fmt.Sprintf("%s/claim", clientURL))
 
 	if err != nil {
 		return "", err

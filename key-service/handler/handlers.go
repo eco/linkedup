@@ -19,7 +19,8 @@ func Router(
 	eb *eventbrite.Session,
 	mk *masterkey.MasterKey,
 	db *models.DatabaseContext,
-	mc mail.Client) http.Handler {
+	mc mail.Client,
+	clientURL string) http.Handler {
 
 	r := mux.NewRouter()
 	// IMPORTANT: you must specify an OPTIONS method matcher for the middleware to set CORS headers
@@ -27,7 +28,7 @@ func Router(
 	r.Use(rest.CorsMiddleware)
 
 	registerPing(r)
-	registerKey(r, eb, mk, db, mc)
+	registerKey(r, eb, mk, db, mc, clientURL)
 	registerIDToAddress(r)
 
 	return middleware.LogHTTP(r)

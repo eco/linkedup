@@ -15,11 +15,16 @@ import (
 	"strings"
 )
 
+const (
+	ClientURLKey = "longy-client-url"
+)
+
 func init() {
 	rootCmd.Flags().Int("port", 1337, "port to bind the rekey service")
 
 	rootCmd.Flags().String("longy-chain-id", "longychain", "chain-id of the running longy game")
 	rootCmd.Flags().String("longy-restservice", "http://localhost:1317", "scheme://host:port of the full node rest client")
+	rootCmd.Flags().String(ClientURLKey, "http://localhost:5000", "scheme://host:port of the client web app")
 
 	// using "master" as the seed
 	rootCmd.Flags().String("longy-masterkey",
@@ -55,6 +60,7 @@ var rootCmd = &cobra.Command{
 
 		longyChainID := viper.GetString("longy-chain-id")
 		longyRestURL := viper.GetString("longy-restservice")
+		longyClientURL := viper.GetString(ClientURLKey)
 
 		key, err := util.Secp256k1FromHex(viper.GetString("longy-masterkey"))
 		if err != nil {
@@ -90,7 +96,7 @@ var rootCmd = &cobra.Command{
 			return fmt.Errorf("master key: %s", err)
 		}
 
-		service := ks.NewService(ebSession, &mKey, &db, mClient)
+		service := ks.NewService(ebSession, &mKey, &db, mClient, longyClientURL)
 		service.StartHTTP(port)
 
 		return nil
