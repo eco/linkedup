@@ -14,21 +14,21 @@ var _ = Describe("Attendee Tests", func() {
 	})
 
 	It("should fail if the adding id is nil or empty", func() {
-		attendee := types.NewAttendee("asdf")
+		attendee := types.NewAttendee("asdf", false)
 		added := attendee.AddScanID(nil)
 		Expect(added).To(BeFalse())
 	})
 
 	It("should succeed if the id is not in the array", func() {
 		b := []byte{1, 2, 3}
-		attendee := types.NewAttendee("asdf")
+		attendee := types.NewAttendee("asdf", false)
 		added := attendee.AddScanID(b)
 		Expect(added).To(BeTrue())
 	})
 
 	It("should fail when id already in scan ids", func() {
 		b := []byte{1, 2, 3}
-		attendee := types.NewAttendee("asdf")
+		attendee := types.NewAttendee("asdf", false)
 		added := attendee.AddScanID(b)
 		Expect(added).To(BeTrue())
 
@@ -41,7 +41,7 @@ var _ = Describe("Attendee Tests", func() {
 		s2 := util.IDToAddress("1234")
 		id, err := types.GenScanID(s1, s2)
 		Expect(err).To(BeNil())
-		attendee := types.NewAttendee("asdf")
+		attendee := types.NewAttendee("asdf", false)
 		added := attendee.AddScanID(id)
 		Expect(added).To(BeTrue())
 
@@ -61,7 +61,7 @@ var _ = Describe("Attendee Tests", func() {
 	})
 
 	It("should return the correct tier for the attendee", func() {
-		attendee := types.NewAttendee("asdf")
+		attendee := types.NewAttendee("asdf", false)
 		Expect(attendee.GetTier()).To(Equal(types.Tier0))
 
 		attendee.Rep = types.Tier1Rep
@@ -83,7 +83,7 @@ var _ = Describe("Attendee Tests", func() {
 	})
 
 	It("should refuse to add invalid win to winnings", func() {
-		attendee := types.NewAttendee("asdf")
+		attendee := types.NewAttendee("asdf", false)
 		Expect(len(attendee.Winnings)).To(Equal(0))
 
 		w := types.Win{
@@ -96,7 +96,7 @@ var _ = Describe("Attendee Tests", func() {
 	})
 
 	It("should add valid win to winnings", func() {
-		attendee := types.NewAttendee("asdf")
+		attendee := types.NewAttendee("asdf", false)
 		Expect(len(attendee.Winnings)).To(Equal(0))
 
 		w := types.Win{
@@ -113,7 +113,7 @@ var _ = Describe("Attendee Tests", func() {
 		var win types.Win
 		var attendee types.Attendee
 		BeforeEach(func() {
-			attendee = types.NewAttendee("asdf")
+			attendee = types.NewAttendee("asdf", false)
 			win = types.Win{
 				Tier:    types.Tier1,
 				Name:    "Name and stuff",
@@ -158,5 +158,47 @@ var _ = Describe("Attendee Tests", func() {
 			Expect(attendee.ClaimWinning(win.Tier)).To(BeFalse())
 		})
 
+	})
+
+	Context("from genesis", func() {
+		It("should not be sponsor when standard ticket type", func() {
+			ga := types.GenesisAttendee{
+				ID:              "123",
+				TicketClassName: "Standard",
+				Profile:         types.GenesisProfile{},
+			}
+			a := types.NewAttendeeFromGenesis(ga)
+			Expect(a.Sponsor).To(BeFalse())
+		})
+
+		It("should be sponsor when sponsor ticket type", func() {
+			ga := types.GenesisAttendee{
+				ID:              "123",
+				TicketClassName: "Sponsors",
+				Profile:         types.GenesisProfile{},
+			}
+			a := types.NewAttendeeFromGenesis(ga)
+			Expect(a.Sponsor).To(BeTrue())
+		})
+
+		It("should be sponsor when cesc speaker ticket type", func() {
+			ga := types.GenesisAttendee{
+				ID:              "123",
+				TicketClassName: "CESC Speakers",
+				Profile:         types.GenesisProfile{},
+			}
+			a := types.NewAttendeeFromGenesis(ga)
+			Expect(a.Sponsor).To(BeTrue())
+		})
+
+		It("should be sponsor when epicenter speaker ticket type", func() {
+			ga := types.GenesisAttendee{
+				ID:              "123",
+				TicketClassName: "Epicenter Speakers",
+				Profile:         types.GenesisProfile{},
+			}
+			a := types.NewAttendeeFromGenesis(ga)
+			Expect(a.Sponsor).To(BeTrue())
+		})
 	})
 })

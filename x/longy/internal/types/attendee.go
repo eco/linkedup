@@ -6,6 +6,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/eco/longy/util"
 	"github.com/tendermint/tendermint/crypto"
+	"strings"
 )
 
 // Attendee encapsulates attendee information
@@ -29,7 +30,7 @@ type Attendee struct {
 
 // NewAttendee is the constructor for `Attendee`. New attendees default to 0 rep
 // and is unclaimed
-func NewAttendee(id string) Attendee {
+func NewAttendee(id string, sponsor bool) Attendee {
 	addr := util.IDToAddress(id)
 
 	return Attendee{
@@ -41,15 +42,15 @@ func NewAttendee(id string) Attendee {
 		Claimed:       false,
 		EncryptedInfo: []byte{},
 		ScanIDs:       []string{},
-
-		Rep: 0,
+		Sponsor:       sponsor,
+		Rep:           0,
 	}
 }
 
 // NewAttendeeFromGenesis will create an `Attendee` from `GenesisAttendee`
 //nolint:gocritic
 func NewAttendeeFromGenesis(ga GenesisAttendee) Attendee {
-	return NewAttendee(ga.ID)
+	return NewAttendee(ga.ID, IsSponsorTicket(ga.TicketClassName))
 }
 
 //AddScanID adds the new scan id if it isn't already added
@@ -115,19 +116,19 @@ func (a *Attendee) containsWinning(won *Win) bool {
 
 // GetID returns the attendee identifier
 //nolint:gocritic
-func (a Attendee) GetID() string {
+func (a *Attendee) GetID() string {
 	return a.ID
 }
 
 // GetAddress returns the deterministic address associated with the attendee
 //nolint:gocritic
-func (a Attendee) GetAddress() sdk.AccAddress {
+func (a *Attendee) GetAddress() sdk.AccAddress {
 	return a.Address
 }
 
 // GetRep returns the attendee's current rep
 //nolint:gocritic
-func (a Attendee) GetRep() uint {
+func (a *Attendee) GetRep() uint {
 	return a.Rep
 }
 
@@ -138,7 +139,7 @@ func (a *Attendee) AddRep(r uint) {
 
 // CurrentCommitment returns the current commitment associated with this attendee
 //nolint:gocritic
-func (a Attendee) CurrentCommitment() util.Commitment {
+func (a *Attendee) CurrentCommitment() util.Commitment {
 	return a.Commitment
 }
 
@@ -157,13 +158,26 @@ func (a *Attendee) ResetCommitment() {
 
 // IsClaimed indicates if this attendee is claimed
 //nolint:gocritic
-func (a Attendee) IsClaimed() bool {
+func (a *Attendee) IsClaimed() bool {
 	return a.Claimed
 }
 
 // SetClaimed will mark this attendee as claimed
 func (a *Attendee) SetClaimed() {
 	a.Claimed = true
+}
+
+//IsSponsorTicket checks to see if the ticket type is of a speaker or sponsor that gets special point bonuses
+func IsSponsorTicket(ticketType string) bool {
+	switch strings.ToLower(ticketType) {
+	case TicketSponsorNameLowerCase:
+		fallthrough
+	case TicketSpeakerCescNameLowerCase:
+		fallthrough
+	case TicketSpeakerEpicenterNameLowerCase:
+		return true
+	}
+	return false
 }
 
 //Encode encodes a hex byte array
