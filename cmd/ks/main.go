@@ -16,6 +16,7 @@ import (
 )
 
 const (
+	//ClientURLKey is the url where the web client app is hosted at
 	ClientURLKey = "longy-client-url"
 )
 

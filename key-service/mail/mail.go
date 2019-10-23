@@ -151,8 +151,8 @@ func (c mockClient) SendOnboardingEmail(
 	return nil
 }
 
-func (c mockClient) SendRecoveryEmail(restApiURL string, profile *eb.AttendeeProfile, id int, token string) error {
-	redirectURI, err := makeRecoveryURI(restApiURL, id, token)
+func (c mockClient) SendRecoveryEmail(clientURL string, profile *eb.AttendeeProfile, id int, token string) error {
+	redirectURI, err := makeRecoveryURI(clientURL, id, token)
 
 	if err != nil {
 		return err
