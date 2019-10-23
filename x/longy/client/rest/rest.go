@@ -62,6 +62,11 @@ func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, storeName string) 
 func CorsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", LinkedUpHTTPS)
+		if r.Method == http.MethodOptions {
+			//Content-Type,Referer,Sec-Fetch-Mode,User-Agent
+			w.Header().Set("Access-Control-Allow-Headers", "*")
+			return
+		}
 		next.ServeHTTP(w, r)
 	})
 }
