@@ -12,7 +12,7 @@ import (
 
 const (
 	//LinkedUpHTTPS CORS endpoint for the linked up client
-	LinkedUpHTTPS = "https://linkedup.sfbw.io/"
+	LinkedUpHTTPS = "https://linkedup.sfbw.io"
 )
 
 // RegisterRoutes - Central function to define routes that get registered by the main application
