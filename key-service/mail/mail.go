@@ -189,7 +189,7 @@ func makeOnboardingURI(
 		return "", err
 	}
 
-	baseURL, err := url.Parse("http://localhost:5000/claim")
+	baseURL, err := url.Parse("https://chain.linkedup.sfbw.io/claim")
 
 	if err != nil {
 		return "", err
