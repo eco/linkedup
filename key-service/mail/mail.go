@@ -3,8 +3,8 @@ package mail
 import (
 	"encoding/base64"
 	"encoding/json"
-	"net/url"
 	"fmt"
+	"net/url"
 	"strconv"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -161,7 +161,8 @@ func (c mockClient) SendRecoveryEmail(profile *eb.AttendeeProfile, id int, token
 }
 
 func makeRecoveryURI(id int, token string) (string, error) {
-	baseURL, err := url.Parse("http://localhost:5000/recover")
+	//baseURL, err := url.Parse("http://localhost:5000/recover")
+	baseURL, err := url.Parse("https://chain.linkedup.sfbw.io/recover")
 
 	if err != nil {
 		return "", err
