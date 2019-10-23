@@ -48,9 +48,7 @@ var _ = Describe("Signature Keeper Tests", func() {
 
 	It("should succeed when signature is valid", func() {
 		signer := crypto.NewSigner(addr, key)
-		txt := addr.String()
-		//fmt.Sprintf("%v", txt)
-		hash, err := crypto.Hash([]byte(txt))
+		hash, err := crypto.Hash(addr)
 		Expect(err).To(BeNil())
 
 		sig, err := signer.PrivKey.Sign(hash)

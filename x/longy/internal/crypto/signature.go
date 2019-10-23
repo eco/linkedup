@@ -14,12 +14,16 @@ func ValidateSig(key crypto.PubKey, address string, sig string) sdk.Error {
 		return types.ErrInvalidPublicKey("public key cannot be empty")
 	}
 
-	//accAddr, e := sdk.AccAddressFromBech32(address)
-	//if e != nil {
-	//	return sdk.ErrInvalidAddress("could not decode bech32 address")
-	//}
+	accAddr, e := sdk.AccAddressFromBech32(address)
+	if e != nil {
+		return sdk.ErrInvalidAddress("could not decode bech32 address")
+	}
+	//hexAddr := hex.EncodeToString(accAddr)
+	//fmt.Printf("hex addr : %v", hexAddr)
 
-	hash, e := Hash([]byte(address))
+	hash, e := Hash(accAddr)
+	//hexHash := hex.EncodeToString(hash)
+	//fmt.Printf("hex hash : %v", hexHash)
 	if e != nil {
 		return types.ErrHashingError("error on hashing address")
 	}
