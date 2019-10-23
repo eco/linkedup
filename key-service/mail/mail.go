@@ -163,8 +163,6 @@ func (c mockClient) SendRecoveryEmail(clientURL string, profile *eb.AttendeeProf
 }
 
 func makeRecoveryURI(clientURL string, id int, token string) (string, error) {
-	//baseURL, err := url.Parse("http://localhost:5000/recover")
-
 	baseURL, err := url.Parse(fmt.Sprintf("%s/recover", clientURL))
 
 	if err != nil {
