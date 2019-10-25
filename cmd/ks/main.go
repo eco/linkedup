@@ -15,17 +15,12 @@ import (
 	"strings"
 )
 
-const (
-	//ClientURLKey is the url where the web client app is hosted at
-	ClientURLKey = "longy-client-url"
-)
-
 func init() {
 	rootCmd.Flags().Int("port", 1337, "port to bind the rekey service")
 
 	rootCmd.Flags().String("longy-chain-id", "longychain", "chain-id of the running longy game")
 	rootCmd.Flags().String("longy-restservice", "http://localhost:1317", "scheme://host:port of the full node rest client")
-	rootCmd.Flags().String(ClientURLKey, "http://localhost:5000", "scheme://host:port of the client web app")
+	rootCmd.Flags().String("longy-app-url", "http://localhost:5000", "scheme://host:port of the client web app")
 
 	// using "master" as the seed
 	rootCmd.Flags().String("longy-masterkey",
@@ -61,7 +56,7 @@ var rootCmd = &cobra.Command{
 
 		longyChainID := viper.GetString("longy-chain-id")
 		longyRestURL := viper.GetString("longy-restservice")
-		longyClientURL := viper.GetString(ClientURLKey)
+		longyAppURL := viper.GetString("longy-app-url")
 
 		key, err := util.Secp256k1FromHex(viper.GetString("longy-masterkey"))
 		if err != nil {
@@ -77,9 +72,9 @@ var rootCmd = &cobra.Command{
 		awsCfg := session.Must(session.NewSession())
 
 		/** Mail Client **/
-		mClient, err := mail.NewMockClient()
+		mClient, err := mail.NewMockClient(longyAppURL)
 		if !mockEmail {
-			mClient, err = mail.NewSESClient(awsCfg, localstack)
+			mClient, err = mail.NewSESClient(awsCfg, localstack, longyAppURL)
 		}
 		if err != nil {
 			return fmt.Errorf("mail client: %s", err)
@@ -97,7 +92,7 @@ var rootCmd = &cobra.Command{
 			return fmt.Errorf("master key: %s", err)
 		}
 
-		service := ks.NewService(ebSession, &mKey, &db, mClient, longyClientURL)
+		service := ks.NewService(ebSession, &mKey, &db, mClient)
 		service.StartHTTP(port)
 
 		return nil

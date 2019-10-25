@@ -24,7 +24,6 @@ type Service struct {
 	masterKey  *masterkey.MasterKey
 	db         *models.DatabaseContext
 	mailClient mail.Client
-	clientURL  string
 }
 
 // NewService is the creator the the rekey-service
@@ -32,14 +31,12 @@ func NewService(
 	ebSession *eventbrite.Session,
 	key *masterkey.MasterKey,
 	db *models.DatabaseContext,
-	mc mail.Client,
-	clientURL string) Service {
+	mc mail.Client) Service {
 	return Service{
 		ebSession:  ebSession,
 		masterKey:  key,
 		db:         db,
 		mailClient: mc,
-		clientURL:  clientURL,
 	}
 }
 
@@ -47,7 +44,7 @@ func NewService(
 func (srv *Service) StartHTTP(port int) {
 	s := &http.Server{
 		Addr:    fmt.Sprintf(":%d", port),
-		Handler: handler.Router(srv.ebSession, srv.masterKey, srv.db, srv.mailClient, srv.clientURL),
+		Handler: handler.Router(srv.ebSession, srv.masterKey, srv.db, srv.mailClient),
 	}
 
 	// will block
