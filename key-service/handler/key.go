@@ -42,6 +42,7 @@ func registerKey(
 // All core logic is implemented here. If there are plans to expand this service,
 // logic (email retrieval, etc) can be lifted into http middleware to allow for better
 // composability
+//nolint: gocyclo
 func key(eb *ebSession.Session,
 	mk *masterkey.MasterKey,
 	db *models.DatabaseContext,
@@ -128,17 +129,15 @@ func key(eb *ebSession.Session,
 
 		imageUploadURL, err := db.GetImageUploadURL(strconv.Itoa(body.AttendeeID))
 		if err != nil {
-			http.Error(
-				w,
-				"failed to sign image upload URL",
-				http.StatusInternalServerError,
-			)
+			http.Error(w, "failed to sign image upload URL", http.StatusInternalServerError)
+			return
 		}
 
 		/** Send the redirect **/
 		err = mc.SendOnboardingEmail(clientURL, profile, attendeeAddress, secret, imageUploadURL)
 		if err != nil {
 			http.Error(w, "email error. try again", http.StatusInternalServerError)
+			return
 		}
 
 		w.WriteHeader(http.StatusOK)
