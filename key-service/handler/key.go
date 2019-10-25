@@ -33,11 +33,9 @@ func registerKey(
 	mc mail.Client,
 	clientURL string) {
 
-	// GET
 	r.HandleFunc("/key", key(eb, mk, db, mc, clientURL)).Methods(http.MethodPost, http.MethodOptions)
 	r.HandleFunc("/recover", keyRecover(db, eb, mc, clientURL)).Methods(http.MethodPost, http.MethodOptions)
 
-	// POST
 	r.HandleFunc("/recover/{id}/{token}", keyGetter(db)).Methods(http.MethodGet, http.MethodOptions)
 }
 
@@ -69,7 +67,7 @@ func key(eb *ebSession.Session,
 			return
 		}
 
-		/** Check if this attendee already has the info registered **/
+		/** Check if this attendee already has info registered **/
 		hasInfo, err := db.HasAttendeeInfo(body.AttendeeID)
 		if err != nil {
 			http.Error(w, "key-service down", http.StatusServiceUnavailable)
