@@ -26,12 +26,12 @@ var _ = Describe("Signature Keeper Tests", func() {
 		Expect(e).To(Not(BeNil()))
 		Expect(e.Code()).To(Equal(types.InvalidPublicKey))
 	})
-	//
-	//It("should fail when address cannot be decoded", func() {
-	//	e := crypto.ValidateSig(key.PubKey(), "notanaddress!", "")
-	//	Expect(e).To(Not(BeNil()))
-	//	Expect(e.Code()).To(Equal(sdk.CodeInvalidAddress))
-	//})
+
+	It("should fail when address cannot be decoded", func() {
+		e := crypto.ValidateSig(key.PubKey(), "notanaddress!", "")
+		Expect(e).To(Not(BeNil()))
+		Expect(e.Code()).To(Equal(sdk.CodeInvalidAddress))
+	})
 
 	It("should fail when signature does not match the key", func() {
 		e := crypto.ValidateSig(key.PubKey(), addr.String(), "fakesig")
@@ -48,14 +48,12 @@ var _ = Describe("Signature Keeper Tests", func() {
 
 	It("should succeed when signature is valid", func() {
 		signer := crypto.NewSigner(addr, key)
-		hash, err := crypto.Hash(addr)
-		Expect(err).To(BeNil())
-
-		sig, err := signer.PrivKey.Sign(hash)
+		addrString := addr.String()
+		sig, err := signer.PrivKey.Sign([]byte(addrString))
 		Expect(err).To(BeNil())
 
 		sigEncoded := hex.EncodeToString(sig)
-		err = crypto.ValidateSig(key.PubKey(), addr.String(), sigEncoded)
+		err = crypto.ValidateSig(key.PubKey(), addrString, sigEncoded)
 		Expect(err).To(BeNil())
 	})
 })
