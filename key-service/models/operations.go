@@ -2,6 +2,7 @@ package models
 
 import (
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 
@@ -17,7 +18,7 @@ var log = logrus.WithField("module", "key-storage")
 // object may be returned.
 //
 // The application will crash if unmarshalling fails.
-func getInfoForID(db *DatabaseContext, id int) []byte {
+func getInfoForID(db *DatabaseContext, id int) ([]byte, error) {
 	result, err := db.db.GetItem(&dynamodb.GetItemInput{
 		TableName: aws.String(infoTableName),
 		Key: map[string]*dynamodb.AttributeValue{
@@ -26,10 +27,9 @@ func getInfoForID(db *DatabaseContext, id int) []byte {
 			},
 		},
 	})
-
 	if err != nil {
 		log.WithError(err).WithField("id", id).Info("failed key retrieval")
-		return nil
+		return nil, err
 	}
 
 	var r storedInfo
@@ -38,7 +38,22 @@ func getInfoForID(db *DatabaseContext, id int) []byte {
 		panic(fmt.Sprintf("Failed to unmarshal storedInfo: %v", err))
 	}
 
-	return r.Data
+	return r.Data, nil
+}
+
+// checks if an entry is present for this id but will lift network errors
+func hasInfoForID(db *DatabaseContext, id int) (bool, error) {
+	_, err := getInfoForID(db, id)
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok && aerr.Code() == dynamodb.ErrCodeResourceNotFoundException {
+			return false, nil
+		}
+
+		// we still return true in case as there was some other aws error
+		return true, err
+	}
+
+	return true, nil
 }
 
 // getAuthTokenForID retrieves the auth record corresponding to the given

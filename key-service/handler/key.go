@@ -33,9 +33,11 @@ func registerKey(
 	mc mail.Client,
 	clientURL string) {
 
+	// GET
 	r.HandleFunc("/key", key(eb, mk, db, mc, clientURL)).Methods(http.MethodPost, http.MethodOptions)
 	r.HandleFunc("/recover", keyRecover(db, eb, mc, clientURL)).Methods(http.MethodPost, http.MethodOptions)
 
+	// POST
 	r.HandleFunc("/recover/{id}/{token}", keyGetter(db)).Methods(http.MethodGet, http.MethodOptions)
 }
 
@@ -64,6 +66,16 @@ func key(eb *ebSession.Session,
 		if err != nil {
 			errMsg := fmt.Sprintf("bad json request body: %s", err)
 			http.Error(w, errMsg, http.StatusBadRequest)
+			return
+		}
+
+		/** Check if this attendee already has the info registered **/
+		hasInfo, err := db.HasAttendeeInfo(body.AttendeeID)
+		if err != nil {
+			http.Error(w, "key-service down", http.StatusServiceUnavailable)
+			return
+		} else if hasInfo {
+			http.Error(w, "attendee info already stored", http.StatusConflict)
 			return
 		}
 
@@ -192,13 +204,16 @@ func keyGetter(db *models.DatabaseContext) http.HandlerFunc {
 			return
 		}
 
-		// checks passed
-		bz := db.GetAttendeeInfo(id)
-		if bz == nil {
-			w.WriteHeader(http.StatusNotFound)
-		} else {
+		// authentication checks passed
+		bz, err := db.GetAttendeeInfo(id)
+		switch {
+		case err != nil:
+			http.Error(w, "key-service down", http.StatusServiceUnavailable)
+		case bz == nil:
+			http.Error(w, "not found", http.StatusNotFound)
+		default:
 			w.WriteHeader(http.StatusOK)
+			w.Write(bz) //nolint
 		}
-		_, _ = w.Write(bz)
 	}
 }
