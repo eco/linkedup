@@ -2,18 +2,16 @@ package main
 
 import (
 	"encoding/json"
-	app "github.com/eco/longy"
-	"github.com/eco/longy/x/longy/client/cli/genesis"
-	"io"
-
 	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/cosmos/cosmos-sdk/x/genaccounts"
 	genaccscli "github.com/cosmos/cosmos-sdk/x/genaccounts/client/cli"
 	"github.com/cosmos/cosmos-sdk/x/staking"
-
+	app "github.com/eco/longy"
+	"github.com/eco/longy/x/longy/client/cli/genesis"
 	"github.com/spf13/cobra"
 	"github.com/tendermint/tendermint/libs/cli"
 	"github.com/tendermint/tendermint/libs/log"
+	"io"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
