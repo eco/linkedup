@@ -77,14 +77,14 @@ func exportAppStateAndTMValidators(
 	logger log.Logger, db dbm.DB, traceStore io.Writer, height int64, forZeroHeight bool, jailWhiteList []string,
 ) (json.RawMessage, []tmtypes.GenesisValidator, error) {
 
-	nsApp := app.NewLongyApp(logger, db)
+	longyApp := app.NewLongyApp(logger, db)
 	if height != -1 {
-		err := nsApp.LoadHeight(height)
+		err := longyApp.LoadHeight(height)
 		if err != nil {
 			return nil, nil, err
 		}
-		return nsApp.ExportAppStateAndValidators(forZeroHeight, jailWhiteList)
+		return longyApp.ExportAppStateAndValidators(forZeroHeight, jailWhiteList)
 	}
 
-	return nsApp.ExportAppStateAndValidators(forZeroHeight, jailWhiteList)
+	return longyApp.ExportAppStateAndValidators(forZeroHeight, jailWhiteList)
 }

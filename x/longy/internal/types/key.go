@@ -65,12 +65,21 @@ func BonusKey() []byte {
 
 //IsAttendeeKey checks the key to see if its for an attendee by checking it starts with the AttendeePrefix
 func IsAttendeeKey(key []byte) bool {
-	l := len(AttendeePrefix)
+	return isKeyOf(key, AttendeePrefix)
+}
+
+//IsScanKey checks the key to see if its for a scan by checking it starts with the ScanPrefix
+func IsScanKey(key []byte) bool {
+	return isKeyOf(key, ScanPrefix)
+}
+
+func isKeyOf(key []byte, prefix []byte) bool {
+	l := len(prefix)
 	if len(key) < l {
 		return false
 	}
 
-	return bytes.Equal(key[:l], AttendeePrefix)
+	return bytes.Equal(key[:l], prefix)
 }
 
 //PrefixKey adds prifix bits to the key

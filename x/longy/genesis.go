@@ -19,6 +19,22 @@ func DefaultGenesisState() GenesisState {
 	return GenesisState{KeyService: GenesisServiceKey{}, Attendees: GenesisAttendees{}}
 }
 
+//NewGenesisState returns a genesis object of the state given the input params
+func NewGenesisState(attendees []types.Attendee, scans []types.Scan, prizes types.GenesisPrizes) GenesisState {
+	ga := GenesisAttendees{}
+	//nolint:gocritic
+	for _, a := range attendees {
+
+		g := GenesisAttendee{
+			ID:              a.ID,
+			TicketClassName: "",
+		}
+		ga = append(ga, g)
+	}
+
+	return GenesisState{KeyService: GenesisServiceKey{}, Attendees: ga}
+}
+
 // ValidateGenesis validates that the passed genesis state is valid
 //nolint:gocritic
 func ValidateGenesis(data GenesisState) error {
@@ -68,16 +84,18 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, state GenesisState) {
 		Denom:  ModuleName,
 		Amount: amount,
 	}}
+
 	for _, a := range state.Attendees {
 		attendee := types.NewAttendeeFromGenesis(a)
 
-		account := accountKeeper.NewAccountWithAddress(ctx, attendee.GetAddress())
-		accountKeeper.SetAccount(ctx, account)
-		_, e := coinKeeper.AddCoins(ctx, account.GetAddress(), coins)
-		if e != nil {
-			panic(e)
+		if accountKeeper.GetAccount(ctx, attendee.GetAddress()) == nil {
+			account := accountKeeper.NewAccountWithAddress(ctx, attendee.GetAddress())
+			accountKeeper.SetAccount(ctx, account)
+			_, e := coinKeeper.AddCoins(ctx, account.GetAddress(), coins)
+			if e != nil {
+				panic(e)
+			}
 		}
-		//attendee.Address = account.GetAddress()
 		k.SetAttendee(ctx, &attendee)
 	}
 
@@ -85,4 +103,13 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, state GenesisState) {
 	for i := range state.Prizes {
 		k.SetPrize(ctx, &state.Prizes[i])
 	}
+}
+
+// ExportGenesis returns a GenesisState for a given context and keeper
+//nolint:gocritic
+func ExportGenesis(ctx sdk.Context, k Keeper) GenesisState {
+	attendees := k.GetAllAttendees(ctx)
+	scans := k.GetAllScans(ctx)
+	prizes, _ := k.GetPrizes(ctx)
+	return NewGenesisState(attendees, scans, prizes)
 }
