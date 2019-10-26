@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws/session"
 	ks "github.com/eco/longy/key-service"
+	ksCfg "github.com/eco/longy/key-service/config"
 	eb "github.com/eco/longy/key-service/eventbrite"
 	"github.com/eco/longy/key-service/mail"
 	mk "github.com/eco/longy/key-service/masterkey"
@@ -55,8 +56,9 @@ var rootCmd = &cobra.Command{
 		mockEmail := localstack || viper.GetBool("email-mock")
 
 		longyChainID := viper.GetString("longy-chain-id")
-		longyRestURL := viper.GetString("longy-restservice")
 		longyAppURL := viper.GetString("longy-app-url")
+		longyRestURL := viper.GetString("longy-restservice")
+		ksCfg.SetLongyRestURL(longyRestURL)
 
 		key, err := util.Secp256k1FromHex(viper.GetString("longy-masterkey"))
 		if err != nil {
@@ -87,7 +89,7 @@ var rootCmd = &cobra.Command{
 		}
 
 		/** Master key session **/
-		mKey, err := mk.NewMasterKey(key, longyRestURL, longyChainID)
+		mKey, err := mk.NewMasterKey(key, longyChainID)
 		if err != nil {
 			return fmt.Errorf("master key: %s", err)
 		}
