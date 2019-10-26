@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/client"
@@ -8,7 +9,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"time"
-	"fmt"
 )
 
 const (
@@ -22,8 +22,8 @@ var (
 
 // DatabaseContext carries context needed to interact with the database.
 type DatabaseContext struct {
-	db *dynamodb.DynamoDB
-	s3 *s3.S3
+	db            *dynamodb.DynamoDB
+	s3            *s3.S3
 	contentBucket string
 }
 
@@ -52,7 +52,7 @@ func NewDatabaseContextWithCfg(cfg client.ConfigProvider, localstack bool, bucke
 		context.s3 = s3.New(
 			cfg,
 			&aws.Config{
-				Endpoint: aws.String("http://localstack:4572"),
+				Endpoint:         aws.String("http://localstack:4572"),
 				S3ForcePathStyle: &forceS3PathStyle,
 			},
 		)
@@ -149,8 +149,13 @@ func (db DatabaseContext) StoreAuthToken(id int, token string) bool {
 /** Retrieval **/
 
 // GetAttendeeInfo -
-func (db DatabaseContext) GetAttendeeInfo(id int) []byte {
+func (db DatabaseContext) GetAttendeeInfo(id int) ([]byte, error) {
 	return getInfoForID(&db, id)
+}
+
+// HasAttendeeInfo -
+func (db DatabaseContext) HasAttendeeInfo(id int) (bool, error) {
+	return hasInfoForID(&db, id)
 }
 
 // GetAuthToken -
