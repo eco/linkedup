@@ -84,7 +84,7 @@ var _ = Describe("Winnings Querier Tests", func() {
 			compare(a.Winnings[1], winnings[1])
 		})
 
-		It("should not return claimed winnings for an attendee", func() {
+		It("should return claimed and unclaimed winnings for an attendee", func() {
 			a := utils.AddAttendeeToKeeper(ctx, &keeper, qr1, true, false)
 			err := keeper.AddRep(ctx, &a, types.Tier1Rep)
 			Expect(err).To(BeNil())
@@ -102,8 +102,9 @@ var _ = Describe("Winnings Querier Tests", func() {
 
 			winnings, err := getWinnings(a.Address.String())
 			Expect(err).To(BeNil())
-			Expect(len(winnings)).To(Equal(1))
-			compare(a.Winnings[1], winnings[0])
+			Expect(len(winnings)).To(Equal(2))
+			compare(a.Winnings[0], winnings[0])
+			compare(a.Winnings[1], winnings[1])
 		})
 
 	})

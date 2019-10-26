@@ -20,14 +20,7 @@ func queryWinnings(ctx sdk.Context, k keeper.Keeper, path []string) (res []byte,
 	}
 
 	winnings := attendee.Winnings
-	ws := make([]types.Win, 0, len(attendee.Winnings))
-	for i := range winnings {
-		if !winnings[i].Claimed {
-			ws = append(ws, winnings[i])
-		}
-	}
-
-	res, e = codec.MarshalJSONIndent(k.Cdc, ws)
+	res, e = codec.MarshalJSONIndent(k.Cdc, winnings)
 
 	if e != nil {
 		panic("could not marshal result to JSON")
