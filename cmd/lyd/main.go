@@ -53,8 +53,10 @@ func main() {
 		genesis.AddGenesisAttendeesCmd(ctx, cdc),
 		// AddGenesisPrizesCmd allows users to add the list of prizes and their quantity for the event
 		genesis.AddGenesisPrizesCmd(ctx, cdc),
-
+		// AddSetGenesisServiceCmd set the service account that we use for our redemptions and key-hosting
 		genesis.AddSetGenesisServiceCmd(ctx, cdc),
+		// ConsensusConfigCmd sets the consensus configurations file for the node to quicken block times
+		genesis.ConsensusConfigCmd(ctx, cdc),
 	)
 
 	server.AddCommands(ctx, cdc, rootCmd, newApp, exportAppStateAndTMValidators)

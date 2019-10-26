@@ -8,9 +8,6 @@ import (
 	"github.com/eco/longy/x/longy"
 	"github.com/eco/longy/x/longy/internal/types"
 	"github.com/spf13/cobra"
-	cfg "github.com/tendermint/tendermint/config"
-	"path/filepath"
-	"time"
 )
 
 // AddGenesisPrizesCmd returns add-genesis-prizes cobra Command. Allows users to add the list of prizes
@@ -20,23 +17,11 @@ func AddGenesisPrizesCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
 		Use:   "add-genesis-prizes",
 		Short: "Add genesis prizes to genesis.json",
 		RunE: func(_ *cobra.Command, args []string) error {
-			setConsensusState(ctx)
-			cfg.WriteConfigFile(filepath.Join(ctx.Config.RootDir, "config", "config.toml"), ctx.Config)
 			return addGenesisPrizes(ctx, cdc)
 		},
 	}
 
 	return cmd
-}
-func setConsensusState(ctx *server.Context) {
-	con := ctx.Config.Consensus
-	con.TimeoutPropose = 100 * time.Millisecond
-	con.TimeoutProposeDelta = 100 * time.Millisecond
-	con.TimeoutPrevote = 100 * time.Millisecond
-	con.TimeoutPrevoteDelta = 100 * time.Millisecond
-	con.TimeoutPrecommit = 100 * time.Millisecond
-	con.TimeoutPrecommitDelta = 100 * time.Millisecond
-	con.TimeoutCommit = 500 * time.Millisecond
 }
 
 // addGenesisPrizes adds the conference prizes to the genesis file

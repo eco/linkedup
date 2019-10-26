@@ -34,6 +34,9 @@ fi
 # Generate the genesis prizes from the event
 ../bin/lyd add-genesis-prizes
 
+# Sets the consensus configurations file for the node to quicken block times
+../bin/lyd consensus-config
+
 # Configure your CLI to eliminate need for chain-id flag
 ../bin/lycli config chain-id longychain
 ../bin/lycli config output json
