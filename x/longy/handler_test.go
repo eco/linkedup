@@ -125,6 +125,12 @@ var _ = Describe("Longy Handler Tests", func() {
 			}
 			res := handler(ctx, keyMsg)
 			Expect(res.IsOK()).Should(BeTrue())
+
+			//set prizes since they can move tiers on claim for the beta testing
+			prizes := types.GetGenesisPrizes()
+			for i := range prizes {
+				keeper.SetPrize(ctx, &prizes[i])
+			}
 		})
 
 		It("cannot key again", func() {
