@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -14,8 +15,54 @@ import (
 	longyCfg "github.com/eco/longy/key-service/config"
 )
 
-var netClient = &http.Client{
-	Timeout: 10 * time.Second,
+var (
+	netClient = &http.Client{
+		Timeout: 10 * time.Second,
+	}
+)
+
+// IsAttendeeClaimed -
+func IsAttendeeClaimed(id string) (bool, error) {
+	restURL := longyCfg.LongyRestURL()
+	reqURL := restURL + fmt.Sprintf("/longy/attendees/%s/claimed", id)
+	resp, err := netClient.Get(reqURL)
+	if err != nil {
+		return false, err
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return false, err
+	}
+
+	claimed, err := strconv.ParseBool(string(body))
+	if err != nil {
+		return false, fmt.Errorf("unexpected attendee claimed response, %s", err)
+	}
+
+	return claimed, nil
+}
+
+// IsAttendeeKeyed -
+func IsAttendeeKeyed(id string) (bool, error) {
+	restURL := longyCfg.LongyRestURL()
+	reqURL := restURL + fmt.Sprintf("/longy/attendees/%s/keyed", id)
+	resp, err := netClient.Get(reqURL)
+	if err != nil {
+		return false, err
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return false, err
+	}
+
+	keyed, err := strconv.ParseBool(string(body))
+	if err != nil {
+		return false, fmt.Errorf("unexpected attendee keyed response, %s", err)
+	}
+
+	return keyed, nil
 }
 
 // GetAccount -
@@ -31,15 +78,17 @@ func GetAccount(addr sdk.AccAddress) (auth.Account, error) {
 	return parseAccountFromBody(resp.Body)
 }
 
-// BroadcastAuthTx -
-func BroadcastAuthTx(tx auth.StdTx) (*sdk.TxResponse, error) {
+// BroadcastAuthTx - mode = "sync|async|block"
+func BroadcastAuthTx(tx auth.StdTx, mode string) (*sdk.TxResponse, error) {
+	if mode != "sync" && mode != "async" && mode != "block" {
+		return nil, fmt.Errorf("incorrect broadcast mode")
+	}
 	restURL := longyCfg.LongyRestURL()
 	reqURL := restURL + "/longy/txs"
-
 	body := struct {
 		Tx   auth.StdTx `json:"tx"`
 		Mode string     `json:"mode"`
-	}{Tx: tx, Mode: "block"}
+	}{Tx: tx, Mode: mode}
 
 	bz, err := json.Marshal(body)
 	if err != nil {

@@ -92,7 +92,7 @@ func (mk *MasterKey) SendKeyTransaction(
 	// create and broadcast the transaction
 	keyMsg := longy.NewMsgKey(attendeeAddr, mk.address, newPublicKey, commitment)
 	tx := mk.createKeyTx(keyMsg)
-	res, err := longyClnt.BroadcastAuthTx(*tx)
+	res, err := longyClnt.BroadcastAuthTx(*tx, "block")
 	if err != nil { // nolint
 		log.WithError(err).Info("failed transaction submission")
 	} else {
