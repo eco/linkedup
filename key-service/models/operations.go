@@ -31,6 +31,9 @@ func getInfoForID(db *DatabaseContext, id int) ([]byte, error) {
 		log.WithError(err).WithField("id", id).Info("failed key retrieval")
 		return nil, err
 	}
+	if result == nil {
+		return nil, nil
+	}
 
 	var r storedInfo
 	err = dynamodbattribute.UnmarshalMap(result.Item, &r)
@@ -50,10 +53,12 @@ func hasInfoForID(db *DatabaseContext, id int) (bool, error) {
 		}
 
 		// we still return true in case as there was some other aws error
+		// no way to determine that the database does not have information
+		// for this id
 		return true, err
 	}
 
-	return true, nil
+	return false, nil
 }
 
 // getAuthTokenForID retrieves the auth record corresponding to the given

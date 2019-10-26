@@ -32,9 +32,12 @@ func registerKey(
 	db *models.DatabaseContext,
 	mc mail.Client) {
 
+	// POST
 	r.HandleFunc("/key", key(eb, mk, db, mc)).Methods(http.MethodPost, http.MethodOptions)
+	r.HandleFunc("/key/retry", keyRetry(db, mk, mc)).Methods(http.MethodPost, http.MethodOptions)
 	r.HandleFunc("/recover", keyRecover(db, eb, mc)).Methods(http.MethodPost, http.MethodOptions)
 
+	// GET
 	r.HandleFunc("/recover/{id}/{token}", keyGetter(db)).Methods(http.MethodGet, http.MethodOptions)
 }
 
@@ -63,6 +66,12 @@ func key(eb *ebSession.Session,
 		if err != nil {
 			errMsg := fmt.Sprintf("bad json request body: %s", err)
 			http.Error(w, errMsg, http.StatusBadRequest)
+			return
+		}
+
+		/** Check if this attendee is in eventbrite **/
+		if found := eb.HasAttendeeID(body.AttendeeID); !found {
+			http.Error(w, "non-existent id", http.StatusNotFound)
 			return
 		}
 
@@ -100,22 +109,18 @@ func key(eb *ebSession.Session,
 		}
 		bz, err := json.Marshal(info)
 		if err != nil {
-			log.WithError(err).WithField("data", info).
-				Error("marshaling attendee info")
-			// this is a server side error that should be covered. 500
+			log.WithError(err).WithField("data", info).Error("marshaling attendee info")
 			http.Error(w, "key storage service down", http.StatusInternalServerError)
 			return
 		}
-		ok = db.StoreAttendeeInfo(body.AttendeeID, bz)
-		if !ok {
+		if ok := db.StoreAttendeeInfo(body.AttendeeID, bz); !ok {
 			http.Error(w, "key storage service down", http.StatusServiceUnavailable)
 			return
 		}
 
 		/** Construct the secret for this and send the key transaction **/
 		secret, commitment := util.CreateCommitment()
-		err = mk.SendKeyTransaction(attendeeAddress, privKey.PubKey(), commitment)
-		if err != nil {
+		if err := mk.SendKeyTransaction(attendeeAddress, privKey.PubKey(), commitment); err != nil {
 			if err == masterkey.ErrAlreadyKeyed {
 				http.Error(w, "id has already been keyed", http.StatusUnauthorized)
 			} else {
@@ -139,6 +144,24 @@ func key(eb *ebSession.Session,
 		}
 
 		w.WriteHeader(http.StatusOK)
+	}
+}
+
+func keyRetry(db *models.DatabaseContext, mk *masterkey.MasterKey, mc mail.Client) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// read in the badge id from the request body
+		body, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			http.Error(w, "unable to read request body", http.StatusBadRequest)
+			return
+		}
+		_, err := strconv.Atoi(string(body))
+		if err != nil || id < 0 {
+			http.Error(w, "body expected to be a positive integer denoting the attendee id", http.StatusBadRequest)
+			return
+		}
+
+		//TODO
 	}
 }
 

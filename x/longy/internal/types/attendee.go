@@ -156,6 +156,11 @@ func (a *Attendee) ResetCommitment() {
 	a.Commitment = nil
 }
 
+// IsKeyed indicates if this attendee is key'd yet
+func (a *Attendee) IsKeyed() bool {
+	return a.PubKey == nil || len(a.PubKey.Bytes()) == 0
+}
+
 // IsClaimed indicates if this attendee is claimed
 //nolint:gocritic
 func (a *Attendee) IsClaimed() bool {
