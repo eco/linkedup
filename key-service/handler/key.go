@@ -41,6 +41,7 @@ func registerKey(
 // All core logic is implemented here. If there are plans to expand this service,
 // logic (email retrieval, etc) can be lifted into http middleware to allow for better
 // composability
+//nolint: gocyclo
 func key(eb *ebSession.Session,
 	mk *masterkey.MasterKey,
 	db *models.DatabaseContext,
@@ -62,6 +63,16 @@ func key(eb *ebSession.Session,
 		if err != nil {
 			errMsg := fmt.Sprintf("bad json request body: %s", err)
 			http.Error(w, errMsg, http.StatusBadRequest)
+			return
+		}
+
+		/** Check if this attendee already has info registered **/
+		hasInfo, err := db.HasAttendeeInfo(body.AttendeeID)
+		if err != nil {
+			http.Error(w, "key-service down", http.StatusServiceUnavailable)
+			return
+		} else if hasInfo {
+			http.Error(w, "attendee info already stored", http.StatusConflict)
 			return
 		}
 
@@ -116,17 +127,15 @@ func key(eb *ebSession.Session,
 
 		imageUploadURL, err := db.GetImageUploadURL(strconv.Itoa(body.AttendeeID))
 		if err != nil {
-			http.Error(
-				w,
-				"failed to sign image upload URL",
-				http.StatusInternalServerError,
-			)
+			http.Error(w, "failed to sign image upload URL", http.StatusInternalServerError)
+			return
 		}
 
 		/** Send the redirect **/
 		err = mc.SendOnboardingEmail(profile, attendeeAddress, secret, imageUploadURL)
 		if err != nil {
 			http.Error(w, "email error. try again", http.StatusInternalServerError)
+			return
 		}
 
 		w.WriteHeader(http.StatusOK)
@@ -190,13 +199,16 @@ func keyGetter(db *models.DatabaseContext) http.HandlerFunc {
 			return
 		}
 
-		// checks passed
-		bz := db.GetAttendeeInfo(id)
-		if bz == nil {
-			w.WriteHeader(http.StatusNotFound)
-		} else {
+		// authentication checks passed
+		bz, err := db.GetAttendeeInfo(id)
+		switch {
+		case err != nil:
+			http.Error(w, "key-service down", http.StatusServiceUnavailable)
+		case bz == nil:
+			http.Error(w, "not found", http.StatusNotFound)
+		default:
 			w.WriteHeader(http.StatusOK)
+			w.Write(bz) //nolint
 		}
-		_, _ = w.Write(bz)
 	}
 }

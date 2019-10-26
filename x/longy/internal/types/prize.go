@@ -14,11 +14,11 @@ const (
 	ShareSponsorAwardPoints uint = 6
 
 	//Tier is the rep needed to be in that tier level
-	Tier1Rep uint = 20
-	Tier2Rep uint = 50
-	Tier3Rep uint = 100
-	Tier4Rep uint = 350
-	Tier5Rep uint = 400
+	Tier1Rep uint = 5  //20
+	Tier2Rep uint = 9  //50
+	Tier3Rep uint = 14 //100
+	Tier4Rep uint = 18 //350
+	Tier5Rep uint = 22 //400
 )
 
 //nolint:golint

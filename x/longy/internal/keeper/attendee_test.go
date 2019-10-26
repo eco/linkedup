@@ -87,6 +87,12 @@ var _ = Describe("Attendee Keeper Tests", func() {
 				BeforeEach(func() {
 					scan.Accepted = true
 					keeper.SetScan(ctx, scan)
+
+					//set prizes since they can move tiers on claim for the beta testing
+					prizes := types.GetGenesisPrizes()
+					for i := range prizes {
+						keeper.SetPrize(ctx, &prizes[i])
+					}
 				})
 
 				It("should succeed to award scan points to attendees", func() {
