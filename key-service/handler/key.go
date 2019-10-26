@@ -66,15 +66,17 @@ func key(eb *ebSession.Session,
 			return
 		}
 
-		/** Check if this attendee already has info registered **/
-		hasInfo, err := db.HasAttendeeInfo(body.AttendeeID)
-		if err != nil {
-			http.Error(w, "key-service down", http.StatusServiceUnavailable)
-			return
-		} else if hasInfo {
-			http.Error(w, "attendee info already stored", http.StatusConflict)
-			return
-		}
+		/*
+			Check if this attendee already has info registered
+			hasInfo, err := db.HasAttendeeInfo(body.AttendeeID)
+			if err != nil {
+				http.Error(w, "key-service down", http.StatusServiceUnavailable)
+				return
+			} else if hasInfo {
+				http.Error(w, "attendee info already stored", http.StatusConflict)
+				return
+			}
+		*/
 
 		/** Attendee information + their their new private key **/
 		privKey, err := util.Secp256k1FromHex(body.CosmosPrivateKey)
