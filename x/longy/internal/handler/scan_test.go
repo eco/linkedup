@@ -62,6 +62,12 @@ var _ = Describe("Scan Handler Tests", func() {
 			createScan(qr1, qr2, sender, receiver, nil, false)
 			inspectScan(sender, receiver, 0, 0, false)
 			data = []byte("asdfasdfa")
+
+			//set prizes since they can move tiers on claim for the beta testing
+			prizes := types.GetGenesisPrizes()
+			for i := range prizes {
+				keeper.SetPrize(ctx, &prizes[i])
+			}
 		})
 
 		It("should add info for s1 without increment points", func() {
