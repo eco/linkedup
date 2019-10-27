@@ -20,20 +20,21 @@ func (k *Keeper) IsServiceAccount(ctx sdk.Context, addr sdk.Address) bool {
 
 //GetService retrieves the service account and returns it
 //nolint:gocritic
-func (k *Keeper) GetService(ctx sdk.Context) *types.GenesisService {
+func (k *Keeper) GetService(ctx sdk.Context) types.GenesisService {
 	key := types.ServiceKey()
 	bz, err := k.Get(ctx, key)
 	if err != nil {
-		return nil
+		return types.GenesisService{}
 	}
 	address := sdk.AccAddress(bz)
 
 	serviceAccount := k.accountKeeper.GetAccount(ctx, address)
 	if serviceAccount == nil {
-		return nil
+		return types.GenesisService{}
+
 	}
 
-	return &types.GenesisService{
+	return types.GenesisService{
 		Address: serviceAccount.GetAddress(),
 		PubKey:  serviceAccount.GetPubKey(),
 	}

@@ -14,7 +14,6 @@ import (
 
 var _ = Describe("Longy Handler Tests", func() {
 	var handler sdk.Handler
-	var keeper longy.Keeper
 	var addr sdk.AccAddress
 	var masterAddr = util.IDToAddress("master")
 	BeforeEach(func() {
@@ -24,9 +23,6 @@ var _ = Describe("Longy Handler Tests", func() {
 		 */
 		BeforeTestRun()
 		addr = util.IDToAddress("1")
-
-		keeper = simApp.LongyKeeper
-		Expect(keeper).ToNot(BeNil())
 
 		handler = longy.NewHandler(keeper)
 		Expect(handler).ToNot(BeNil())

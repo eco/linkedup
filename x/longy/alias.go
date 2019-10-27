@@ -65,9 +65,6 @@ type (
 	// GenesisPrizes is the array of prizes for the event
 	GenesisPrizes = types.GenesisPrizes
 
-	// GenesisAttendee is the attendee for the genesis file
-	GenesisAttendee = types.Attendee
-
 	// GenesisService is the genesis type for the service account
 	GenesisService = types.GenesisService
 )

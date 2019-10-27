@@ -17,7 +17,8 @@ type GenesisState struct {
 
 // DefaultGenesisState returns the default genesis struct for the longy module
 func DefaultGenesisState() GenesisState {
-	return GenesisState{KeyService: GenesisService{}, Attendees: GenesisAttendees{}}
+	return GenesisState{KeyService: GenesisService{}, Attendees: GenesisAttendees{},
+		Scans: GenesisScans{}, Prizes: GenesisPrizes{}}
 }
 
 //NewGenesisState returns a genesis object of the state given the input params
@@ -35,6 +36,10 @@ func ValidateGenesis(data GenesisState) error {
 
 	if data.Attendees == nil {
 		return types.ErrGenesisAttendeesEmpty("empty genesis attendees")
+	}
+
+	if data.Prizes == nil {
+		return types.ErrGenesisPrizesEmpty("empty genesis prizes")
 	}
 
 	var seenIds = make(map[string]bool)
@@ -55,10 +60,14 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, state GenesisState) {
 	coinKeeper := k.CoinKeeper()
 
 	// set the master service account
-	serviceAccount := accountKeeper.NewAccountWithAddress(ctx, state.KeyService.Address)
+	serviceAccount := accountKeeper.GetAccount(ctx, state.KeyService.Address)
 	if serviceAccount == nil {
-		panic(types.ErrMasterAccountNotSet("master account must be set in genesis"))
+		serviceAccount = accountKeeper.NewAccountWithAddress(ctx, state.KeyService.Address)
+		if serviceAccount == nil {
+			panic(types.ErrServiceAccountNotSet("service account must be set in genesis"))
+		}
 	}
+
 	err := serviceAccount.SetPubKey(state.KeyService.PubKey) //nolint
 	if err != nil {
 		panic(err)
@@ -102,5 +111,5 @@ func ExportGenesis(ctx sdk.Context, k Keeper) GenesisState {
 	attendees := k.GetAllAttendees(ctx)
 	scans := k.GetAllScans(ctx)
 	prizes, _ := k.GetPrizes(ctx)
-	return NewGenesisState(*service, attendees, scans, prizes)
+	return NewGenesisState(service, attendees, scans, prizes)
 }

@@ -63,7 +63,9 @@ var _ = Describe("Service Key Keeper Tests", func() {
 
 	It("should fail to return a service account when not set", func() {
 		service := keeper.GetService(ctx)
-		Expect(service).To(BeNil())
+		Expect(service).ToNot(BeNil())
+		Expect(service.Address.Empty()).To(BeTrue())
+		Expect(service.PubKey).To(BeNil())
 	})
 
 	It("should fail to return a service account when not set", func() {
