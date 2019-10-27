@@ -21,7 +21,7 @@ func init() {
 
 	rootCmd.Flags().String("longy-chain-id", "longychain", "chain-id of the running longy game")
 	rootCmd.Flags().String("longy-restservice", "http://localhost:1317", "scheme://host:port of the full node rest client")
-	rootCmd.Flags().String("longy-app-url", "http://localhost:5000", "scheme://host:port of the client web app")
+	rootCmd.Flags().String("longy-app-url", "http://localhost:5000", "scheme://host of the client web app")
 
 	// using "master" as the seed
 	rootCmd.Flags().String("longy-masterkey",
