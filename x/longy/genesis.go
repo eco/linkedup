@@ -11,6 +11,7 @@ import (
 type GenesisState struct {
 	KeyService GenesisServiceKey `json:"key_service"`
 	Attendees  GenesisAttendees  `json:"attendees"`
+	Scans      GenesisScans      `json:"scans"`
 	Prizes     GenesisPrizes     `json:"prizes"`
 }
 
@@ -21,18 +22,8 @@ func DefaultGenesisState() GenesisState {
 
 //NewGenesisState returns a genesis object of the state given the input params
 func NewGenesisState(attendees []types.Attendee, scans []types.Scan, prizes types.GenesisPrizes) GenesisState {
-	ga := GenesisAttendees{}
-	//nolint:gocritic
-	for _, a := range attendees {
 
-		g := GenesisAttendee{
-			ID:              a.ID,
-			TicketClassName: "",
-		}
-		ga = append(ga, g)
-	}
-
-	return GenesisState{KeyService: GenesisServiceKey{}, Attendees: ga}
+	return GenesisState{KeyService: GenesisServiceKey{}, Attendees: attendees}
 }
 
 // ValidateGenesis validates that the passed genesis state is valid
@@ -85,18 +76,17 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, state GenesisState) {
 		Amount: amount,
 	}}
 
-	for _, a := range state.Attendees {
-		attendee := types.NewAttendeeFromGenesis(a)
-
-		if accountKeeper.GetAccount(ctx, attendee.GetAddress()) == nil {
-			account := accountKeeper.NewAccountWithAddress(ctx, attendee.GetAddress())
+	for i := range state.Attendees {
+		a := &state.Attendees[i]
+		if accountKeeper.GetAccount(ctx, a.GetAddress()) == nil {
+			account := accountKeeper.NewAccountWithAddress(ctx, a.GetAddress())
 			accountKeeper.SetAccount(ctx, account)
 			_, e := coinKeeper.AddCoins(ctx, account.GetAddress(), coins)
 			if e != nil {
 				panic(e)
 			}
 		}
-		k.SetAttendee(ctx, &attendee)
+		k.SetAttendee(ctx, a)
 	}
 
 	//set prizes

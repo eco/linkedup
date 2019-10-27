@@ -159,46 +159,4 @@ var _ = Describe("Attendee Tests", func() {
 		})
 
 	})
-
-	Context("from genesis", func() {
-		It("should not be sponsor when standard ticket type", func() {
-			ga := types.GenesisAttendee{
-				ID:              "123",
-				TicketClassName: "Standard",
-				Profile:         types.GenesisProfile{},
-			}
-			a := types.NewAttendeeFromGenesis(ga)
-			Expect(a.Sponsor).To(BeFalse())
-		})
-
-		It("should be sponsor when sponsor ticket type", func() {
-			ga := types.GenesisAttendee{
-				ID:              "123",
-				TicketClassName: "Sponsors",
-				Profile:         types.GenesisProfile{},
-			}
-			a := types.NewAttendeeFromGenesis(ga)
-			Expect(a.Sponsor).To(BeTrue())
-		})
-
-		It("should be sponsor when cesc speaker ticket type", func() {
-			ga := types.GenesisAttendee{
-				ID:              "123",
-				TicketClassName: "CESC Speakers",
-				Profile:         types.GenesisProfile{},
-			}
-			a := types.NewAttendeeFromGenesis(ga)
-			Expect(a.Sponsor).To(BeTrue())
-		})
-
-		It("should be sponsor when epicenter speaker ticket type", func() {
-			ga := types.GenesisAttendee{
-				ID:              "123",
-				TicketClassName: "Epicenter Speakers",
-				Profile:         types.GenesisProfile{},
-			}
-			a := types.NewAttendeeFromGenesis(ga)
-			Expect(a.Sponsor).To(BeTrue())
-		})
-	})
 })
