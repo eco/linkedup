@@ -208,8 +208,6 @@ func keyRecover(db *models.DatabaseContext, mk *masterkey.MasterKey, mc mail.Cli
 				http.Error(w, "unable to key the account", http.StatusInternalServerError)
 				return
 			}
-
-			log.Infof("keyed badge id: %d", id)
 		}
 
 		/** Create an auth token and send recovery email **/
