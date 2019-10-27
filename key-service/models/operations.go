@@ -2,7 +2,6 @@ package models
 
 import (
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 
@@ -14,8 +13,7 @@ import (
 var log = logrus.WithField("module", "key-storage")
 
 // getKeyForID retrieves the information record corresponding to the given
-// email address. If an error occurs or no such record can be found an empty
-// object may be returned.
+// email address. If a record does not exist, nil bytes will be returned
 //
 // The application will crash if unmarshalling fails.
 func getInfoForID(db *DatabaseContext, id int) ([]byte, error) {
@@ -28,10 +26,10 @@ func getInfoForID(db *DatabaseContext, id int) ([]byte, error) {
 		},
 	})
 	if err != nil {
-		log.WithError(err).WithField("id", id).Info("failed key retrieval")
+		log.WithError(err).WithField("id", id).Info("failed info retrieval")
 		return nil, err
-	}
-	if result == nil {
+	} else if result == nil || result.Item == nil || len(result.Item) == 0 {
+		// item not found
 		return nil, nil
 	}
 
@@ -44,29 +42,11 @@ func getInfoForID(db *DatabaseContext, id int) ([]byte, error) {
 	return r.Data, nil
 }
 
-// checks if an entry is present for this id but will lift network errors
-func hasInfoForID(db *DatabaseContext, id int) (bool, error) {
-	_, err := getInfoForID(db, id)
-	if err != nil {
-		if aerr, ok := err.(awserr.Error); ok && aerr.Code() == dynamodb.ErrCodeResourceNotFoundException {
-			return false, nil
-		}
-
-		// we still return true in case as there was some other aws error
-		// no way to determine that the database does not have information
-		// for this id
-		return true, err
-	}
-
-	return false, nil
-}
-
 // getAuthTokenForID retrieves the auth record corresponding to the given
-// email address. If an error occurs or no such record can be found an empty
-// object may be returned.
+// email address. `nil` will be returned for entries that do not exist
 //
 // The application will crash if unmarshalling fails.
-func getAuthTokenForID(db *DatabaseContext, id int) *storedAuth {
+func getAuthTokenForID(db *DatabaseContext, id int) (string, error) {
 	result, err := db.db.GetItem(&dynamodb.GetItemInput{
 		TableName: aws.String(authTableName),
 		Key: map[string]*dynamodb.AttributeValue{
@@ -75,10 +55,12 @@ func getAuthTokenForID(db *DatabaseContext, id int) *storedAuth {
 			},
 		},
 	})
-
 	if err != nil {
 		log.WithError(err).WithField("id", id).Info("failed auth retrieval")
-		return nil
+		return "", err
+	} else if result == nil || result.Item == nil || len(result.Item) == 0 {
+		// item not found
+		return "", nil
 	}
 
 	var r storedAuth
@@ -87,7 +69,7 @@ func getAuthTokenForID(db *DatabaseContext, id int) *storedAuth {
 		panic(fmt.Sprintf("Failed to unmarshal StoredAuth: %s", err))
 	}
 
-	return &r
+	return r.AuthToken, nil
 }
 
 // setKey sets the record associating key material with an email address
@@ -102,7 +84,7 @@ func setInfo(db *DatabaseContext, key *storedInfo) bool {
 	}
 
 	_, err = db.db.PutItem(&dynamodb.PutItemInput{
-		TableName: aws.String("linkedup-keyservice"),
+		TableName: aws.String(infoTableName),
 		Item:      item,
 	})
 
@@ -126,10 +108,9 @@ func setAuthToken(db *DatabaseContext, key *storedAuth) bool {
 	}
 
 	_, err = db.db.PutItem(&dynamodb.PutItemInput{
-		TableName: aws.String("linkedup-keyservice-auth"),
+		TableName: aws.String(authTableName),
 		Item:      item,
 	})
-
 	if err != nil {
 		log.WithError(err).Error("failed auth storage")
 		return false

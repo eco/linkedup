@@ -12,41 +12,29 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
+	longyApp "github.com/eco/longy"
 	longyCfg "github.com/eco/longy/key-service/config"
+	"github.com/sirupsen/logrus"
 )
 
 var (
 	netClient = &http.Client{
 		Timeout: 10 * time.Second,
 	}
+
+	cdc = longyApp.MakeCodec()
+
+	log = logrus.WithField("module", "longyclient")
 )
 
-// IsAttendeeClaimed -
-func IsAttendeeClaimed(id string) (bool, error) {
-	restURL := longyCfg.LongyRestURL()
-	reqURL := restURL + fmt.Sprintf("/longy/attendees/%s/claimed", id)
-	resp, err := netClient.Get(reqURL)
-	if err != nil {
-		return false, err
-	}
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return false, err
-	}
-
-	claimed, err := strconv.ParseBool(string(body))
-	if err != nil {
-		return false, fmt.Errorf("unexpected attendee claimed response, %s", err)
-	}
-
-	return claimed, nil
-}
-
 // IsAttendeeKeyed -
-func IsAttendeeKeyed(id string) (bool, error) {
+func IsAttendeeKeyed(id int) (bool, error) {
+	if id < 0 {
+		return false, fmt.Errorf("id must be a positive integer")
+	}
+
 	restURL := longyCfg.LongyRestURL()
-	reqURL := restURL + fmt.Sprintf("/longy/attendees/%s/keyed", id)
+	reqURL := restURL + fmt.Sprintf("/longy/attendees/%d/keyed", id)
 	resp, err := netClient.Get(reqURL)
 	if err != nil {
 		return false, err
@@ -90,7 +78,7 @@ func BroadcastAuthTx(tx auth.StdTx, mode string) (*sdk.TxResponse, error) {
 		Mode string     `json:"mode"`
 	}{Tx: tx, Mode: mode}
 
-	bz, err := json.Marshal(body)
+	bz, err := cdc.MarshalJSON(body)
 	if err != nil {
 		return nil, err
 	}
@@ -99,6 +87,7 @@ func BroadcastAuthTx(tx auth.StdTx, mode string) (*sdk.TxResponse, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
 
 	// If we error in the following statements, key-service is broken at this point
 	// What is the right sequence number? It could have incremented, we cannot know forsure
@@ -109,10 +98,15 @@ func BroadcastAuthTx(tx auth.StdTx, mode string) (*sdk.TxResponse, error) {
 	bz, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		panic(err)
+	} else if resp.StatusCode != 200 {
+		log.WithField("status", resp.Status).WithField("body", string(bz)).
+			Error("non-ok broadcast tx submission response")
+
+		return nil, fmt.Errorf("broadcast tx response")
 	}
 
 	var res sdk.TxResponse
-	if err = json.Unmarshal(bz, &res); err != nil {
+	if err = cdc.UnmarshalJSON(bz, &res); err != nil {
 		panic(err)
 	}
 

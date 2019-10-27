@@ -36,6 +36,7 @@ func NewAttendee(id string, sponsor bool) Attendee {
 	return Attendee{
 		ID:      id,
 		Address: addr,
+		PubKey:  nil,
 		Name:    "",
 
 		Commitment:    nil,
@@ -158,7 +159,7 @@ func (a *Attendee) ResetCommitment() {
 
 // IsKeyed indicates if this attendee is key'd yet
 func (a *Attendee) IsKeyed() bool {
-	return a.PubKey == nil || len(a.PubKey.Bytes()) == 0
+	return a.PubKey != nil
 }
 
 // IsClaimed indicates if this attendee is claimed

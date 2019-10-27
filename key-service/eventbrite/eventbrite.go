@@ -68,11 +68,6 @@ func (s *Session) AttendeeProfile(id int) (*eventbrite.AttendeeProfile, bool) {
 	return &profile, ok
 }
 
-func (s *Session) HasAttendeeID(id int) bool {
-	_, found := s.attendees[id]
-	return found
-}
-
 func (s *Session) poll(ticker *time.Ticker, eventID int, authToken string) {
 	for range ticker.C {
 		attendees, err := eventbrite.GetAttendees(eventID, authToken)
