@@ -98,6 +98,11 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, state GenesisState) {
 		k.SetAttendee(ctx, a)
 	}
 
+	//set scans
+	for i := range state.Scans {
+		k.SetScan(ctx, &state.Scans[i])
+	}
+
 	//set prizes
 	for i := range state.Prizes {
 		k.SetPrize(ctx, &state.Prizes[i])
