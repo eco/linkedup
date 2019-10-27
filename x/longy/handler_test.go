@@ -5,6 +5,7 @@ import (
 	"github.com/eco/longy/util"
 	"github.com/eco/longy/x/longy"
 	"github.com/eco/longy/x/longy/internal/types"
+	"github.com/eco/longy/x/longy/utils"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	tmcrypto "github.com/tendermint/tendermint/crypto/secp256k1"
@@ -13,9 +14,8 @@ import (
 
 var _ = Describe("Longy Handler Tests", func() {
 	var handler sdk.Handler
-	var keeper longy.Keeper
 	var addr sdk.AccAddress
-	var masterAddr sdk.AccAddress = util.IDToAddress("master")
+	var masterAddr = util.IDToAddress("master")
 	BeforeEach(func() {
 		/*
 		* Here we setup a test attendee & cosmos account that has a
@@ -24,21 +24,21 @@ var _ = Describe("Longy Handler Tests", func() {
 		BeforeTestRun()
 		addr = util.IDToAddress("1")
 
-		keeper = simApp.LongyKeeper
-		Expect(keeper).ToNot(BeNil())
-
 		handler = longy.NewHandler(keeper)
 		Expect(handler).ToNot(BeNil())
 
 		redeemer := util.IDToAddress("redeem")
+		et := utils.EventbriteAttendee{
+			ID:              "1",
+			TicketClassName: "regular",
+			Profile:         utils.EventbriteProfile{},
+		}
 		genesis := longy.GenesisState{
-			KeyService: types.GenesisServiceKey{
+			KeyService: types.GenesisService{
 				Address: masterAddr,
 			},
-			Attendees: []types.GenesisAttendee{
-				types.GenesisAttendee{
-					ID: "1",
-				},
+			Attendees: []types.Attendee{
+				et.ToGenesisAttendee(),
 			},
 		}
 		r := keeper.AccountKeeper().NewAccountWithAddress(ctx, redeemer)

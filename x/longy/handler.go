@@ -52,7 +52,7 @@ func handleMsgKey(ctx sdk.Context, k Keeper, msg types.MsgKey) sdk.Result {
 	}
 
 	// verify that master key used to sign this message
-	if !k.IsMasterAccount(ctx, msg.MasterAddress) {
+	if !k.IsServiceAccount(ctx, msg.MasterAddress) {
 		return types.ErrInsufficientPrivileges("only the service account can call this").Result()
 	}
 
@@ -114,7 +114,7 @@ func handleMsgClaimKey(ctx sdk.Context, k Keeper, msg types.MsgClaimKey) sdk.Res
 //nolint
 func handleBonus(ctx sdk.Context, k Keeper, msg types.MsgBonus) sdk.Result {
 	// verify that only the master account can send this message
-	if !k.IsMasterAccount(ctx, msg.MasterAddress) {
+	if !k.IsServiceAccount(ctx, msg.MasterAddress) {
 		return types.ErrInsufficientPrivileges("only the service account can call this").Result()
 	}
 
@@ -133,7 +133,7 @@ func handleBonus(ctx sdk.Context, k Keeper, msg types.MsgBonus) sdk.Result {
 //nolint
 func handleClearBonus(ctx sdk.Context, k Keeper, msg types.MsgClearBonus) sdk.Result {
 	// verify that only the master account can send this message
-	if !k.IsMasterAccount(ctx, msg.MasterAddress) {
+	if !k.IsServiceAccount(ctx, msg.MasterAddress) {
 		return types.ErrInsufficientPrivileges("only the service account can call this").Result()
 	}
 

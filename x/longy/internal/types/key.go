@@ -23,12 +23,10 @@ var (
 	ScanPrefix = []byte{0x1}
 	//PrizePrefix is the prefix for the prize type
 	PrizePrefix = []byte{0x2}
-	//MasterKeyPrefix is the prefix for storing the public address of the service account
-	MasterKeyPrefix = []byte{0x3}
-	//RedeemKeyPrefix is the prefix for storing the public address of the redeem account for prizes
-	RedeemKeyPrefix = []byte{0x4}
+	//ServicePrefix is the prefix for storing the public address of the service account
+	ServicePrefix = []byte{0x3}
 	//BonusKeyPrefix is the prefix for retrieving the active bonus
-	BonusKeyPrefix = []byte{0x5}
+	BonusKeyPrefix = []byte{0x4}
 	//KeySeparator is the separator between the prefix and the type key
 	KeySeparator = []byte("::")
 )
@@ -48,14 +46,9 @@ func PrizeKey(id []byte) []byte {
 	return PrefixKey(PrizePrefix, id)
 }
 
-// MasterKey will return the store key for the master key
-func MasterKey() []byte {
-	return MasterKeyPrefix
-}
-
-// RedeemKey will return the store key for the redeem key
-func RedeemKey() []byte {
-	return RedeemKeyPrefix
+// ServiceKey will return the store key for the service
+func ServiceKey() []byte {
+	return ServicePrefix
 }
 
 // BonusKey -
@@ -65,12 +58,21 @@ func BonusKey() []byte {
 
 //IsAttendeeKey checks the key to see if its for an attendee by checking it starts with the AttendeePrefix
 func IsAttendeeKey(key []byte) bool {
-	l := len(AttendeePrefix)
+	return isKeyOf(key, AttendeePrefix)
+}
+
+//IsScanKey checks the key to see if its for a scan by checking it starts with the ScanPrefix
+func IsScanKey(key []byte) bool {
+	return isKeyOf(key, ScanPrefix)
+}
+
+func isKeyOf(key []byte, prefix []byte) bool {
+	l := len(prefix)
 	if len(key) < l {
 		return false
 	}
 
-	return bytes.Equal(key[:l], AttendeePrefix)
+	return bytes.Equal(key[:l], prefix)
 }
 
 //PrefixKey adds prifix bits to the key

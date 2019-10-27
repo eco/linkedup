@@ -29,6 +29,9 @@ const (
 	// GenesisAttendeesEmpty is the code for when the attendees are not set in the genesis file
 	GenesisAttendeesEmpty
 
+	// GenesisPrizesEmpty is the code for when the prizes are not set in the genesis file
+	GenesisPrizesEmpty
+
 	// EventbriteEnvVariableNotSet is the code for when the eventbrite environmental var containing the auth key is
 	//not set
 	EventbriteEnvVariableNotSet
@@ -97,8 +100,8 @@ const (
 	InvalidSignature
 	//InvalidPublicKey is the code for when the public key for a sig verification is empty or missing
 	InvalidPublicKey
-	//MasterAccountNotSet is the code for when the master account has not been set
-	MasterAccountNotSet
+	//ServiceAccountNotSet is the code for when the service account has not been set
+	ServiceAccountNotSet
 
 	// DefaultError is the code for when a random error occurs that we do not provide a unique code to
 	DefaultError
@@ -137,6 +140,11 @@ func ErrGenesisKeyServiceAddressEmpty(format string, args ...interface{}) sdk.Er
 // ErrGenesisAttendeesEmpty occurs when the attendees are not set in the genesis file
 func ErrGenesisAttendeesEmpty(format string, args ...interface{}) sdk.Error {
 	return sdk.NewError(LongyCodeSpace, GenesisAttendeesEmpty, format, args...)
+}
+
+// ErrGenesisPrizesEmpty occurs when the prizes are not set in the genesis file
+func ErrGenesisPrizesEmpty(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, GenesisPrizesEmpty, format, args...)
 }
 
 // ErrEventbriteEnvVariableNotSet occurs when the attendees are not set in the genesis file
@@ -275,9 +283,9 @@ func ErrInvalidPublicKey(format string, args ...interface{}) sdk.Error {
 	return sdk.NewError(LongyCodeSpace, InvalidPublicKey, format, args...)
 }
 
-//ErrMasterAccountNotSet occurs when the master account has not been set
-func ErrMasterAccountNotSet(format string, args ...interface{}) sdk.Error {
-	return sdk.NewError(LongyCodeSpace, MasterAccountNotSet, format, args...)
+//ErrServiceAccountNotSet occurs when the master account has not been set
+func ErrServiceAccountNotSet(format string, args ...interface{}) sdk.Error {
+	return sdk.NewError(LongyCodeSpace, ServiceAccountNotSet, format, args...)
 }
 
 //ErrDefault occurs when a random error occurs that we do not provide a unique code to

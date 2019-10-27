@@ -20,25 +20,50 @@ var _ = Describe("Key Tests", func() {
 		Expect(bytes.Compare(prefixedKey, []byte("foo::bar"))).To(Equal(0))
 	})
 
-	It("should return false when key is nil or empty", func() {
+	Context("attendee keys", func() {
+		It("should return false when key is nil or empty", func() {
 
-		Expect(types.IsAttendeeKey(nil)).To(BeFalse())
-		Expect(types.IsAttendeeKey([]byte{})).To(BeFalse())
+			Expect(types.IsAttendeeKey(nil)).To(BeFalse())
+			Expect(types.IsAttendeeKey([]byte{})).To(BeFalse())
+		})
+
+		It("should return false when key is not of attendee type", func() {
+			key := types.ServiceKey()
+
+			Expect(types.IsAttendeeKey(key)).To(BeFalse())
+
+			key = types.PrizeKey([]byte("stuff"))
+			Expect(types.IsAttendeeKey(key)).To(BeFalse())
+		})
+
+		It("should return true when key is of attendee type", func() {
+			s1 := util.IDToAddress("asdf")
+			key := types.AttendeeKey(s1)
+
+			Expect(types.IsAttendeeKey(key)).To(BeTrue())
+		})
 	})
 
-	It("should return false when key is not of attendee type", func() {
-		key := types.MasterKey()
+	Context("scan keys", func() {
+		It("should return false when key is nil or empty", func() {
 
-		Expect(types.IsAttendeeKey(key)).To(BeFalse())
+			Expect(types.IsScanKey(nil)).To(BeFalse())
+			Expect(types.IsScanKey([]byte{})).To(BeFalse())
+		})
 
-		key = types.PrizeKey([]byte("stuff"))
-		Expect(types.IsAttendeeKey(key)).To(BeFalse())
-	})
+		It("should return false when key is not of attendee type", func() {
+			key := types.ServiceKey()
 
-	It("should return true when key is of attendee type", func() {
-		s1 := util.IDToAddress("asdf")
-		key := types.AttendeeKey(s1)
+			Expect(types.IsScanKey(key)).To(BeFalse())
 
-		Expect(types.IsAttendeeKey(key)).To(BeTrue())
+			key = types.PrizeKey([]byte("stuff"))
+			Expect(types.IsScanKey(key)).To(BeFalse())
+		})
+
+		It("should return true when key is of attendee type", func() {
+			key := types.ScanKey([]byte("asdf"))
+
+			Expect(types.IsScanKey(key)).To(BeTrue())
+		})
 	})
 })

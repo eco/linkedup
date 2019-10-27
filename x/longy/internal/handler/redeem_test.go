@@ -26,7 +26,7 @@ var _ = Describe("Redeem Handler Tests", func() {
 
 	Context("when master account set", func() {
 		BeforeEach(func() {
-			utils.SetMasterAccount(ctx, keeper, sender)
+			utils.SetServiceAccount(ctx, keeper, sender)
 		})
 
 		It("should fail when the sender is the master account, but attendee doesn't exist", func() {
@@ -36,7 +36,7 @@ var _ = Describe("Redeem Handler Tests", func() {
 		})
 
 		It("should succeed when the sender is the master account and attendee exist", func() {
-			utils.SetMasterAccount(ctx, keeper, sender)
+			utils.SetServiceAccount(ctx, keeper, sender)
 			utils.AddAttendeeToKeeper(ctx, &keeper, qr2, true, false)
 			msg := types.NewMsgRedeem(sender, receiver)
 			result := handler(ctx, msg)
@@ -44,7 +44,7 @@ var _ = Describe("Redeem Handler Tests", func() {
 		})
 
 		It("should succeed to set all attendee winnings to claimed", func() {
-			utils.SetMasterAccount(ctx, keeper, sender)
+			utils.SetServiceAccount(ctx, keeper, sender)
 			attendee := utils.AddAttendeeToKeeper(ctx, &keeper, qr2, true, false)
 			attendee.Winnings = append(attendee.Winnings, types.Win{
 				Tier:    types.Tier1,

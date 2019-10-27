@@ -28,8 +28,8 @@ const (
 
 //EventbriteData is the return data of a page call
 type EventbriteData struct {
-	PaginationInfo Pagination             `json:"pagination"`
-	Attendees      longy.GenesisAttendees `json:"attendees"`
+	PaginationInfo Pagination          `json:"pagination"`
+	Attendees      EventbriteAttendees `json:"attendees"`
 }
 
 //Pagination is the pagination info of a page call
@@ -64,9 +64,11 @@ func fetchAttendees(eventID string, authKey string) (ga longy.GenesisAttendees, 
 		return
 	}
 	totalAttendees := data.PaginationInfo.Count
-	aChan := make(chan longy.GenesisAttendee, totalAttendees)
+	aChan := make(chan EventbriteAttendee, totalAttendees)
 	eChan := make(chan sdk.Error, totalAttendees)
-	ga = data.Attendees
+	for i := range data.Attendees {
+		ga = append(ga, data.Attendees[i].ToGenesisAttendee())
+	}
 
 	var wg sync.WaitGroup
 
@@ -90,12 +92,12 @@ func fetchAttendees(eventID string, authKey string) (ga longy.GenesisAttendees, 
 }
 
 //mergeAttendees merges the first paginated call for attendees with the attendee channel populated from subsequent calls
-func mergeAttendees(ac chan longy.GenesisAttendee, ga longy.GenesisAttendees) longy.GenesisAttendees {
+func mergeAttendees(ac chan EventbriteAttendee, ga longy.GenesisAttendees) longy.GenesisAttendees {
 	temp := make(longy.GenesisAttendees, len(ac))
 	i := 0
 	close(ac)
 	for d := range ac {
-		temp[i] = d
+		temp[i] = d.ToGenesisAttendee()
 		i++
 	}
 	ga = append(ga, temp...)
@@ -110,7 +112,7 @@ func asyncGet(
 	wg *sync.WaitGroup,
 	client *http.Client,
 	headerAuth string,
-	aChan chan longy.GenesisAttendee,
+	aChan chan EventbriteAttendee,
 	eChan chan<- sdk.Error) {
 	defer wg.Done()
 	da, err := processPage(client, eventID, i, headerAuth)

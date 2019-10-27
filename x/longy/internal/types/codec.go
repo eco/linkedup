@@ -29,5 +29,6 @@ func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterConcrete(LeaderBoard{}, RouterKey+"/LeaderBoard", nil)
 	cdc.RegisterConcrete(Tier{}, RouterKey+"/Tier", nil)
 	cdc.RegisterConcrete(Bonus{}, RouterKey+"/Bonus", nil)
+	cdc.RegisterConcrete(Scan{}, RouterKey+"/Scan", nil)
 	cdc.RegisterConcrete(Win{}, RouterKey+"/Win", nil)
 }

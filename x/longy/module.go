@@ -128,7 +128,7 @@ func (am AppModule) InitGenesis(ctx sdk.Context, data json.RawMessage) []abci.Va
 
 // ExportGenesis export genesis
 // nolint: gocritic
-func (AppModule) ExportGenesis(ctx sdk.Context) json.RawMessage {
-	//return make([]byte, 0)
-	return nil
+func (am AppModule) ExportGenesis(ctx sdk.Context) json.RawMessage {
+	gs := ExportGenesis(ctx, am.keeper)
+	return ModuleCdc.MustMarshalJSON(gs)
 }

@@ -17,7 +17,7 @@ var _ = Describe("Generate Attendee Genesis Tests", func() {
 		isEnvSet bool
 	)
 
-	BeforeSuite(func() {
+	BeforeEach(func() {
 		key = os.Getenv(utils.EventbriteAuthEnvKey)
 		event = os.Getenv(utils.EventbriteEventEnvKey)
 

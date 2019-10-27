@@ -6,26 +6,23 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/eco/longy/util"
 	"github.com/tendermint/tendermint/crypto"
-	"strings"
 )
 
 // Attendee encapsulates attendee information
 type Attendee struct {
-	ID      string
-	Address sdk.AccAddress
-	PubKey  crypto.PubKey
-	Name    string
-	//UnixTimeSecClaimed is the unix time in seconds of the block header of when this attendee account was claimed
-	UnixTimeSecClaimed int64
-	Commitment         util.Commitment
-	Claimed            bool
-	Sponsor            bool
-	RsaPublicKey       string
-	EncryptedInfo      []byte
-	ScanIDs            []string
-	Winnings           []Win
-
-	Rep uint
+	ID                 string          `json:"id"`
+	Address            sdk.AccAddress  `json:"address"`
+	PubKey             crypto.PubKey   `json:"pubKey,omitempty"`
+	Name               string          `json:"name,omitempty"`
+	UnixTimeSecClaimed int64           `json:"unixTimeSecClaimed,omitempty"` //time when this attendee account was claimed
+	Commitment         util.Commitment `json:"commitment,omitempty"`
+	Claimed            bool            `json:"claimed,omitempty"`
+	Sponsor            bool            `json:"sponsor,omitempty"`
+	RsaPublicKey       string          `json:"rsaPublicKey,omitempty"`
+	EncryptedInfo      []byte          `json:"encryptedInfo,omitempty"`
+	ScanIDs            []string        `json:"scanIds,omitempty"`
+	Winnings           []Win           `json:"winnings,omitempty"`
+	Rep                uint            `json:"rep,omitempty"`
 }
 
 // NewAttendee is the constructor for `Attendee`. New attendees default to 0 rep
@@ -45,12 +42,6 @@ func NewAttendee(id string, sponsor bool) Attendee {
 		Sponsor:       sponsor,
 		Rep:           0,
 	}
-}
-
-// NewAttendeeFromGenesis will create an `Attendee` from `GenesisAttendee`
-//nolint:gocritic
-func NewAttendeeFromGenesis(ga GenesisAttendee) Attendee {
-	return NewAttendee(ga.ID, IsSponsorTicket(ga.TicketClassName))
 }
 
 //AddScanID adds the new scan id if it isn't already added
@@ -165,19 +156,6 @@ func (a *Attendee) IsClaimed() bool {
 // SetClaimed will mark this attendee as claimed
 func (a *Attendee) SetClaimed() {
 	a.Claimed = true
-}
-
-//IsSponsorTicket checks to see if the ticket type is of a speaker or sponsor that gets special point bonuses
-func IsSponsorTicket(ticketType string) bool {
-	switch strings.ToLower(ticketType) {
-	case TicketSponsorNameLowerCase:
-		fallthrough
-	case TicketSpeakerCescNameLowerCase:
-		fallthrough
-	case TicketSpeakerEpicenterNameLowerCase:
-		return true
-	}
-	return false
 }
 
 //Encode encodes a hex byte array

@@ -8,24 +8,24 @@ import (
 //Scan represents an unique scan between two parties, can only be one scan between the same parties
 type Scan struct {
 	//ID is the key we use to store this struct in the keyStore, it is unique per S1-S2 pair
-	ID []byte
+	ID []byte `json:"id"`
 	//S1 is the scanner that initiates the scan
-	S1 sdk.AccAddress
+	S1 sdk.AccAddress `json:"s1"`
 	//S2 is the person who's QR code is scanned
-	S2 sdk.AccAddress
+	S2 sdk.AccAddress `json:"s2"`
 	//D1 is the encrypted data shared by S1 with S2
-	D1 []byte
+	D1 []byte `json:"d1"`
 	//D2 is the encrypted data shared by S2 with S1
-	D2 []byte
+	D2 []byte `json:"d2"`
 	//P1 are the points earned by S1 for a scan
-	P1 uint
+	P1 uint `json:"p1"`
 	//P2 are the points earned by S2 for a scan
-	P2 uint
+	P2 uint `json:"p2"`
 	//UnixTimeSec is the unix time in seconds of the block header of when this scan was created
-	UnixTimeSec int64
+	UnixTimeSec int64 `json:"unixTimeSec"`
 	//Accepted is true when S2, the scanned participant, posts on-chain that they accept the connection
 	//this is equivalent of posting their own MsgScanQR or MsgInfo
-	Accepted bool
+	Accepted bool `json:"accepted"`
 }
 
 //NewScan creates a new scan and sets its id
