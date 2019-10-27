@@ -191,7 +191,6 @@ func makeOnboardingURI(
 	}
 
 	baseURL, err := url.Parse(fmt.Sprintf("%s/claim", clientURL))
-
 	if err != nil {
 		return "", err
 	}

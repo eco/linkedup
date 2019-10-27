@@ -89,6 +89,7 @@ Flags:
       --longy-chain-id string       chain-id of the running longy game (default "longychain")
       --longy-masterkey string      hex encoded master private key (default "fc613b4dfd6736a7bd268c8a0e74ed0d1c04a959f59dd74ef2874983fd443fca")
       --longy-restservice string    scheme://host:port of the full node rest client (default "http://localhost:1317")
+	  --longy-app-url              scheme://host of the client web app
 
       --eventbrite-auth string      eventbrite authorization token
       --eventbrite-event int        id associated with the eventbrite event

@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	//LongyCodeSpace is the codespace  type for errors
+	// LongyCodeSpace is the codespace  type for errors
 	LongyCodeSpace sdk.CodespaceType = ModuleName
 
 	// ItemNotFound is the code for no item
@@ -17,7 +17,7 @@ const (
 	// ScanNotFound is the code when we cannot find a scan in the keeper with the given id
 	ScanNotFound
 
-	//PrizeNotFound is the code when we cannot find an info in the keeper with the given id
+	// PrizeNotFound is the code when we cannot find an info in the keeper with the given id
 	PrizeNotFound
 
 	// InsufficientPrivileges is the code for when a transaction signer doesn't have the necessary privilege

@@ -153,19 +153,9 @@ func (db DatabaseContext) GetAttendeeInfo(id int) ([]byte, error) {
 	return getInfoForID(&db, id)
 }
 
-// HasAttendeeInfo -
-func (db DatabaseContext) HasAttendeeInfo(id int) (bool, error) {
-	return hasInfoForID(&db, id)
-}
-
 // GetAuthToken -
-func (db DatabaseContext) GetAuthToken(id int) string {
-	value := getAuthTokenForID(&db, id)
-	if value == nil {
-		return ""
-	}
-
-	return value.AuthToken
+func (db DatabaseContext) GetAuthToken(id int) (string, error) {
+	return getAuthTokenForID(&db, id)
 }
 
 // GetImageUploadURL get a URL that an image can be uploaded to
@@ -176,7 +166,6 @@ func (db DatabaseContext) GetImageUploadURL(key string) (string, error) {
 	})
 
 	result, err := req.Presign(15 * time.Minute)
-
 	if err != nil {
 		return "", err
 	}
