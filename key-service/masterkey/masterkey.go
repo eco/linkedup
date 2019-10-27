@@ -3,6 +3,8 @@ package masterkey
 import (
 	"errors"
 	"fmt"
+	"sync"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
@@ -12,26 +14,13 @@ import (
 	"github.com/eco/longy/x/longy"
 	"github.com/sirupsen/logrus"
 	tmcrypto "github.com/tendermint/tendermint/crypto"
-	"net/http"
-	"sync"
-	"time"
 )
 
 var log = logrus.WithField("module", "masterkey")
 
 var (
-	netClient = &http.Client{
-		Timeout: 10 * time.Second,
-	}
-
 	// ErrAlreadyKeyed denotes that this address has already been key'd
 	ErrAlreadyKeyed = errors.New("account already key'ed")
-
-	// ErrInternal -
-	ErrInternal = errors.New("internal err")
-
-	// ErrTxSubmission -
-	ErrTxSubmission = errors.New("unable to complete tx submission")
 )
 
 // MasterKey encapslates the master key for the longy game
@@ -92,7 +81,7 @@ func (mk *MasterKey) SendKeyTransaction(
 	// create and broadcast the transaction
 	keyMsg := longy.NewMsgKey(attendeeAddr, mk.address, newPublicKey, commitment)
 	tx := mk.createKeyTx(keyMsg)
-	res, err := longyClnt.BroadcastAuthTx(*tx, "block")
+	res, err := longyClnt.BroadcastAuthTx(tx, "block")
 	if err != nil { // nolint
 		log.WithError(err).Info("failed transaction submission")
 	} else {

@@ -39,7 +39,7 @@ func IsAttendeeKeyed(id int) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	defer resp.Body.Close()
+	defer resp.Body.Close() //nolint
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return false, err
@@ -62,20 +62,20 @@ func GetAccount(addr sdk.AccAddress) (auth.Account, error) {
 		return nil, err
 	}
 
-	defer resp.Body.Close()
+	defer resp.Body.Close() //nolint
 	return parseAccountFromBody(resp.Body)
 }
 
 // BroadcastAuthTx - mode = "sync|async|block"
-func BroadcastAuthTx(tx auth.StdTx, mode string) (*sdk.TxResponse, error) {
+func BroadcastAuthTx(tx *auth.StdTx, mode string) (*sdk.TxResponse, error) {
 	if mode != "sync" && mode != "async" && mode != "block" {
 		return nil, fmt.Errorf("incorrect broadcast mode")
 	}
 	restURL := longyCfg.LongyRestURL()
 	reqURL := restURL + "/longy/txs"
 	body := struct {
-		Tx   auth.StdTx `json:"tx"`
-		Mode string     `json:"mode"`
+		Tx   *auth.StdTx `json:"tx"`
+		Mode string      `json:"mode"`
 	}{Tx: tx, Mode: mode}
 
 	bz, err := cdc.MarshalJSON(body)
@@ -87,7 +87,7 @@ func BroadcastAuthTx(tx auth.StdTx, mode string) (*sdk.TxResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer resp.Body.Close() //nolint
 
 	// If we error in the following statements, key-service is broken at this point
 	// What is the right sequence number? It could have incremented, we cannot know forsure

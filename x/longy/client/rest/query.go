@@ -52,7 +52,7 @@ func attendeeClaimedHandler(cliCtx context.CLIContext, storeName string) http.Ha
 		}
 
 		w.WriteHeader(http.StatusOK)
-		w.Write(res)
+		w.Write(res) //nolint
 	}
 }
 
@@ -75,7 +75,7 @@ func attendeeKeyedHandler(cliCtx context.CLIContext, storeName string) http.Hand
 		}
 
 		w.WriteHeader(http.StatusOK)
-		w.Write(res)
+		w.Write(res) //nolint
 	}
 }
 

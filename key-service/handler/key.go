@@ -120,7 +120,8 @@ func key(eb *ebSession.Session,
 		}
 
 		/** Send the key transaction **/
-		if err := mk.SendKeyTransaction(attendeeAddress, privKey.PubKey(), commitment); err != nil {
+		err = mk.SendKeyTransaction(attendeeAddress, privKey.PubKey(), commitment)
+		if err != nil {
 			if err == masterkey.ErrAlreadyKeyed {
 				http.Error(w, "id has already been keyed", http.StatusUnauthorized)
 			} else {
@@ -144,10 +145,11 @@ func key(eb *ebSession.Session,
 		}
 
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("keyed"))
+		w.Write([]byte("keyed")) //nolint
 	}
 }
 
+//nolint: gocyclo
 func keyRecover(db *models.DatabaseContext, mk *masterkey.MasterKey, mc mail.Client) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		/** Read the attendee id from the body **/
@@ -172,7 +174,8 @@ func keyRecover(db *models.DatabaseContext, mk *masterkey.MasterKey, mc mail.Cli
 			return
 		}
 		var attendeeInfo AttendeeInfo
-		if err := json.Unmarshal(infoBz, &attendeeInfo); err != nil {
+		err = json.Unmarshal(infoBz, &attendeeInfo)
+		if err != nil {
 			http.Error(w, "internal error", http.StatusInternalServerError)
 			return
 		}
@@ -183,7 +186,11 @@ func keyRecover(db *models.DatabaseContext, mk *masterkey.MasterKey, mc mail.Cli
 			http.Error(w, "key-service down", http.StatusServiceUnavailable)
 			return
 		} else if !keyed {
-			privKey, _ := util.Secp256k1FromHex(attendeeInfo.CosmosPrivateKey)
+			privKey, err := util.Secp256k1FromHex(attendeeInfo.CosmosPrivateKey)
+			if err != nil {
+				http.Error(w, "bad stored private key. visit support booth", http.StatusBadRequest)
+				return
+			}
 
 			// key the account
 			if err != nil {
@@ -218,7 +225,7 @@ func keyRecover(db *models.DatabaseContext, mk *masterkey.MasterKey, mc mail.Cli
 		}
 
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("check email"))
+		w.Write([]byte("check email")) //nolint
 	}
 }
 
