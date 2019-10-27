@@ -28,7 +28,7 @@ var _ = Describe("Key Tests", func() {
 		})
 
 		It("should return false when key is not of attendee type", func() {
-			key := types.MasterKey()
+			key := types.ServiceKey()
 
 			Expect(types.IsAttendeeKey(key)).To(BeFalse())
 
@@ -52,7 +52,7 @@ var _ = Describe("Key Tests", func() {
 		})
 
 		It("should return false when key is not of attendee type", func() {
-			key := types.MasterKey()
+			key := types.ServiceKey()
 
 			Expect(types.IsScanKey(key)).To(BeFalse())
 

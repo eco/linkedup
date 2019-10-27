@@ -75,7 +75,7 @@ var _ = Describe("Scan Keeper Tests", func() {
 
 		It("should return all scans while ignoring anything else in the keeper", func() {
 			keeper.Set(ctx, []byte("somekey"), []byte("somevalue"))
-			utils.SetMasterAccount(ctx, keeper, util.IDToAddress("111111"))
+			utils.SetServiceAccount(ctx, keeper, util.IDToAddress("111111"))
 			utils.AddAttendeeToKeeper(ctx, &keeper, "111111", true, false)
 
 			scans := keeper.GetAllScans(ctx)

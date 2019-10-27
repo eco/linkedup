@@ -239,7 +239,7 @@ var _ = Describe("Attendee Keeper Tests", func() {
 
 			It("should succeed to return all attendees and ignore other key-vals in store", func() {
 				keeper.Set(ctx, []byte("somekey"), []byte("somevalue"))
-				utils.SetMasterAccount(ctx, keeper, util.IDToAddress("111111"))
+				utils.SetServiceAccount(ctx, keeper, util.IDToAddress("111111"))
 				utils.AddAttendeeToKeeper(ctx, &keeper, "111111", true, false)
 				attendees := keeper.GetAllAttendees(ctx)
 				Expect(len(attendees)).To(Equal(3))

@@ -7,6 +7,7 @@ import (
 	"github.com/eco/longy/x/longy"
 	"github.com/eco/longy/x/longy/internal/types"
 	"github.com/onsi/gomega"
+	crypto "github.com/tendermint/tendermint/crypto/secp256k1"
 )
 
 //AddAttendeeToKeeper is a helper for adding an attendee and its associate account to a test keeper
@@ -22,12 +23,15 @@ func AddAttendeeToKeeper(ctx sdk.Context, keeper *longy.Keeper, badgeID string, 
 	return
 }
 
-//SetMasterAccount creates and sets an account to be the redeemer
+//SetServiceAccount creates and sets an account to be the service
 //nolint:gocritic
-func SetMasterAccount(ctx sdk.Context, k longy.Keeper, addresses sdk.AccAddress) exported.Account {
+func SetServiceAccount(ctx sdk.Context, k longy.Keeper, addresses sdk.AccAddress) exported.Account {
 	acc := k.AccountKeeper().NewAccountWithAddress(ctx, addresses)
+	pubKey := crypto.GenPrivKeySecp256k1([]byte("service")).PubKey()
+	err := acc.SetPubKey(pubKey)
+	gomega.Expect(err).To(gomega.BeNil())
 	k.AccountKeeper().SetAccount(ctx, acc)
-	err := k.SetMasterAddress(ctx, addresses)
+	err = k.SetServiceAddress(ctx, addresses)
 	gomega.Expect(err).To(gomega.BeNil())
 	return acc
 }

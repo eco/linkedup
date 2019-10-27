@@ -12,10 +12,10 @@ type GenesisAttendees []Attendee
 // GenesisScans is the full array of scans to initialize
 type GenesisScans []Scan
 
-// GenesisServiceKey is the genesis type for the re-key service
-type GenesisServiceKey struct {
-	Address       sdk.AccAddress `json:"address"`
-	crypto.PubKey `json:"pubkey"`
+// GenesisService is the genesis type for the re-key service
+type GenesisService struct {
+	Address sdk.AccAddress `json:"address"`
+	PubKey  crypto.PubKey  `json:"pubkey"`
 }
 
 // GenesisPrizes is the full array of prizes for the event

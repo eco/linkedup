@@ -38,7 +38,7 @@ var _ = Describe("Longy Handler Tests", func() {
 			Profile:         utils.EventbriteProfile{},
 		}
 		genesis := longy.GenesisState{
-			KeyService: types.GenesisServiceKey{
+			KeyService: types.GenesisService{
 				Address: masterAddr,
 			},
 			Attendees: []types.Attendee{
