@@ -53,7 +53,8 @@ func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, storeName string) 
 	// <storeName>/winnings?address_id={address_id}
 	r.HandleFunc(fmt.Sprintf("/%s/%s", storeName, querier.WinningsKey),
 		query.WinningsHandler(cliCtx, storeName)).
-		Queries(query.AddressIDKey, fmt.Sprintf("{%s}", query.AddressIDKey)).Methods("GET")
+		Queries(query.AddressIDKey, fmt.Sprintf("{%s}", query.AddressIDKey)).
+		Methods(http.MethodGet, http.MethodOptions)
 
 	// open endpoint to post to in order to claim the prizes of an attendee by passing a sig from the attendee
 	r.HandleFunc("/longy/claim", query.ClaimHandler(cliCtx)).Methods(http.MethodPost, http.MethodOptions)
