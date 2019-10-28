@@ -154,7 +154,7 @@ func setEmail(db *DatabaseContext, email *storeEmail) bool {
 	})
 
 	if err != nil {
-		log.WithError(err).Error("failed auth storage")
+		log.WithError(err).Error("failed email storage")
 		return false
 	}
 

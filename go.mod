@@ -4,6 +4,7 @@ go 1.13
 
 require (
 	github.com/aws/aws-sdk-go v1.25.19
+	github.com/badoux/checkmail v0.0.0-20181210160741-9661bd69e9ad
 	github.com/btcsuite/btcd v0.0.0-20190926002857-ba530c4abb35 // indirect
 	github.com/cosmos/cosmos-sdk v0.37.3
 	github.com/cosmos/go-bip39 v0.0.0-20180819234021-555e2067c45d // indirect

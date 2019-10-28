@@ -28,7 +28,7 @@ func Router(
 
 	registerPing(r)
 	registerKey(r, eb, mk, db, mc)
-	registerEmailManual(r, eb, db)
+	registerEmailManual(r, db)
 	registerIDToAddress(r)
 
 	return middleware.LogHTTP(r)
