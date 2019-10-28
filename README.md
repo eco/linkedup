@@ -113,11 +113,11 @@ implies `--email-mock`.
 
 #### Key Service API
 **Quick & Convenient Endpoints**  
-`/ping [GET]` health check. Simply writes a Status 200 along with "pong" in the request body  
-`/id/<id> [GET]` converts an badge id into a determinsistic cosmos address  
+1. `/ping [GET]` health check. Simply writes a Status 200 along with "pong" in the request body  
+2. `/id/<id> [GET]` converts an badge id into a determinsistic cosmos address  
 
 **Main Endpoints**  
-`/key [POST]` is the entry point for keying an account.  
+3. `/key [POST]` is the entry point for keying an account.  
   Request Body:  
   ```
   {
@@ -139,7 +139,7 @@ implies `--email-mock`.
     Status 500: Something internal went wrong. (i.e marshalling data)  
       - The logs will contain information about what went wrong  
 
-`/recover [POST]` will start the process of recovering an account  
+4. `/recover [POST]` will start the process of recovering an account  
   Request Body:  
   ```
   {
@@ -156,7 +156,7 @@ implies `--email-mock`.
     Status 503: Another external component outside the service is down. Backend storage or email.  
       - Check the logs  
 
-`/recover/<id>/<authtoken> [GET]` will retrieve complete attendee information that is stored  
+5. `/recover/<id>/<authtoken> [GET]` will retrieve complete attendee information that is stored  
   Response Body:
   ```
   {
