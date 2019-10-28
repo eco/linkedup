@@ -27,6 +27,7 @@ type AttendeeInfo struct {
 	// private key information
 	CosmosPrivateKey string `json:"cosmos_private_key"`
 	RSAPrivateKey    string `json:"rsa_private_key"`
+	RSAPublicKey     string `json:"rsa_public_key"`
 
 	// needed to claim the attendee account
 	CommitmentSecret string          `json:"commitment_secret"`
@@ -53,6 +54,7 @@ func registerKey(
 // All core logic is implemented here. If there are plans to expand this service,
 // logic (email retrieval, etc) can be lifted into http middleware to allow for better
 // composability
+//nolint: gocyclo, gocritic
 func key(eb *ebSession.Session,
 	mk *masterkey.MasterKey,
 	db *models.DatabaseContext,
@@ -63,6 +65,7 @@ func key(eb *ebSession.Session,
 		// private key information
 		CosmosPrivateKey string `json:"cosmos_private_key"`
 		RSAPrivateKey    string `json:"rsa_private_key"`
+		RSAPublicKey     string `json:"rsa_public_key"`
 
 		UseVerification bool `json:"use_verification"`
 	}
@@ -75,6 +78,9 @@ func key(eb *ebSession.Session,
 			return
 		} else if body.AttendeeID < 0 {
 			http.Error(w, "attendee id must be a positive integer", http.StatusBadRequest)
+			return
+		} else if body.CosmosPrivateKey == "" || body.RSAPrivateKey == "" || body.RSAPublicKey == "" {
+			http.Error(w, "cosmos private key & rsa private/public keys must be present", http.StatusBadRequest)
 			return
 		}
 
@@ -118,6 +124,7 @@ func key(eb *ebSession.Session,
 
 			CosmosPrivateKey: body.CosmosPrivateKey,
 			RSAPrivateKey:    body.RSAPrivateKey,
+			RSAPublicKey:     body.RSAPublicKey,
 
 			CommitmentSecret: secret,
 			Commitment:       commitment,
