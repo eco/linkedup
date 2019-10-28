@@ -1,13 +1,12 @@
 package models
 
 import (
+	"fmt"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
-
 	"github.com/sirupsen/logrus"
-
-	"fmt"
 )
 
 var log = logrus.WithField("module", "key-storage")
@@ -42,11 +41,11 @@ func getInfoForID(db *DatabaseContext, id int) ([]byte, error) {
 	return r.Data, nil
 }
 
-// getAuthTokenForID retrieves the auth record corresponding to the given
+// getVerificationTokenForID retrieves the auth record corresponding to the given
 // email address. `nil` will be returned for entries that do not exist
 //
 // The application will crash if unmarshalling fails.
-func getAuthTokenForID(db *DatabaseContext, id int) (string, error) {
+func getVerificationTokenForID(db *DatabaseContext, id int) (string, error) {
 	result, err := db.db.GetItem(&dynamodb.GetItemInput{
 		TableName: aws.String(authTableName),
 		Key: map[string]*dynamodb.AttributeValue{
@@ -96,12 +95,12 @@ func setInfo(db *DatabaseContext, key *storedInfo) bool {
 	return true
 }
 
-// setAuthTokenForEmail sets the record associating key material with an email address
+// setVerificationTokenForEmail sets the record associating key material with an email address
 // in the application database. A new entry is created if none exists, and the
 // existing record is updated if one is already present.
 //
 // Returns true unless an error occurs.
-func setAuthToken(db *DatabaseContext, key *storedAuth) bool {
+func setVerificationToken(db *DatabaseContext, key *storedAuth) bool {
 	item, err := dynamodbattribute.MarshalMap(key)
 	if err != nil {
 		panic(err)
