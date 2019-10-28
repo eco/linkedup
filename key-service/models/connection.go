@@ -2,13 +2,14 @@ package models
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/client"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"time"
 )
 
 const (
@@ -131,14 +132,14 @@ func (db DatabaseContext) StoreAttendeeInfo(id int, info []byte) bool {
 	return setInfo(&db, value)
 }
 
-// StoreAuthToken -
-func (db DatabaseContext) StoreAuthToken(id int, token string) bool {
+// StoreVerificationToken -
+func (db DatabaseContext) StoreVerificationToken(id int, token string) bool {
 	auth := &storedAuth{
 		ID:        id,
 		AuthToken: token,
 	}
 
-	return setAuthToken(&db, auth)
+	return setVerificationToken(&db, auth)
 }
 
 // StoreEmail sets the email address for that id
@@ -158,19 +159,9 @@ func (db DatabaseContext) GetAttendeeInfo(id int) ([]byte, error) {
 	return getInfoForID(&db, id)
 }
 
-// HasAttendeeInfo -
-func (db DatabaseContext) HasAttendeeInfo(id int) (bool, error) {
-	return hasInfoForID(&db, id)
-}
-
-// GetAuthToken -
-func (db DatabaseContext) GetAuthToken(id int) string {
-	value := getAuthTokenForID(&db, id)
-	if value == nil {
-		return ""
-	}
-
-	return value.AuthToken
+// GetVerificationToken -
+func (db DatabaseContext) GetVerificationToken(id int) (string, error) {
+	return getVerificationTokenForID(&db, id)
 }
 
 //GetEmail gets the associated email for that id, expect empty string since few attendees set a new email manually
@@ -183,14 +174,13 @@ func (db DatabaseContext) GetEmail(id int) string {
 }
 
 // GetImageUploadURL get a URL that an image can be uploaded to
-func (db DatabaseContext) GetImageUploadURL(key string) (string, error) {
+func (db DatabaseContext) GetImageUploadURL(id int) (string, error) {
 	req, _ := db.s3.PutObjectRequest(&s3.PutObjectInput{
 		Bucket: aws.String(db.contentBucket),
-		Key:    aws.String(fmt.Sprintf("avatars/%s", key)),
+		Key:    aws.String(fmt.Sprintf("avatars/%d", id)),
 	})
 
 	result, err := req.Presign(15 * time.Minute)
-
 	if err != nil {
 		return "", err
 	}

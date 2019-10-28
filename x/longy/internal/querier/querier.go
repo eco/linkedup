@@ -7,19 +7,31 @@ import (
 )
 
 const (
-	//QueryAttendees  is the key for attendee gets
+	// QueryAttendees is the key for attendee gets
 	QueryAttendees = "attendees"
-	//QueryScans is the key for scan gets
+
+	// QueryAttendeeClaimed -
+	QueryAttendeeClaimed = "attendee_claimed"
+
+	// QueryAttendeeKeyed -
+	QueryAttendeeKeyed = "attendee_keyed"
+
+	// QueryScans is the key for scan gets
 	QueryScans = "scans"
-	//QueryBonus is the key for checking for the current bonus
+
+	// QueryBonus is the key for checking for the current bonus
 	QueryBonus = "bonus"
-	//AddressKey is the key for attendee gets by address
+
+	// AddressKey is the key for attendee gets by address
 	AddressKey = "address"
-	//PrizesKey is the key for the event prizes
+
+	// PrizesKey is the key for the event prizes
 	PrizesKey = "prizes"
-	//LeaderKey is the key for the leader board
+
+	// LeaderKey is the key for the leader board
 	LeaderKey = "leader"
-	//WinningsKey is the key for getting the unclaimed prizes of an attendee
+
+	// WinningsKey is the key for getting the unclaimed prizes of an attendee
 	WinningsKey = "winnings"
 )
 
@@ -37,18 +49,27 @@ func NewQuerier(keeper keeper.Keeper) sdk.Querier {
 				return queryAttendeesByAddr(ctx, queryArgs, keeper)
 			}
 			return queryAttendees(ctx, queryArgs, keeper)
+
+		case QueryAttendeeClaimed:
+			return queryAttendeeClaimed(ctx, queryArgs, keeper)
+
+		case QueryAttendeeKeyed:
+			return queryAttendeeKeyed(ctx, queryArgs, keeper)
+
 		case QueryScans:
 			return queryScans(ctx, queryArgs, keeper)
+
 		case PrizesKey:
 			return queryPrizes(ctx, keeper)
+
 		case QueryBonus:
 			return queryBonus(ctx, keeper)
+
 		case LeaderKey:
 			return leaderBoard(ctx, keeper)
+
 		case WinningsKey:
 			return queryWinnings(ctx, keeper, queryArgs)
-		default:
-			break
 		}
 
 		return nil, sdk.ErrUnknownRequest("unknown query endpoint")

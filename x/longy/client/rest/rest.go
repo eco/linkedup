@@ -18,42 +18,51 @@ const (
 // RegisterRoutes - Central function to define routes that get registered by the main application
 //nolint:gocritic
 func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, storeName string) {
-	//longy/attendees/{attendee_id}
+	// <storeName>/attendees/{attendee_id}
 	r.HandleFunc(fmt.Sprintf("/%s/%s/{%s}", storeName, querier.QueryAttendees, query.AttendeeIDKey),
 		attendeeHandler(cliCtx, storeName)).Methods(http.MethodGet, http.MethodOptions)
 
-	//longy/attendees/address/{address_id}
+	// <storeName>/attendees/address/{address_id}
 	r.HandleFunc(fmt.Sprintf("/%s/%s/%s/{%s}", storeName, querier.QueryAttendees, querier.AddressKey,
 		query.AddressIDKey), attendeeAddressHandler(cliCtx, storeName)).Methods(http.MethodGet, http.MethodOptions)
 
-	//longy/scans/{scan_id}
+	// <storeName>/attendees/{attendee_id}/claimed
+	r.HandleFunc(fmt.Sprintf("/%s/attendees/{%s}/claimed", storeName, query.AttendeeIDKey),
+		attendeeClaimedHandler(cliCtx, storeName)).Methods(http.MethodGet, http.MethodOptions)
+
+	// <storeName>/attendees/{attendee_id}/keyed
+	r.HandleFunc(fmt.Sprintf("/%s/attendees/{%s}/keyed", storeName, query.AttendeeIDKey),
+		attendeeKeyedHandler(cliCtx, storeName)).Methods(http.MethodGet, http.MethodOptions)
+
+	// <storeName>/scans/{scan_id}
 	r.HandleFunc(fmt.Sprintf("/%s/%s/{%s}", storeName, querier.QueryScans, query.ScanIDKey),
 		scanGetHandler(cliCtx, storeName)).Methods(http.MethodGet, http.MethodOptions)
 
-	//longy/prizes
+	// <storeName>/prizes
 	r.HandleFunc(fmt.Sprintf("/%s/%s", storeName, querier.PrizesKey),
 		prizesGetHandler(cliCtx, storeName)).Methods(http.MethodGet, http.MethodOptions)
 
-	//longy/bonus
+	// <storeName>/bonus
 	r.HandleFunc(fmt.Sprintf("/%s/%s", storeName, querier.QueryBonus),
 		bonusGetHandler(cliCtx, storeName)).Methods(http.MethodGet, http.MethodOptions)
 
-	//longy/leader
+	// <storeName>/leader
 	r.HandleFunc(fmt.Sprintf("/%s/%s", storeName, querier.LeaderKey),
 		query.LeaderBoardHandler(cliCtx, storeName)).Methods(http.MethodGet, http.MethodOptions)
 
-	//longy/winnings?address_id={address_id}
+	// <storeName>/winnings?address_id={address_id}
 	r.HandleFunc(fmt.Sprintf("/%s/%s", storeName, querier.WinningsKey),
 		query.WinningsHandler(cliCtx, storeName)).
-		Queries(query.AddressIDKey, fmt.Sprintf("{%s}", query.AddressIDKey)).Methods("GET")
+		Queries(query.AddressIDKey, fmt.Sprintf("{%s}", query.AddressIDKey)).
+		Methods(http.MethodGet, http.MethodOptions)
 
-	//open endpoint to post to in order to claim the prizes of an attendee by passing a sig from the attendee
-	r.HandleFunc("/longy/claim", query.ClaimHandler(cliCtx)).Methods("POST")
+	// open endpoint to post to in order to claim the prizes of an attendee by passing a sig from the attendee
+	r.HandleFunc("/longy/claim", query.ClaimHandler(cliCtx)).Methods(http.MethodPost, http.MethodOptions)
 
-	//open endpoint to post transactions directly to full node
+	// open endpoint to post transactions directly to full node
 	r.HandleFunc("/longy/txs", rest.BroadcastTxRequest(cliCtx)).Methods(http.MethodPost, http.MethodOptions)
 
-	// IMPORTANT: you must specify an OPTIONS method matcher for the middleware to set CORS headers
+	//  IMPORTANT: you must specify an OPTIONS method matcher for the middleware to set CORS headers
 	r.Use(mux.CORSMethodMiddleware(r))
 	r.Use(CorsMiddleware)
 }

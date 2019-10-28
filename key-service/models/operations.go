@@ -1,21 +1,18 @@
 package models
 
 import (
+	"fmt"
+
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
-
 	"github.com/sirupsen/logrus"
-
-	"fmt"
 )
 
 var log = logrus.WithField("module", "key-storage")
 
 // getKeyForID retrieves the information record corresponding to the given
-// email address. If an error occurs or no such record can be found an empty
-// object may be returned.
+// email address. If a record does not exist, nil bytes will be returned
 //
 // The application will crash if unmarshalling fails.
 func getInfoForID(db *DatabaseContext, id int) ([]byte, error) {
@@ -28,8 +25,11 @@ func getInfoForID(db *DatabaseContext, id int) ([]byte, error) {
 		},
 	})
 	if err != nil {
-		log.WithError(err).WithField("id", id).Info("failed key retrieval")
+		log.WithError(err).WithField("id", id).Info("failed info retrieval")
 		return nil, err
+	} else if result == nil || result.Item == nil || len(result.Item) == 0 {
+		// item not found
+		return nil, nil
 	}
 
 	var r storedInfo
@@ -41,27 +41,11 @@ func getInfoForID(db *DatabaseContext, id int) ([]byte, error) {
 	return r.Data, nil
 }
 
-// checks if an entry is present for this id but will lift network errors
-func hasInfoForID(db *DatabaseContext, id int) (bool, error) {
-	_, err := getInfoForID(db, id)
-	if err != nil {
-		if aerr, ok := err.(awserr.Error); ok && aerr.Code() == dynamodb.ErrCodeResourceNotFoundException {
-			return false, nil
-		}
-
-		// we still return true in case as there was some other aws error
-		return true, err
-	}
-
-	return true, nil
-}
-
-// getAuthTokenForID retrieves the auth record corresponding to the given
-// email address. If an error occurs or no such record can be found an empty
-// object may be returned.
+// getVerificationTokenForID retrieves the auth record corresponding to the given
+// email address. `nil` will be returned for entries that do not exist
 //
 // The application will crash if unmarshalling fails.
-func getAuthTokenForID(db *DatabaseContext, id int) *storedAuth {
+func getVerificationTokenForID(db *DatabaseContext, id int) (string, error) {
 	result, err := db.db.GetItem(&dynamodb.GetItemInput{
 		TableName: aws.String(authTableName),
 		Key: map[string]*dynamodb.AttributeValue{
@@ -70,10 +54,12 @@ func getAuthTokenForID(db *DatabaseContext, id int) *storedAuth {
 			},
 		},
 	})
-
 	if err != nil {
 		log.WithError(err).WithField("id", id).Info("failed auth retrieval")
-		return nil
+		return "", err
+	} else if result == nil || result.Item == nil || len(result.Item) == 0 {
+		// item not found
+		return "", nil
 	}
 
 	var r storedAuth
@@ -82,7 +68,7 @@ func getAuthTokenForID(db *DatabaseContext, id int) *storedAuth {
 		panic(fmt.Sprintf("Failed to unmarshal StoredAuth: %s", err))
 	}
 
-	return &r
+	return r.AuthToken, nil
 }
 
 func getEmailForID(db *DatabaseContext, id int) *storeEmail {
@@ -121,7 +107,7 @@ func setInfo(db *DatabaseContext, key *storedInfo) bool {
 	}
 
 	_, err = db.db.PutItem(&dynamodb.PutItemInput{
-		TableName: aws.String("linkedup-keyservice"),
+		TableName: aws.String(infoTableName),
 		Item:      item,
 	})
 
@@ -133,22 +119,21 @@ func setInfo(db *DatabaseContext, key *storedInfo) bool {
 	return true
 }
 
-// setAuthTokenForEmail sets the record associating key material with an email address
+// setVerificationTokenForEmail sets the record associating key material with an email address
 // in the application database. A new entry is created if none exists, and the
 // existing record is updated if one is already present.
 //
 // Returns true unless an error occurs.
-func setAuthToken(db *DatabaseContext, key *storedAuth) bool {
+func setVerificationToken(db *DatabaseContext, key *storedAuth) bool {
 	item, err := dynamodbattribute.MarshalMap(key)
 	if err != nil {
 		panic(err)
 	}
 
 	_, err = db.db.PutItem(&dynamodb.PutItemInput{
-		TableName: aws.String("linkedup-keyservice-auth"),
+		TableName: aws.String(authTableName),
 		Item:      item,
 	})
-
 	if err != nil {
 		log.WithError(err).Error("failed auth storage")
 		return false
