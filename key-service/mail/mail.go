@@ -86,7 +86,7 @@ func (c sesClient) SendOnboardingEmail(
 
 	log.Tracef("sending onboarding email to: %s", profile.Email)
 
-	err = c.sendEmailWithURL(profile.Email, redirectURI, "linkedup-onboarding")
+	err = c.sendEmailWithURL(profile.Email, redirectURI, onboardingRedirectTemplate)
 	if err != nil {
 		log.WithError(err).Errorf("unable to send onboarding email to %s", profile.Email)
 	}

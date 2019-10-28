@@ -72,7 +72,7 @@ func key(eb *ebSession.Session,
 			http.Error(w, fmt.Sprintf("request body: %s", err), http.StatusBadRequest)
 			return
 		} else if body.AttendeeID < 0 {
-			http.Error(w, "attendee id must be a postive integer", http.StatusBadRequest)
+			http.Error(w, "attendee id must be a positive integer", http.StatusBadRequest)
 			return
 		}
 
@@ -153,7 +153,7 @@ func keyRecover(
 			http.Error(w, fmt.Sprintf("request body: %s", err), http.StatusBadRequest)
 			return
 		} else if body.AttendeeID < 0 {
-			http.Error(w, "attendee id must be a postive integer", http.StatusBadRequest)
+			http.Error(w, "attendee id must be a positive integer", http.StatusBadRequest)
 			return
 		}
 
@@ -185,6 +185,7 @@ func keyRecover(
 }
 
 // helper used by both `key` and `keyRecover`
+//nolint:gocyclo
 func keyAndEmail(
 	mk *masterkey.MasterKey,
 	db *models.DatabaseContext,
@@ -211,7 +212,8 @@ func keyAndEmail(
 			}
 		}
 
-		// unique token to retrieve stored info. Store this token if we are `useVerification` or `!onboarding`
+		// unique token to retrieve stored info. Store this token if we are `useVerification` or `!onboarding`.
+		// !onboarding indicates this was instantiated via recovery
 		token := generateVerificationToken()
 		if useVerification || !onboarding {
 			if ok := db.StoreVerificationToken(id, token); !ok {
@@ -222,26 +224,15 @@ func keyAndEmail(
 
 		// send the email
 		var err error
-
-		if onboarding {
-			// onboarding email
-
-			if useVerification {
-				err = mc.SendVerificationEmail(info.Profile.Email, token)
-			} else {
-				err = mc.SendOnboardingEmail(info.Profile, info.CommitmentSecret, info.ImageUploadURL)
-			}
-
+		if useVerification {
+			err = mc.SendVerificationEmail(info.Profile.Email, token)
 		} else {
-			// recovery email
-
-			if useVerification {
-				err = mc.SendVerificationEmail(info.Profile.Email, token)
+			if onboarding {
+				// onboarding email
+				err = mc.SendOnboardingEmail(info.Profile, info.CommitmentSecret, info.ImageUploadURL)
 			} else {
-				if err := mc.SendRecoveryEmail(info.Profile, idStr, token); err != nil {
-					http.Error(w, "key service down", http.StatusServiceUnavailable)
-					return
-				}
+				// recovery email
+				err = mc.SendRecoveryEmail(info.Profile, idStr, token)
 			}
 		}
 
@@ -254,7 +245,7 @@ func keyAndEmail(
 	}
 }
 
-// retrieve attendee infomation with the given verification token
+// retrieve attendee information with the given verification token
 func keyRetrieval(db *models.DatabaseContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
