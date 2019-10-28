@@ -118,18 +118,18 @@ implies `--email-mock`.
 
 **Main Endpoints**  
 `/key [POST]` is the entry point for keying an account.  
-    **Request Body**:  
-    ```
-    {
-      "attendee_id": "<id>",
-      "cosmos_private_key": "hex-encoded private key"
-      "cosmos_rsa_key": "string representation of the rsa key"
-      "use_verification": true|false
-    }
-    ```  
-    If `use_verification` is set, the email will contain a 6-digit verification code that can then be used to retrieve all the stored
-    attendee information using `/recover/<id>/<token>`  
-  
+  Request Body:  
+  ```
+  {
+    "attendee_id": "<id>",
+    "cosmos_private_key": "hex-encoded private key"
+    "cosmos_rsa_key": "string representation of the rsa key"
+    "use_verification": true|false
+  }
+  ```  
+  If `use_verification` is set, the email will contain a 6-digit verification code that can then be used to retrieve all the stored
+  attendee information using `/recover/<id>/<token>`  
+
     Status 200: Key transaction was successfully submitted and the email (redirect or verification).  
     Status 400: Bad input to this endpoint. Request body could be malformed. failed conversion for `cosmos_private_key` to a valid secp256k1 key.  
     Status 404: The attendee id was not found in the eventbrite event.  
@@ -140,16 +140,16 @@ implies `--email-mock`.
       - The logs will contain information about what went wrong  
 
 `/recover [POST]` will start the process of recovering an account  
-    **Request Body**:  
-    ```
-    {
-      "attendee_id": "<id>",
-      "use_verification": true|false
-    }
-    ```  
-    If `use_verification` is set, the email will contain a 6-digit verification code that can then be used to retrieve all the stored
-    attendee information using `/recover/<id>/<token>`  
-  
+  Request Body:  
+  ```
+  {
+    "attendee_id": "<id>",
+    "use_verification": true|false
+  }
+  ```  
+  If `use_verification` is set, the email will contain a 6-digit verification code that can then be used to retrieve all the stored
+  attendee information using `/recover/<id>/<token>`  
+
     Status 200: Recovery email with the token was sent succesfully.  
     Status 400: Bad request body. Check the error response.  
     Status 404: The attendee for the corresponding id was not found in eventbrite.  
@@ -157,25 +157,26 @@ implies `--email-mock`.
       - Check the logs  
 
 `/recover/<id>/<authtoken> [GET]` will retrieve complete attendee information that is stored  
-    **Response Body**:
-    ```
-    {
-      "address": "<account adddress>",
-      "attendee": {
-          "id": <badgeID>,
-          "first_name": "first name",
-          "last_name": "last name",
-          "email": "email address"
-      },
-  
-      "cosmos_private_key": "hex encoded private key bytes"
-      "rsa_private_key": ".."
-  
-      "commitment": "commitment set in the key message",
-      "commitment_secret": "pre-image to the commitment",
-      "image_upload_url": "url to upload avatar to"
-    }
-    ```  
+  Response Body:
+  ```
+  {
+    "address": "<account adddress>",
+    "attendee": {
+        "id": <badgeID>,
+        "first_name": "first name",
+        "last_name": "last name",
+        "email": "email address"
+    },
+
+    "cosmos_private_key": "hex encoded private key bytes"
+    "rsa_private_key": ".."
+
+    "commitment": "commitment set in the key message",
+    "commitment_secret": "pre-image to the commitment",
+    "image_upload_url": "url to upload avatar to"
+  }
+  ```
+
     Status 200: Check the response body for the result.  
     Status 404: No information found on this attendee.  
     Status 401: Incorrect authentication token OR there is not authentication token set for this attendee id.  
