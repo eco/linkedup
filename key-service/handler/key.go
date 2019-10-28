@@ -180,7 +180,7 @@ func keyRecover(
 		}
 
 		keyAndEmail(mk, db, mc,
-			body.AttendeeID, &attendeeInfo, false, keyed, body.UseVerification)
+			body.AttendeeID, &attendeeInfo, false, keyed, body.UseVerification)(w, r)
 	}
 }
 
