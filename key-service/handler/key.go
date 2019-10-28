@@ -145,7 +145,7 @@ func keyRecover(
 	mk *masterkey.MasterKey,
 	mc mail.Client) http.HandlerFunc {
 	type reqBody struct {
-		AttendeeID      int  `json:"id"`
+		AttendeeID      int  `json:"attendee_id"`
 		UseVerification bool `json:"use_verification"`
 	}
 
