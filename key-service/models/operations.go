@@ -71,6 +71,30 @@ func getVerificationTokenForID(db *DatabaseContext, id int) (string, error) {
 	return r.AuthToken, nil
 }
 
+func getEmailForID(db *DatabaseContext, id int) *storeEmail {
+	result, err := db.db.GetItem(&dynamodb.GetItemInput{
+		TableName: aws.String(emailTableName),
+		Key: map[string]*dynamodb.AttributeValue{
+			"ID": {
+				N: aws.String(idToString(id)),
+			},
+		},
+	})
+
+	if err != nil {
+		log.WithError(err).WithField("id", id).Info("no email for id stored")
+		return nil
+	}
+
+	var e storeEmail
+	err = dynamodbattribute.UnmarshalMap(result.Item, &e)
+	if err != nil {
+		panic(fmt.Sprintf("Failed to unmarshal storeEmail: %s", err))
+	}
+
+	return &e
+}
+
 // setKey sets the record associating key material with an email address
 // in the application database. A new entry is created if none exists, and the
 // existing record is updated if one is already present.
@@ -112,6 +136,25 @@ func setVerificationToken(db *DatabaseContext, key *storedAuth) bool {
 	})
 	if err != nil {
 		log.WithError(err).Error("failed auth storage")
+		return false
+	}
+
+	return true
+}
+
+func setEmail(db *DatabaseContext, email *storeEmail) bool {
+	item, err := dynamodbattribute.MarshalMap(email)
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = db.db.PutItem(&dynamodb.PutItemInput{
+		TableName: aws.String(emailTableName),
+		Item:      item,
+	})
+
+	if err != nil {
+		log.WithError(err).Error("failed email storage")
 		return false
 	}
 

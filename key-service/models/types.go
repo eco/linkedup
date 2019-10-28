@@ -11,3 +11,9 @@ type storedAuth struct {
 	ID        int
 	AuthToken string
 }
+
+// email is the id <-> email override that we use for attendees who's eventbrite emails are not set correctly
+type storeEmail struct {
+	ID    int
+	Email string
+}

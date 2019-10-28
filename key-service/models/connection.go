@@ -13,8 +13,9 @@ import (
 )
 
 const (
-	infoTableName = "linkedup-keyservice"
-	authTableName = "linkedup-keyservice-auth"
+	infoTableName  = "linkedup-keyservice"
+	authTableName  = "linkedup-keyservice-auth"
+	emailTableName = "linkedup-email"
 )
 
 var (
@@ -41,8 +42,8 @@ func NewDatabaseContext(localstack bool, contentBucket string) (DatabaseContext,
 
 // NewDatabaseContextWithCfg constructs a new DatabaseContext, using the given AWS
 // session handle.
-func NewDatabaseContextWithCfg(cfg client.ConfigProvider, localstack bool, bucket string) (DatabaseContext, error) {
-	context := DatabaseContext{}
+func NewDatabaseContextWithCfg(cfg client.ConfigProvider, localstack bool,
+	bucket string) (context DatabaseContext, err error) {
 	if localstack {
 		context.db = dynamodb.New(
 			cfg,
@@ -83,31 +84,26 @@ func NewDatabaseContextWithCfg(cfg client.ConfigProvider, localstack bool, bucke
 func createTables(db *dynamodb.DynamoDB) error {
 
 	/** create table to store attendee information **/
-	_, err := db.CreateTable(&dynamodb.CreateTableInput{
-		BillingMode: aws.String("PAY_PER_REQUEST"),
-		TableName:   aws.String(infoTableName),
-		AttributeDefinitions: []*dynamodb.AttributeDefinition{
-			{
-				AttributeName: aws.String("ID"),
-				AttributeType: aws.String("N"),
-			},
-		},
-		KeySchema: []*dynamodb.KeySchemaElement{
-			{
-				AttributeName: aws.String("ID"),
-				KeyType:       aws.String("HASH"),
-			},
-		},
-	})
-
+	err := createTable(db, infoTableName)
 	if err != nil {
 		return err
 	}
 
 	/** create table to store auth tokens for key recovery **/
-	_, err = db.CreateTable(&dynamodb.CreateTableInput{
+	err = createTable(db, authTableName)
+	if err != nil {
+		return err
+	}
+
+	/** create table to store emails attendees that change it manually **/
+	err = createTable(db, emailTableName)
+	return err
+}
+
+func createTable(db *dynamodb.DynamoDB, tableName string) error {
+	_, err := db.CreateTable(&dynamodb.CreateTableInput{
 		BillingMode: aws.String("PAY_PER_REQUEST"),
-		TableName:   aws.String(authTableName),
+		TableName:   aws.String(tableName),
 		AttributeDefinitions: []*dynamodb.AttributeDefinition{
 			{
 				AttributeName: aws.String("ID"),
@@ -121,7 +117,6 @@ func createTables(db *dynamodb.DynamoDB) error {
 			},
 		},
 	})
-
 	return err
 }
 
@@ -147,6 +142,16 @@ func (db DatabaseContext) StoreVerificationToken(id int, token string) bool {
 	return setVerificationToken(&db, auth)
 }
 
+// StoreEmail sets the email address for that id
+func (db DatabaseContext) StoreEmail(id int, address string) bool {
+	email := &storeEmail{
+		ID:    id,
+		Email: address,
+	}
+
+	return setEmail(&db, email)
+}
+
 /** Retrieval **/
 
 // GetAttendeeInfo -
@@ -157,6 +162,15 @@ func (db DatabaseContext) GetAttendeeInfo(id int) ([]byte, error) {
 // GetVerificationToken -
 func (db DatabaseContext) GetVerificationToken(id int) (string, error) {
 	return getVerificationTokenForID(&db, id)
+}
+
+//GetEmail gets the associated email for that id, expect empty string since few attendees set a new email manually
+func (db DatabaseContext) GetEmail(id int) string {
+	e := getEmailForID(&db, id)
+	if e == nil {
+		return ""
+	}
+	return e.Email
 }
 
 // GetImageUploadURL get a URL that an image can be uploaded to
