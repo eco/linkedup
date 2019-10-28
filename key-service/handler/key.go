@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/eco/longy/eventbrite"
 	ebSession "github.com/eco/longy/key-service/eventbrite"
 	longyClnt "github.com/eco/longy/key-service/longyclient"
@@ -20,6 +21,7 @@ import (
 
 // AttendeeInfo -
 type AttendeeInfo struct {
+	Address sdk.AccAddress
 	Profile *eventbrite.AttendeeProfile `json:"attendee"`
 
 	// private key information
@@ -110,6 +112,7 @@ func key(eb *ebSession.Session,
 		// generate the unique <secret / commitment> pair for this attendee
 		secret, commitment := util.CreateCommitment()
 		info := &AttendeeInfo{
+			Address: util.IDToAddress(fmt.Sprintf("%d", body.AttendeeID)),
 			Profile: profile,
 
 			CosmosPrivateKey: body.CosmosPrivateKey,
@@ -229,7 +232,7 @@ func keyAndEmail(
 		} else {
 			if onboarding {
 				// onboarding email
-				err = mc.SendOnboardingEmail(info.Profile, info.CommitmentSecret, info.ImageUploadURL)
+				err = mc.SendOnboardingEmail(info.Address, info.Profile, info.CommitmentSecret, info.ImageUploadURL)
 			} else {
 				// recovery email
 				err = mc.SendRecoveryEmail(info.Profile, idStr, token)

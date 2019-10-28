@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/client"
 	"github.com/aws/aws-sdk-go/service/ses"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	eb "github.com/eco/longy/eventbrite"
 	"github.com/sirupsen/logrus"
 )
@@ -24,7 +25,7 @@ const (
 
 // Client used to send emails
 type Client interface {
-	SendOnboardingEmail(*eb.AttendeeProfile, string, string) error
+	SendOnboardingEmail(sdk.AccAddress, *eb.AttendeeProfile, string, string) error
 	SendRecoveryEmail(*eb.AttendeeProfile, string, string) error
 
 	SendVerificationEmail(string, string) error
@@ -74,11 +75,12 @@ func NewSESClient(cfg client.ConfigProvider, localstack bool, longyAppURL string
 // SendOnboardingEmail will construct and send the email containing the initial
 // onboarding message and URL with the given secret
 func (c sesClient) SendOnboardingEmail(
+	attendeeAddr sdk.AccAddress,
 	profile *eb.AttendeeProfile,
 	secret string,
 	imageUploadURL string,
 ) error {
-	redirectURI, err := makeOnboardingURI(c.longyAppURL, profile, secret, imageUploadURL)
+	redirectURI, err := makeOnboardingURI(c.longyAppURL, attendeeAddr, profile, secret, imageUploadURL)
 	if err != nil {
 		log.Errorf("unable to generate email URI: %s", err.Error())
 		return err
@@ -143,11 +145,12 @@ func (c sesClient) sendEmailWithURL(dest string, url string, template string) er
 
 // SendOnboardingEmail will construct and send the email corresponding to onboarding the user
 func (c mockClient) SendOnboardingEmail(
+	attendeeAddr sdk.AccAddress,
 	profile *eb.AttendeeProfile,
 	secret string,
 	imageUploadURL string,
 ) error {
-	redirectURI, err := makeOnboardingURI(c.longyAppURL, profile, secret, imageUploadURL)
+	redirectURI, err := makeOnboardingURI(c.longyAppURL, attendeeAddr, profile, secret, imageUploadURL)
 	if err != nil {
 		return err
 	}
@@ -190,6 +193,7 @@ func makeRecoveryURI(clientURL string, id string, token string) (string, error) 
 
 func makeOnboardingURI(
 	clientURL string,
+	attendeeAddr sdk.AccAddress,
 	profile *eb.AttendeeProfile,
 	secret string,
 	imageUploadURL string,
@@ -206,6 +210,7 @@ func makeOnboardingURI(
 	}
 
 	params := url.Values{}
+	params.Add("attendee", attendeeAddr.String())
 	params.Add("profile", base64.StdEncoding.EncodeToString(jsonProfileData))
 	params.Add("secret", secret)
 	params.Add("avatar", imageUploadURL)
