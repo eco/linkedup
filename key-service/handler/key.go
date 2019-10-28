@@ -228,6 +228,11 @@ func keyAndEmail(
 
 		// send the email
 		var err error
+		//check if the email has been changed manually for the attendee
+		storedEmail := db.GetEmail(info.Profile.ID)
+		if storedEmail != "" {
+			info.Profile.Email = storedEmail
+		}
 		if useVerification {
 			err = mc.SendVerificationEmail(info.Profile.Email, token)
 		} else {
