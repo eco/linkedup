@@ -134,6 +134,10 @@ func key(eb *ebSession.Session,
 		}
 
 		/** Send the redirect **/
+		storedEmail := db.GetEmail(body.AttendeeID)
+		if storedEmail != "" {
+			profile.Email = storedEmail
+		}
 		err = mc.SendOnboardingEmail(profile, attendeeAddress, secret, imageUploadURL)
 		if err != nil {
 			http.Error(w, "email error. try again", http.StatusInternalServerError)
