@@ -21,12 +21,12 @@ import (
 
 // AttendeeInfo -
 type AttendeeInfo struct {
-	Address sdk.AccAddress
+	Address sdk.AccAddress              `json:"address"`
 	Profile *eventbrite.AttendeeProfile `json:"attendee"`
 
 	// private key information
 	CosmosPrivateKey string `json:"cosmos_private_key"`
-	RSAPrivateKey    string `json:"RSA_key"`
+	RSAPrivateKey    string `json:"rsa_private_key"`
 
 	// needed to claim the attendee account
 	CommitmentSecret string          `json:"commitment_secret"`
@@ -95,12 +95,6 @@ func key(eb *ebSession.Session,
 			return
 		}
 
-		imageUploadURL, err := db.GetImageUploadURL(body.AttendeeID)
-		if err != nil {
-			http.Error(w, "failed to sign image upload URL", http.StatusServiceUnavailable)
-			return
-		}
-
 		/** Sanity check on the private key **/
 		_, err = util.Secp256k1FromHex(body.CosmosPrivateKey)
 		if err != nil {
@@ -109,6 +103,13 @@ func key(eb *ebSession.Session,
 		}
 
 		/** Store the attendee information **/
+
+		imageUploadURL, err := db.GetImageUploadURL(body.AttendeeID)
+		if err != nil {
+			http.Error(w, "failed to sign image upload URL", http.StatusServiceUnavailable)
+			return
+		}
+
 		// generate the unique <secret / commitment> pair for this attendee
 		secret, commitment := util.CreateCommitment()
 		info := &AttendeeInfo{
@@ -240,7 +241,7 @@ func keyAndEmail(
 		}
 
 		if err != nil {
-			http.Error(w, "email error. try again", http.StatusInternalServerError)
+			http.Error(w, "email error. try again", http.StatusServiceUnavailable)
 			return
 		}
 
