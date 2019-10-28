@@ -56,7 +56,7 @@ func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, storeName string) 
 		Queries(query.AddressIDKey, fmt.Sprintf("{%s}", query.AddressIDKey)).Methods("GET")
 
 	// open endpoint to post to in order to claim the prizes of an attendee by passing a sig from the attendee
-	r.HandleFunc("/longy/claim", query.ClaimHandler(cliCtx)).Methods("POST")
+	r.HandleFunc("/longy/claim", query.ClaimHandler(cliCtx)).Methods(http.MethodPost, http.MethodOptions)
 
 	// open endpoint to post transactions directly to full node
 	r.HandleFunc("/longy/txs", rest.BroadcastTxRequest(cliCtx)).Methods(http.MethodPost, http.MethodOptions)
