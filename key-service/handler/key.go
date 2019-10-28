@@ -1,8 +1,14 @@
 package handler
 
 import (
+	"crypto/rand"
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
+	"strconv"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/eco/longy/eventbrite"
 	ebSession "github.com/eco/longy/key-service/eventbrite"
 	longyClnt "github.com/eco/longy/key-service/longyclient"
@@ -10,24 +16,23 @@ import (
 	"github.com/eco/longy/key-service/masterkey"
 	"github.com/eco/longy/key-service/models"
 	"github.com/eco/longy/util"
-	"github.com/google/uuid"
 	"github.com/gorilla/mux"
-	"io/ioutil"
-	"net/http"
-	"strconv"
 )
 
 // AttendeeInfo -
 type AttendeeInfo struct {
+	Address sdk.AccAddress              `json:"address"`
 	Profile *eventbrite.AttendeeProfile `json:"attendee"`
 
 	// private key information
 	CosmosPrivateKey string `json:"cosmos_private_key"`
-	RSAPrivateKey    string `json:"RSA_key"`
+	RSAPrivateKey    string `json:"rsa_private_key"`
 
 	// needed to claim the attendee account
 	CommitmentSecret string          `json:"commitment_secret"`
 	Commitment       util.Commitment `json:"commitment"`
+
+	ImageUploadURL string `json:"image_upload_url"`
 }
 
 func registerKey(
@@ -48,37 +53,35 @@ func registerKey(
 // All core logic is implemented here. If there are plans to expand this service,
 // logic (email retrieval, etc) can be lifted into http middleware to allow for better
 // composability
-//nolint: gocyclo
 func key(eb *ebSession.Session,
 	mk *masterkey.MasterKey,
 	db *models.DatabaseContext,
 	mc mail.Client) http.HandlerFunc {
+	type reqBody struct {
+		AttendeeID int `json:"attendee_id"`
+
+		// private key information
+		CosmosPrivateKey string `json:"cosmos_private_key"`
+		RSAPrivateKey    string `json:"rsa_private_key"`
+
+		UseVerification bool `json:"use_verification"`
+	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
-		// generate the unique <secret / commitment> pair for this attendee
-		secret, commitment := util.CreateCommitment()
-
 		/** Read the request body **/
-		type reqBody struct {
-			AttendeeID int `json:"attendee_id"`
-
-			// private key information
-			CosmosPrivateKey string `json:"cosmos_private_key"`
-			RSAPrivateKey    string `json:"rsa_private_key"`
-		}
 		var body reqBody
-		jsonDecoder := json.NewDecoder(r.Body)
-		err := jsonDecoder.Decode(&body)
-		if err != nil {
-			errMsg := fmt.Sprintf("bad json request body: %s", err)
-			http.Error(w, errMsg, http.StatusBadRequest)
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			http.Error(w, fmt.Sprintf("request body: %s", err), http.StatusBadRequest)
+			return
+		} else if body.AttendeeID < 0 {
+			http.Error(w, "attendee id must be a positive integer", http.StatusBadRequest)
 			return
 		}
 
 		/** Check if this attendee is in eventbrite **/
 		profile, found := eb.AttendeeProfile(body.AttendeeID)
 		if !found {
-			http.Error(w, "non-registered id", http.StatusNotFound)
+			http.Error(w, "non-registered badge id", http.StatusNotFound)
 			return
 		}
 
@@ -88,25 +91,38 @@ func key(eb *ebSession.Session,
 			http.Error(w, "key-service down", http.StatusServiceUnavailable)
 			return
 		} else if len(infoBz) != 0 {
-			http.Error(w, "attendee info already stored. /recover instead", http.StatusConflict)
+			http.Error(w, "attendee info onboarded. use /recover instead", http.StatusConflict)
 			return
 		}
 
-		/** Attendee information + their their new private key **/
-		privKey, err := util.Secp256k1FromHex(body.CosmosPrivateKey)
+		/** Sanity check on the private key **/
+		_, err = util.Secp256k1FromHex(body.CosmosPrivateKey)
 		if err != nil {
 			http.Error(w, fmt.Sprintf("bad cosmos private key: %s", err), http.StatusBadRequest)
 			return
 		}
-		attendeeAddress := util.IDToAddress(fmt.Sprintf("%d", body.AttendeeID))
 
 		/** Store the attendee information **/
-		info := AttendeeInfo{
-			Profile:          profile,
+
+		imageUploadURL, err := db.GetImageUploadURL(body.AttendeeID)
+		if err != nil {
+			http.Error(w, "failed to sign image upload URL", http.StatusServiceUnavailable)
+			return
+		}
+
+		// generate the unique <secret / commitment> pair for this attendee
+		secret, commitment := util.CreateCommitment()
+		info := &AttendeeInfo{
+			Address: util.IDToAddress(fmt.Sprintf("%d", body.AttendeeID)),
+			Profile: profile,
+
 			CosmosPrivateKey: body.CosmosPrivateKey,
 			RSAPrivateKey:    body.RSAPrivateKey,
+
 			CommitmentSecret: secret,
 			Commitment:       commitment,
+
+			ImageUploadURL: imageUploadURL,
 		}
 		bz, err := json.Marshal(info)
 		if err != nil {
@@ -119,53 +135,34 @@ func key(eb *ebSession.Session,
 			return
 		}
 
-		/** Send the key transaction **/
-		err = mk.SendKeyTransaction(attendeeAddress, privKey.PubKey(), commitment)
-		if err != nil {
-			if err == masterkey.ErrAlreadyKeyed {
-				http.Error(w, "id has already been keyed", http.StatusUnauthorized)
-			} else {
-				http.Error(w, "internal error. try again", http.StatusInternalServerError)
-			}
-			return
-		}
-		log.Infof("keyed badge id: %d", body.AttendeeID)
-
-		imageUploadURL, err := db.GetImageUploadURL(strconv.Itoa(body.AttendeeID))
-		if err != nil {
-			http.Error(w, "failed to sign image upload URL", http.StatusInternalServerError)
-			return
-		}
-
-		/** Send the redirect **/
-		err = mc.SendOnboardingEmail(profile, attendeeAddress, secret, imageUploadURL)
-		if err != nil {
-			http.Error(w, "email error. try again", http.StatusInternalServerError)
-			return
-		}
-
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("keyed")) //nolint
+		keyed := false // attendee information stored for the first time. Account could not have been keyed prior
+		keyAndEmail(mk, db, mc,
+			body.AttendeeID, info, true, keyed, body.UseVerification)(w, r)
 	}
 }
 
-//nolint: gocyclo
-func keyRecover(db *models.DatabaseContext, mk *masterkey.MasterKey, mc mail.Client) http.HandlerFunc {
+func keyRecover(
+	db *models.DatabaseContext,
+	mk *masterkey.MasterKey,
+	mc mail.Client) http.HandlerFunc {
+	type reqBody struct {
+		AttendeeID      int  `json:"attendee_id"`
+		UseVerification bool `json:"use_verification"`
+	}
+
 	return func(w http.ResponseWriter, r *http.Request) {
-		/** Read the attendee id from the body **/
-		body, err := ioutil.ReadAll(r.Body)
-		if err != nil {
-			http.Error(w, "unable to read request body", http.StatusBadRequest)
+		/** Read request body**/
+		var body reqBody
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			http.Error(w, fmt.Sprintf("request body: %s", err), http.StatusBadRequest)
 			return
-		}
-		id, err := strconv.Atoi(string(body))
-		if err != nil || id < 0 {
-			http.Error(w, "body expected to be a positive integer denoting the attendee id", http.StatusBadRequest)
+		} else if body.AttendeeID < 0 {
+			http.Error(w, "attendee id must be a positive integer", http.StatusBadRequest)
 			return
 		}
 
 		/** Retrieve attendee information from the database **/
-		infoBz, err := db.GetAttendeeInfo(id)
+		infoBz, err := db.GetAttendeeInfo(body.AttendeeID)
 		if err != nil {
 			http.Error(w, "key-service down", http.StatusServiceUnavailable)
 			return
@@ -176,57 +173,83 @@ func keyRecover(db *models.DatabaseContext, mk *masterkey.MasterKey, mc mail.Cli
 		var attendeeInfo AttendeeInfo
 		err = json.Unmarshal(infoBz, &attendeeInfo)
 		if err != nil {
-			http.Error(w, "internal error", http.StatusInternalServerError)
+			http.Error(w, "corrupt attendee information", http.StatusInternalServerError)
 			return
 		}
 
-		/** Check if this attendee needs to be keyed **/
-		keyed, err := longyClnt.IsAttendeeKeyed(id)
+		keyed, err := longyClnt.IsAttendeeKeyed(body.AttendeeID)
 		if err != nil {
 			http.Error(w, "key-service down", http.StatusServiceUnavailable)
 			return
-		} else if !keyed {
-			privKey, err := util.Secp256k1FromHex(attendeeInfo.CosmosPrivateKey)
+		}
+
+		keyAndEmail(mk, db, mc,
+			body.AttendeeID, &attendeeInfo, false, keyed, body.UseVerification)(w, r)
+	}
+}
+
+// helper used by both `key` and `keyRecover`
+//nolint:gocyclo
+func keyAndEmail(
+	mk *masterkey.MasterKey,
+	db *models.DatabaseContext,
+	mc mail.Client,
+
+	id int,
+	info *AttendeeInfo,
+	onboarding, keyed, useVerification bool,
+) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		idStr := fmt.Sprintf("%d", id)
+
+		// key the attendee if required
+		if !keyed {
+			privKey, err := util.Secp256k1FromHex(info.CosmosPrivateKey)
 			if err != nil {
-				http.Error(w, "bad stored private key. visit support booth", http.StatusBadRequest)
+				http.Error(w, "corrupt attendee private key", http.StatusInternalServerError)
 				return
 			}
-
-			// key the account
-			if err != nil {
-				errMsg := fmt.Sprintf("bad cosmos private key: %s", err)
-				http.Error(w, errMsg, http.StatusBadRequest)
-				return
-			}
-			attendeeAddr := util.IDToAddress(fmt.Sprintf("%d", id))
-
-			err = mk.SendKeyTransaction(
-				attendeeAddr,
-				privKey.PubKey(),
-				attendeeInfo.Commitment)
+			err = mk.SendKeyTransaction(util.IDToAddress(idStr), privKey.PubKey(), info.Commitment)
 			if err != nil && err != masterkey.ErrAlreadyKeyed {
-				http.Error(w, "unable to key the account", http.StatusInternalServerError)
+				http.Error(w, "internal error. try again", http.StatusInternalServerError)
 				return
 			}
 		}
 
-		/** Create an auth token and send recovery email **/
-		token := uuid.New().String()
-		if ok := db.StoreAuthToken(id, token); !ok {
-			http.Error(w, "key-service down", http.StatusServiceUnavailable)
-			return
+		// unique token to retrieve stored info. Store this token if we are `useVerification` or `!onboarding`.
+		// !onboarding indicates this was instantiated via recovery
+		token := generateVerificationToken()
+		if useVerification || !onboarding {
+			if ok := db.StoreVerificationToken(id, token); !ok {
+				http.Error(w, "key-service down", http.StatusServiceUnavailable)
+				return
+			}
 		}
 
-		if err := mc.SendRecoveryEmail(attendeeInfo.Profile, id, token); err != nil {
-			http.Error(w, "key-service down", http.StatusServiceUnavailable)
+		// send the email
+		var err error
+		if useVerification {
+			err = mc.SendVerificationEmail(info.Profile.Email, token)
+		} else {
+			if onboarding {
+				// onboarding email
+				err = mc.SendOnboardingEmail(info.Address, info.Profile, info.CommitmentSecret, info.ImageUploadURL)
+			} else {
+				// recovery email
+				err = mc.SendRecoveryEmail(info.Profile, idStr, token)
+			}
+		}
+
+		if err != nil {
+			http.Error(w, "email error. try again", http.StatusServiceUnavailable)
 			return
 		}
 
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("check email")) //nolint
 	}
 }
 
+// retrieve attendee information with the given verification token
 func keyRetrieval(db *models.DatabaseContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
@@ -237,7 +260,7 @@ func keyRetrieval(db *models.DatabaseContext) http.HandlerFunc {
 			return
 		}
 
-		expectedToken, err := db.GetAuthToken(id)
+		expectedToken, err := db.GetVerificationToken(id)
 		if err != nil {
 			http.Error(w, "key-service down", http.StatusServiceUnavailable)
 			return
@@ -262,4 +285,22 @@ func keyRetrieval(db *models.DatabaseContext) http.HandlerFunc {
 			w.Write(bz) //nolint
 		}
 	}
+}
+
+/** Helpers **/
+
+// used to generate a verification code 6 digits in length
+var table = [10]byte{'1', '2', '3', '4', '5', '6', '7', '8', '9', '0'}
+
+func generateVerificationToken() string {
+	b := make([]byte, 6)
+	n, err := io.ReadAtLeast(rand.Reader, b, 6)
+	if n != 6 {
+		panic(err)
+	}
+
+	for i := 0; i < len(b); i++ {
+		b[i] = table[int(b[i])%len(table)]
+	}
+	return string(b)
 }

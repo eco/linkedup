@@ -112,8 +112,11 @@ drivers to look for LocalStack services on the `localstack` host instead. It
 implies `--email-mock`.
 
 #### Key Service API
-1. `/ping [GET]` is a health check. Simply writes a Status 200 along with "pong" in the request body  
-2. `/id/<id> [GET]` is a convenience endpoint to convert an badge id into a determinsistic cosmos address  
+**Quick & Convenient Endpoints**  
+1. `/ping [GET]` health check. Simply writes a Status 200 along with "pong" in the request body  
+2. `/id/<id> [GET]` converts an badge id into a determinsistic cosmos address  
+
+**Main Endpoints**  
 3. `/key [POST]` is the entry point for keying an account.  
   Request Body:  
   ```
@@ -121,32 +124,62 @@ implies `--email-mock`.
     "attendee_id": "<id>",
     "cosmos_private_key": "hex-encoded private key"
     "cosmos_rsa_key": "string representation of the rsa key"
+    "use_verification": true|false
   }
   ```  
-  Status 200: Key transaction was successfully submitted and the email containing the redirect uri was sent  
-  Status 400: Bad request body. Check the returned response  
-  Status 401: The attendee has already keyed their account  
-  Status 404: The attendee id was not found in the eventbrite event  
-  Status 503: Another external component outside of the key service went wrong. (i.e email / backend storage / etc)  
-    - The logs will contain information about what went wrong  
-  Status 500: Something internal went wrong. (i.e marshalling data)  
-    - The logs will contain information about what went wrong  
+  If `use_verification` is set, the email will contain a 6-digit verification code that can then be used to retrieve all the stored
+  attendee information using `/recover/<id>/<token>`  
+
+    Status 200: Key transaction was successfully submitted and the email (redirect or verification).  
+    Status 400: Bad input to this endpoint. Request body could be malformed. failed conversion for `cosmos_private_key` to a valid secp256k1 key.  
+    Status 404: The attendee id was not found in the eventbrite event.  
+    Status 409: This attendee has already gone through the onboarding flow and has information stored.  
+    Status 503: Another external component outside of the key service went wrong. (i.e email / backend storage / etc).  
+      - The logs will contain information about what went wrong  
+    Status 500: Something internal went wrong. (i.e marshalling data)  
+      - The logs will contain information about what went wrong  
 
 4. `/recover [POST]` will start the process of recovering an account  
   Request Body:  
-  `badge id number`
+  ```
+  {
+    "attendee_id": "<id>",
+    "use_verification": true|false
+  }
+  ```  
+  If `use_verification` is set, the email will contain a 6-digit verification code that can then be used to retrieve all the stored
+  attendee information using `/recover/<id>/<token>`  
 
-  Status 200: An email was sent with a redirect uri to hit the following endpoint below with the authentication token to retrieve attendee information.  
-  Status 400: Bad request body. Check the error response  
-  Status 404: The attendee for the corresponding id was not found in eventbrite  
-  Status 503: Another external component outside the service is down. Backend storage or email  
-    - Check the logs  
+    Status 200: Recovery email with the token was sent succesfully.  
+    Status 400: Bad request body. Check the error response.  
+    Status 404: The attendee for the corresponding id was not found in eventbrite.  
+    Status 503: Another external component outside the service is down. Backend storage or email.  
+      - Check the logs  
 
 5. `/recover/<id>/<authtoken> [GET]` will retrieve complete attendee information that is stored  
+  Response Body:
+  ```
+  {
+    "address": "<account adddress>",
+    "attendee": {
+        "id": <badgeID>,
+        "first_name": "first name",
+        "last_name": "last name",
+        "email": "email address"
+    },
 
-  Status 200: Check the response body for the result  
-  Status 404: No information found on this attendee  
-  Status 401: Incorrect authentication token OR there is not authentication token set for this attendee id. Must start from the `/recover` endpoint above  
+    "cosmos_private_key": "hex encoded private key bytes"
+    "rsa_private_key": ".."
+
+    "commitment": "commitment set in the key message",
+    "commitment_secret": "pre-image to the commitment",
+    "image_upload_url": "url to upload avatar to"
+  }
+  ```
+
+    Status 200: Check the response body for the result.  
+    Status 404: No information found on this attendee.  
+    Status 401: Incorrect authentication token OR there is not authentication token set for this attendee id.  
 
 ### Running database tests
 The database tests depend on a local DynamoDB instance running on port 8000.
