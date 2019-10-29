@@ -27,6 +27,8 @@ var (
 	ServicePrefix = []byte{0x3}
 	//BonusKeyPrefix is the prefix for retrieving the active bonus
 	BonusKeyPrefix = []byte{0x4}
+	//BonusServicePrefix =
+	BonusServicePrefix = []byte{0x5}
 	//KeySeparator is the separator between the prefix and the type key
 	KeySeparator = []byte("::")
 )
@@ -49,6 +51,11 @@ func PrizeKey(id []byte) []byte {
 // ServiceKey will return the store key for the service
 func ServiceKey() []byte {
 	return ServicePrefix
+}
+
+// BonusServiceKey
+func BonusServiceKey() []byte {
+	return BonusServicePrefix
 }
 
 // BonusKey -

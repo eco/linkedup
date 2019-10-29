@@ -2,23 +2,30 @@ package cli
 
 import (
 	"fmt"
+	"strconv"
+
 	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
+	longyCfg "github.com/eco/longy/key-service/config"
+	longyClnt "github.com/eco/longy/key-service/longyclient"
 	"github.com/eco/longy/util"
 	"github.com/eco/longy/x/longy"
 	"github.com/eco/longy/x/longy/internal/types"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	tmcrypto "github.com/tendermint/tendermint/crypto"
-	"strconv"
 )
 
+//nolint
 func init() {
-	longyTxCmd.PersistentFlags().String("private-key", "", "hex-encoded secp256k1 private key of the master account") //nolint
-	viper.BindPFlag("private-key", longyTxCmd.PersistentFlags().Lookup("private-key"))                                //nolint
+	// default value uses "bonus" as the seed
+	longyTxCmd.PersistentFlags().String("private-key", "5f220b4a45832c0710e50d99fb0202a8554dcfe4e8593939d2820a689cbff212",
+		"hex-encoded secp256k1 private key of the bonus service account")
+	longyTxCmd.PersistentFlags().String("longy-rest-url", "http://localhost:1317", "scheme://host:port of the longy rest service")
+	viper.BindPFlag("private-key", longyTxCmd.PersistentFlags().Lookup("private-key"))
+	viper.BindPFlag("longy-rest-url", longyTxCmd.PersistentFlags().Lookup("longy-rest-url"))
 }
 
 var longyTxCmd = &cobra.Command{
@@ -44,34 +51,36 @@ func createBonusCmd(cdc *codec.Codec) *cobra.Command {
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			viper.BindPFlags(cmd.Flags()) //nolint
-			cliCtx := context.NewCLIContext().WithTrustNode(true).WithCodec(cdc)
 			chainID := viper.GetString(client.FlagChainID)
+			restURL := viper.GetString("longy-rest-url")
+			fmt.Printf("Longy Rest Service URL: %s\n", restURL)
+			longyCfg.SetLongyRestURL(restURL)
 
 			bonusAmt, err := strconv.Atoi(args[0])
 			if err != nil || bonusAmt <= 0 {
 				return fmt.Errorf("multiplier must be a positive number > 0 in decimal format")
 			}
 
-			/** read in the private key and retrieve the master account */
-			masterAcc, privKey, err := getMasterAccountFromViper(&cliCtx)
+			/** read in the private key and retrieve the bonus account */
+			bonusAccount, privKey, err := readBonusAccountFromViper()
 			if err != nil {
 				return fmt.Errorf("master account: %s", err)
 			}
 
 			/** construct the message **/
-			bonusMsg := longy.NewMsgBonus(uint(bonusAmt), masterAcc.GetAddress())
+			bonusMsg := longy.NewMsgBonus(uint(bonusAmt), bonusAccount.GetAddress())
 
 			/** send the message **/
-			txBytes, err := createTxBytes(
+			tx, err := createAuthTx(
 				cdc, bonusMsg, privKey, chainID,
-				masterAcc.GetAccountNumber(), masterAcc.GetSequence())
+				bonusAccount.GetAccountNumber(), bonusAccount.GetSequence())
 			if err != nil {
-				return fmt.Errorf("tx bytes: %s", err)
+				return fmt.Errorf("tx creation: %s", err)
 			}
 
-			res, err := cliCtx.BroadcastTxCommit(txBytes)
+			res, err := longyClnt.BroadcastAuthTx(tx, "block")
 			if err != nil {
-				return fmt.Errorf("tx submission: %s", err)
+				return fmt.Errorf("tx sbumission: %s", err)
 			}
 
 			fmt.Printf("Transaction Response:\n%v\n", res)
@@ -88,27 +97,29 @@ func clearBonusCmd(cdc *codec.Codec) *cobra.Command {
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			viper.BindPFlags(cmd.Flags()) //nolint
-			cliCtx := context.NewCLIContext().WithTrustNode(true).WithCodec(cdc)
 			chainID := viper.GetString(client.FlagChainID)
+			restURL := viper.GetString("longy-rest-url")
+			fmt.Printf("Longy Rest Service URL: %s\n", restURL)
+			longyCfg.SetLongyRestURL(restURL)
 
 			/** read in the private key and retrieve the master account */
-			masterAcc, privKey, err := getMasterAccountFromViper(&cliCtx)
+			bonusAccount, privKey, err := readBonusAccountFromViper()
 			if err != nil {
 				return fmt.Errorf("master account: %s", err)
 			}
 
 			/** construct the message **/
-			clearBonusMsg := longy.NewMsgClearBonus(masterAcc.GetAddress())
+			clearBonusMsg := longy.NewMsgClearBonus(bonusAccount.GetAddress())
 
 			/** send the message **/
-			txBytes, err := createTxBytes(
+			tx, err := createAuthTx(
 				cdc, clearBonusMsg, privKey, chainID,
-				masterAcc.GetAccountNumber(), masterAcc.GetSequence())
+				bonusAccount.GetAccountNumber(), bonusAccount.GetSequence())
 			if err != nil {
-				return fmt.Errorf("tx bytes: %s", err)
+				return fmt.Errorf("tx creation: %s", err)
 			}
 
-			res, err := cliCtx.BroadcastTxCommit(txBytes)
+			res, err := longyClnt.BroadcastAuthTx(tx, "block")
 			if err != nil {
 				return fmt.Errorf("tx submission: %s", err)
 			}
@@ -120,34 +131,28 @@ func clearBonusCmd(cdc *codec.Codec) *cobra.Command {
 	}
 }
 
-//nolint
-func getMasterAccountFromViper(cliCtx *context.CLIContext) (auth.Account, tmcrypto.PrivKey, error) {
-	accRetriever := auth.NewAccountRetriever(cliCtx)
-
-	keyStr := viper.GetString("private-key")
-	if len(keyStr) == 0 {
-		return nil, nil, fmt.Errorf("empty private key")
-	}
-	privKey, err := util.Secp256k1FromHex(keyStr)
+func readBonusAccountFromViper() (auth.Account, tmcrypto.PrivKey, error) {
+	privKey, err := util.Secp256k1FromHex(viper.GetString("private-key"))
 	if err != nil {
-		return nil, nil, fmt.Errorf("private-key: %s", err)
+		return nil, nil, fmt.Errorf("private key: %s\n", err)
 	}
-	masterAddr := sdk.AccAddress(privKey.PubKey().Address())
 
-	acc, err := accRetriever.GetAccount(masterAddr)
+	// retrieve the bonus account
+	addr := sdk.AccAddress(privKey.PubKey().Address())
+	bonusAccount, err := longyClnt.GetAccount(addr)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("retrieving bonus account: %s\n", err)
 	}
 
-	return acc, privKey, nil
+	return bonusAccount, privKey, nil
 }
 
-func createTxBytes(
+func createAuthTx(
 	cdc *codec.Codec,
 	msg sdk.Msg,
 	privKey tmcrypto.PrivKey,
 	chainID string,
-	accNum, seqNum uint64) ([]byte, error) {
+	accNum, seqNum uint64) (*auth.StdTx, error) {
 
 	msgs := []sdk.Msg{msg}
 	nilFee := auth.NewStdFee(50000, sdk.NewCoins(sdk.NewInt64Coin("longy", 0)))
@@ -161,5 +166,5 @@ func createTxBytes(
 	stdSig := auth.StdSignature{PubKey: privKey.PubKey(), Signature: sig}
 	tx := auth.NewStdTx(msgs, nilFee, []auth.StdSignature{stdSig}, "")
 
-	return auth.DefaultTxEncoder(cdc)(tx)
+	return &tx, nil
 }

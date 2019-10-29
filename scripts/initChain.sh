@@ -25,8 +25,9 @@ fi
 ../bin/lyd add-genesis-account $(../bin/lycli keys show bob -a) 1000longy,100000000stake
 ../bin/lyd add-genesis-account $(../bin/lycli keys show redeemer -a) 1000longy,100000000stake
 
-# Set the default master key
-../bin/lyd set-genesis-service
+# Set the default master and bonus key
+../bin/lyd set-genesis-key-service
+../bin/lyd set-genesis-bonus-service
 
 # Generate the genesis attendees from the eventbrite api
 ../bin/lyd add-genesis-attendees

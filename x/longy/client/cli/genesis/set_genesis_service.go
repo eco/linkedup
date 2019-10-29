@@ -12,19 +12,31 @@ import (
 	"github.com/tendermint/tendermint/libs/cli"
 )
 
-// AddSetGenesisServiceCmd will set the testing master public/address keys where "master" is the seed
-func AddSetGenesisServiceCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
+// AddSetGenesisKeyServiceCmd will set the testing master public/address keys where "master" is the seed
+func AddSetGenesisKeyServiceCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use: "set-genesis-service",
+		Use: "set-genesis-key-service",
 		RunE: func(_ *cobra.Command, args []string) error {
-			return setGenesisService(ctx, cdc)
+			return setGenesisService(ctx, cdc, true)
 		},
 	}
 
 	return cmd
 }
 
-func setGenesisService(ctx *server.Context, cdc *codec.Codec) error {
+// AddSetGenesisBonusServiceCmd -
+func AddSetGenesisBonusServiceCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
+	cmd := &cobra.Command{
+		Use: "set-genesis-bonus-service",
+		RunE: func(_ *cobra.Command, args []string) error {
+			return setGenesisService(ctx, cdc, false)
+		},
+	}
+
+	return cmd
+}
+
+func setGenesisService(ctx *server.Context, cdc *codec.Codec, isKeyService bool) error {
 	config := ctx.Config
 	config.SetRoot(viper.GetString(cli.HomeFlag))
 
@@ -42,10 +54,17 @@ func setGenesisService(ctx *server.Context, cdc *codec.Codec) error {
 		return err
 	}
 
-	pubKey := tmcrypto.GenPrivKeySecp256k1([]byte("master")).PubKey()
-	sdkAddr := sdk.AccAddress(pubKey.Address())
-	genState.KeyService.Address = sdkAddr
-	genState.KeyService.PubKey = pubKey
+	if isKeyService {
+		pubKey := tmcrypto.GenPrivKeySecp256k1([]byte("master")).PubKey()
+		sdkAddr := sdk.AccAddress(pubKey.Address())
+		genState.KeyService.Address = sdkAddr
+		genState.KeyService.PubKey = pubKey
+	} else {
+		pubKey := tmcrypto.GenPrivKeySecp256k1([]byte("bonus")).PubKey()
+		sdkAddr := sdk.AccAddress(pubKey.Address())
+		genState.BonusService.Address = sdkAddr
+		genState.BonusService.PubKey = pubKey
+	}
 
 	bz, err := cdc.MarshalJSON(genState)
 	if err != nil {
