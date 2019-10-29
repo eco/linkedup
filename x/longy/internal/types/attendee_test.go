@@ -78,8 +78,21 @@ var _ = Describe("Attendee Tests", func() {
 
 		attendee.Rep = types.Tier5Rep
 		Expect(attendee.GetTier()).To(Equal(types.Tier5))
-		attendee.Rep = types.Tier5Rep + types.Tier5Rep
-		Expect(attendee.GetTier()).To(Equal(types.Tier5))
+
+		attendee.Rep = types.Tier6Rep
+		Expect(attendee.GetTier()).To(Equal(types.Tier6))
+
+		attendee.Rep = types.Tier7Rep
+		Expect(attendee.GetTier()).To(Equal(types.Tier7))
+
+		attendee.Rep = types.Tier8Rep
+		Expect(attendee.GetTier()).To(Equal(types.Tier8))
+
+		attendee.Rep = types.Tier9Rep
+		Expect(attendee.GetTier()).To(Equal(types.Tier9))
+
+		attendee.Rep = types.Tier9Rep + types.Tier9Rep
+		Expect(attendee.GetTier()).To(Equal(types.Tier9))
 	})
 
 	It("should refuse to add invalid win to winnings", func() {

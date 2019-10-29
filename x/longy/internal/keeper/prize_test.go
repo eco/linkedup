@@ -13,7 +13,7 @@ var _ = Describe("Prize Keeper Tests", func() {
 		BeforeTestRun()
 		prizes = types.GetGenesisPrizes()
 		//hard-code this to make sure it doesn't un-expectantly change
-		Expect(len(prizes)).To(Equal(5))
+		Expect(len(prizes)).To(Equal(9))
 	})
 
 	It("should fail when we try to get a prize that doesn't exist", func() {
