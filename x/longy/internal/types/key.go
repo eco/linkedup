@@ -53,7 +53,7 @@ func ServiceKey() []byte {
 	return ServicePrefix
 }
 
-// BonusServiceKey
+// BonusServiceKey -
 func BonusServiceKey() []byte {
 	return BonusServicePrefix
 }

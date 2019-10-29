@@ -71,8 +71,7 @@ func createBonusCmd(cdc *codec.Codec) *cobra.Command {
 			bonusMsg := longy.NewMsgBonus(uint(bonusAmt), bonusAccount.GetAddress())
 
 			/** send the message **/
-			tx, err := createAuthTx(
-				cdc, bonusMsg, privKey, chainID,
+			tx, err := createAuthTx(bonusMsg, privKey, chainID,
 				bonusAccount.GetAccountNumber(), bonusAccount.GetSequence())
 			if err != nil {
 				return fmt.Errorf("tx creation: %s", err)
@@ -80,7 +79,7 @@ func createBonusCmd(cdc *codec.Codec) *cobra.Command {
 
 			res, err := longyClnt.BroadcastAuthTx(tx, "block")
 			if err != nil {
-				return fmt.Errorf("tx sbumission: %s", err)
+				return fmt.Errorf("tx submission: %s", err)
 			}
 
 			fmt.Printf("Transaction Response:\n%v\n", res)
@@ -112,8 +111,7 @@ func clearBonusCmd(cdc *codec.Codec) *cobra.Command {
 			clearBonusMsg := longy.NewMsgClearBonus(bonusAccount.GetAddress())
 
 			/** send the message **/
-			tx, err := createAuthTx(
-				cdc, clearBonusMsg, privKey, chainID,
+			tx, err := createAuthTx(clearBonusMsg, privKey, chainID,
 				bonusAccount.GetAccountNumber(), bonusAccount.GetSequence())
 			if err != nil {
 				return fmt.Errorf("tx creation: %s", err)
@@ -134,21 +132,20 @@ func clearBonusCmd(cdc *codec.Codec) *cobra.Command {
 func readBonusAccountFromViper() (auth.Account, tmcrypto.PrivKey, error) {
 	privKey, err := util.Secp256k1FromHex(viper.GetString("private-key"))
 	if err != nil {
-		return nil, nil, fmt.Errorf("private key: %s\n", err)
+		return nil, nil, fmt.Errorf("private key: %s", err)
 	}
 
 	// retrieve the bonus account
 	addr := sdk.AccAddress(privKey.PubKey().Address())
 	bonusAccount, err := longyClnt.GetAccount(addr)
 	if err != nil {
-		return nil, nil, fmt.Errorf("retrieving bonus account: %s\n", err)
+		return nil, nil, fmt.Errorf("retrieving bonus account: %s", err)
 	}
 
 	return bonusAccount, privKey, nil
 }
 
 func createAuthTx(
-	cdc *codec.Codec,
 	msg sdk.Msg,
 	privKey tmcrypto.PrivKey,
 	chainID string,
