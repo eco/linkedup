@@ -26,9 +26,10 @@ func init() {
 	var isAuthSet bool
 	authToken, isAuthSet = os.LookupEnv(EmailAuthEnvKey)
 	if !isAuthSet {
-		panic("auth token for email not set, set EMAIL_AUTH in env vars")
+		authToken = ""
+		log.Errorf("environment variable %s not set!", EmailAuthEnvKey)
 	} else {
-		fmt.Println("email auth token set to env variable")
+		log.Info("email auth token set to env variable")
 	}
 }
 
