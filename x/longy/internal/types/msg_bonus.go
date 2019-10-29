@@ -11,15 +11,15 @@ var _ sdk.Msg = MsgClearBonus{}
 
 // MsgBonus triggers a bonus period
 type MsgBonus struct {
-	MasterAddress sdk.AccAddress `json:"masterAddress"`
-	Multiplier    uint           `json:"multiplier"`
+	BonusServiceAddress sdk.AccAddress `json:"bonus_service_address"`
+	Multiplier          uint           `json:"multiplier"`
 }
 
 // NewMsgBonus -
-func NewMsgBonus(multiplier uint, masterAddr sdk.AccAddress) MsgBonus {
+func NewMsgBonus(multiplier uint, addr sdk.AccAddress) MsgBonus {
 	return MsgBonus{
-		MasterAddress: masterAddr,
-		Multiplier:    multiplier,
+		BonusServiceAddress: addr,
+		Multiplier:          multiplier,
 	}
 }
 
@@ -36,8 +36,8 @@ func (msg MsgBonus) Type() string {
 // ValidateBasic -
 func (msg MsgBonus) ValidateBasic() sdk.Error {
 	switch {
-	case msg.MasterAddress.Empty():
-		return sdk.ErrInvalidAddress("unset master address")
+	case msg.BonusServiceAddress.Empty():
+		return sdk.ErrInvalidAddress("unset bonus service address")
 	case msg.Multiplier == 0:
 		return ErrDefault("zero multiplier")
 	}
@@ -47,7 +47,7 @@ func (msg MsgBonus) ValidateBasic() sdk.Error {
 
 // GetSigners -
 func (msg MsgBonus) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.MasterAddress}
+	return []sdk.AccAddress{msg.BonusServiceAddress}
 }
 
 // GetSignBytes -
@@ -60,13 +60,13 @@ func (msg MsgBonus) GetSignBytes() []byte {
 
 // MsgClearBonus -
 type MsgClearBonus struct {
-	MasterAddress sdk.AccAddress `json:"masterAddress"`
+	BonusServiceAddress sdk.AccAddress `json:"bonus_service_address"`
 }
 
 // NewMsgClearBonus -
-func NewMsgClearBonus(masterAddr sdk.AccAddress) MsgClearBonus {
+func NewMsgClearBonus(addr sdk.AccAddress) MsgClearBonus {
 	return MsgClearBonus{
-		MasterAddress: masterAddr,
+		BonusServiceAddress: addr,
 	}
 }
 
@@ -82,8 +82,8 @@ func (msg MsgClearBonus) Type() string {
 
 // ValidateBasic -
 func (msg MsgClearBonus) ValidateBasic() sdk.Error {
-	if msg.MasterAddress.Empty() {
-		return sdk.ErrInvalidAddress("empty master address")
+	if msg.BonusServiceAddress.Empty() {
+		return sdk.ErrInvalidAddress("empty bonus service address")
 	}
 
 	return nil
@@ -91,7 +91,7 @@ func (msg MsgClearBonus) ValidateBasic() sdk.Error {
 
 // GetSigners -
 func (msg MsgClearBonus) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.MasterAddress}
+	return []sdk.AccAddress{msg.BonusServiceAddress}
 }
 
 // GetSignBytes -

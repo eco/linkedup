@@ -114,8 +114,8 @@ func handleMsgClaimKey(ctx sdk.Context, k Keeper, msg types.MsgClaimKey) sdk.Res
 //nolint
 func handleBonus(ctx sdk.Context, k Keeper, msg types.MsgBonus) sdk.Result {
 	// verify that only the master account can send this message
-	if !k.IsServiceAccount(ctx, msg.MasterAddress) {
-		return types.ErrInsufficientPrivileges("only the service account can call this").Result()
+	if !k.IsBonusServiceAccount(ctx, msg.BonusServiceAddress) {
+		return types.ErrInsufficientPrivileges("only the bonus service account can call this").Result()
 	}
 
 	// check if a bonus is already live
@@ -133,8 +133,8 @@ func handleBonus(ctx sdk.Context, k Keeper, msg types.MsgBonus) sdk.Result {
 //nolint
 func handleClearBonus(ctx sdk.Context, k Keeper, msg types.MsgClearBonus) sdk.Result {
 	// verify that only the master account can send this message
-	if !k.IsServiceAccount(ctx, msg.MasterAddress) {
-		return types.ErrInsufficientPrivileges("only the service account can call this").Result()
+	if !k.IsBonusServiceAccount(ctx, msg.BonusServiceAddress) {
+		return types.ErrInsufficientPrivileges("only the bonus service account can call this").Result()
 	}
 
 	if !k.HasLiveBonus(ctx) {
