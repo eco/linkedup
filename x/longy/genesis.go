@@ -77,9 +77,11 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, state GenesisState) {
 		if serviceAccount == nil {
 			panic("service account must be set in genesis")
 		}
-	} else if err := serviceAccount.SetPubKey(state.KeyService.PubKey); err != nil {
+	}
+	if err := serviceAccount.SetPubKey(state.KeyService.PubKey); err != nil {
 		panic(err)
-	} else if _, err := coinKeeper.AddCoins(ctx, state.KeyService.Address, coins); err != nil {
+	}
+	if _, err := coinKeeper.AddCoins(ctx, state.KeyService.Address, coins); err != nil {
 		panic(err)
 	}
 	accountKeeper.SetAccount(ctx, serviceAccount)
@@ -91,9 +93,11 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, state GenesisState) {
 		if bonusAccount == nil {
 			panic("bonus account must be set in genesis")
 		}
-	} else if err := bonusAccount.SetPubKey(state.BonusService.PubKey); err != nil {
+	}
+	if err := bonusAccount.SetPubKey(state.BonusService.PubKey); err != nil {
 		panic(err)
-	} else if _, err := coinKeeper.AddCoins(ctx, state.BonusService.Address, coins); err != nil {
+	}
+	if _, err := coinKeeper.AddCoins(ctx, state.BonusService.Address, coins); err != nil {
 		panic(err)
 	}
 	accountKeeper.SetAccount(ctx, bonusAccount)

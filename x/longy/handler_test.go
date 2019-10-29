@@ -37,6 +37,9 @@ var _ = Describe("Longy Handler Tests", func() {
 			KeyService: types.GenesisService{
 				Address: masterAddr,
 			},
+			BonusService: types.GenesisService{
+				Address: util.IDToAddress("foo"),
+			},
 			Attendees: []types.Attendee{
 				et.ToGenesisAttendee(),
 			},
