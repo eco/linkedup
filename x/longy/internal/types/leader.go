@@ -21,10 +21,10 @@ type Tier struct {
 
 //LeaderBoard is the leader board struct
 type LeaderBoard struct {
-	TotalCount int  `json:"totalCount"`
-	Tier1      Tier `json:"tier1"`
-	Tier2      Tier `json:"tier2"`
-	Time       time.Time
+	TotalCount int       `json:"totalCount"`
+	Tier1      Tier      `json:"tier1"`
+	Tier2      Tier      `json:"tier2"`
+	Time       time.Time `json:"time"`
 }
 
 //NewLeaderBoard returns an initialized leader board with some constants
