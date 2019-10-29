@@ -37,14 +37,14 @@ var longyTxCmd = &cobra.Command{
 //GetTxCmd returns all of the commands to post transaction to the longy module
 func GetTxCmd(cdc *codec.Codec) *cobra.Command {
 	longyTxCmd.AddCommand(
-		createBonusCmd(cdc),
-		clearBonusCmd(cdc),
+		createBonusCmd(),
+		clearBonusCmd(),
 	)
 
 	return longyTxCmd
 }
 
-func createBonusCmd(cdc *codec.Codec) *cobra.Command {
+func createBonusCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "create-bonus <multiplier>",
 		Short: "create a bonus for sponsor scans",
@@ -89,7 +89,7 @@ func createBonusCmd(cdc *codec.Codec) *cobra.Command {
 	}
 }
 
-func clearBonusCmd(cdc *codec.Codec) *cobra.Command {
+func clearBonusCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "clear-bonus",
 		Short: "clear the bonus period",
