@@ -15,10 +15,14 @@ const (
 
 	//Tier is the rep needed to be in that tier level
 	Tier1Rep uint = 5  //20
-	Tier2Rep uint = 9  //50
-	Tier3Rep uint = 14 //100
-	Tier4Rep uint = 18 //350
-	Tier5Rep uint = 22 //400
+	Tier2Rep uint = 9  //30
+	Tier3Rep uint = 14 //40
+	Tier4Rep uint = 18 //50
+	Tier5Rep uint = 22 //75
+	Tier6Rep uint = 24 //100
+	Tier7Rep uint = 28 //125
+	Tier8Rep uint = 30 //170
+	Tier9Rep uint = 32 //220
 )
 
 //nolint:golint
@@ -29,14 +33,19 @@ const (
 	Tier3
 	Tier4
 	Tier5
+	Tier6
+	Tier7
+	Tier8
+	Tier9
 )
 
 //Prize is the genesis type for the prizes
 type Prize struct {
-	Tier      uint   `json:"tier"`
-	RepNeeded uint   `json:"repNeeded"`
-	PrizeText string `json:"prizeText"`
-	Quantity  int    `json:"quantity"`
+	Tier             uint   `json:"tier"`
+	RepNeeded        uint   `json:"repNeeded"`
+	PrizeText        string `json:"prizeText"`
+	PrizeDescription string `json:"prizeDescription"`
+	Quantity         int    `json:"quantity"`
 }
 
 //Win is the type for the prizes that an attendee has earned playing the game

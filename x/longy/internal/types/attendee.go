@@ -80,6 +80,7 @@ func (a *Attendee) ClaimWinning(tier uint) (claimed bool) {
 }
 
 //GetTier returns the tier group that an attendee is in based on their rep value
+//nolint:gocyclo
 func (a *Attendee) GetTier() uint {
 	switch {
 	case a.Rep < Tier1Rep:
@@ -92,8 +93,16 @@ func (a *Attendee) GetTier() uint {
 		return Tier3
 	case a.Rep < Tier5Rep:
 		return Tier4
-	default:
+	case a.Rep < Tier6Rep:
 		return Tier5
+	case a.Rep < Tier7Rep:
+		return Tier6
+	case a.Rep < Tier8Rep:
+		return Tier7
+	case a.Rep < Tier9Rep:
+		return Tier8
+	default:
+		return Tier9
 	}
 }
 

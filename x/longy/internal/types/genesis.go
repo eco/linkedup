@@ -36,34 +36,85 @@ func GetPrizeIDByTier(tier uint) []byte {
 func GetGenesisPrizes() GenesisPrizes {
 	return GenesisPrizes{
 		Prize{
-			Tier:      Tier1,
-			RepNeeded: Tier1Rep,
-			PrizeText: "Nano Ledger",
-			Quantity:  400,
+			Tier:             Tier1,
+			RepNeeded:        Tier1Rep,
+			PrizeText:        "Pocket Bitcoin White Paper",
+			PrizeDescription: "A pocket edition of the Bitcoin white paper by Satoshi Nakamoto",
+			Quantity:         150,
 		},
 		Prize{
 			Tier:      Tier2,
 			RepNeeded: Tier2Rep,
-			PrizeText: "Key Keeper",
-			Quantity:  200,
+			PrizeText: "5 Kong Notes",
+			PrizeDescription: "Kong is the first crypto-cash; it combines state-of-the-art secure elements, " +
+				"groundbreaking flex PCBs, and time-locked smart contracts. You can keep it in your pocket, or " +
+				"spend it just like cash. No transaction fees, no paper trail. Kong does for cash what Bitcoin did " +
+				"for money -- it opens the floodgates for the next billion crypto users.",
+			Quantity: 200,
 		},
 		Prize{
 			Tier:      Tier3,
 			RepNeeded: Tier3Rep,
-			PrizeText: "Customized SFBW Week Shirt",
-			Quantity:  150,
+			PrizeText: "Ledger Nano S",
+			PrizeDescription: "Securely hold your crypto assets. The Ledger Nano S is built around the most secure " +
+				"type of chip on the market, ensuring optimal security for your crypto.",
+			Quantity: 300,
 		},
 		Prize{
 			Tier:      Tier4,
 			RepNeeded: Tier4Rep,
-			PrizeText: "Customized SFBW Physical Coins",
-			Quantity:  100,
+			PrizeText: "20 KONG Notes",
+			PrizeDescription: "Kong is the first crypto-cash; it combines state-of-the-art secure elements, " +
+				"groundbreaking flex PCBs, and time-locked smart contracts. You can keep it in your pocket, or " +
+				"spend it just like cash. No transaction fees, no paper trail. Kong does for cash what Bitcoin did " +
+				"for money -- it opens the floodgates for the next billion crypto users.",
+			Quantity: 50,
 		},
 		Prize{
 			Tier:      Tier5,
 			RepNeeded: Tier5Rep,
-			PrizeText: "Artwork",
-			Quantity:  50,
+			PrizeText: "100 KONG Notes",
+			PrizeDescription: "Kong is the first crypto-cash; it combines state-of-the-art secure elements, " +
+				"groundbreaking flex PCBs, and time-locked smart contracts. You can keep it in your pocket, or " +
+				"spend it just like cash. No transaction fees, no paper trail. Kong does for cash what Bitcoin did " +
+				"for money -- it opens the floodgates for the next billion crypto users.",
+			Quantity: 150,
+		}, Prize{
+			Tier:             Tier6,
+			RepNeeded:        Tier6Rep,
+			PrizeText:        "Customized SFBW Physical Coin",
+			PrizeDescription: "Limited Edition SFBW 2019 Physical Coin",
+			Quantity:         100,
+		}, Prize{
+			Tier:      Tier7,
+			RepNeeded: Tier7Rep,
+			PrizeDescription: "KeyKeep Hardware Wallet\n" +
+				"PIN protection against unauthorized use\n" +
+				"Additional passphrase protection\n" +
+				"Customizable transaction speeds\n" +
+				"Limitless wallet addresses on one device",
+			Quantity: 100,
+		}, Prize{
+			Tier:      Tier8,
+			RepNeeded: Tier8Rep,
+			PrizeText: "Customized SFBW Week Shirt",
+			PrizeDescription: "SF Blockchain Week - Assorted Color and Size\n" +
+				"Unisex\n" +
+				"100% combed and ring-spun cotton (heather colors contain polyester)\n" +
+				"Fabric weight: 4.2 oz (142 g/m2)\n" +
+				"Shoulder-to-shoulder taping\n" +
+				"Side-seamed\n" +
+				"Assorted sizes and colors",
+			Quantity: 150,
+		}, Prize{
+			Tier:      Tier9,
+			RepNeeded: Tier9Rep,
+			PrizeText: "Nakamoto by Cryptograffiti",
+			PrizeDescription: "Nakamoto print by cryptograffiti\n" +
+				"Signed and numbered, limited-edition of 100\n" +
+				"11 in x 13 in (28 cm x 33 cm)\n" +
+				"Aqueous pigment fine art, semi-gloss archival rag print",
+			Quantity: 1,
 		},
 	}
 }

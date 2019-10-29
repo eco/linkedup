@@ -1,5 +1,7 @@
 package types
 
+import "time"
+
 const (
 	//LeaderBoardCount is the total number of attendees on the board
 	LeaderBoardCount = 30
@@ -19,9 +21,10 @@ type Tier struct {
 
 //LeaderBoard is the leader board struct
 type LeaderBoard struct {
-	TotalCount int  `json:"totalCount"`
-	Tier1      Tier `json:"tier1"`
-	Tier2      Tier `json:"tier2"`
+	TotalCount int       `json:"totalCount"`
+	Tier1      Tier      `json:"tier1"`
+	Tier2      Tier      `json:"tier2"`
+	Time       time.Time `json:"time"`
 }
 
 //NewLeaderBoard returns an initialized leader board with some constants
