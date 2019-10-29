@@ -56,7 +56,7 @@ func ValidateGenesis(data GenesisState) error {
 }
 
 // InitGenesis will run module initialization using the genesis state
-//nolint:gocritic
+//nolint:gocritic,gocylco
 func InitGenesis(ctx sdk.Context, k keeper.Keeper, state GenesisState) {
 	// create and set of all the attendees and cosmos accounts
 	accountKeeper := k.AccountKeeper()
