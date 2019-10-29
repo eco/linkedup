@@ -219,7 +219,7 @@ var _ = Describe("Attendee Keeper Tests", func() {
 						p2, err := keeper.GetPrize(ctx, prize2.GetID())
 						Expect(err).To(BeNil())
 
-						Expect(p1.Quantity).To(Equal(0))
+						Expect(p1.Quantity).To(Equal(uint(0)))
 						Expect(p2.Quantity).To(Equal(prize2.Quantity - 1))
 					})
 				})

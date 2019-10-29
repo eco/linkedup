@@ -40,7 +40,7 @@ func GetGenesisPrizes() GenesisPrizes {
 			RepNeeded:        Tier1Rep,
 			PrizeText:        "Pocket Bitcoin White Paper",
 			PrizeDescription: "A pocket edition of the Bitcoin white paper by Satoshi Nakamoto",
-			Quantity:         150,
+			Quantity:         Tier1Quantity,
 		},
 		Prize{
 			Tier:      Tier2,
@@ -50,7 +50,7 @@ func GetGenesisPrizes() GenesisPrizes {
 				"groundbreaking flex PCBs, and time-locked smart contracts. You can keep it in your pocket, or " +
 				"spend it just like cash. No transaction fees, no paper trail. Kong does for cash what Bitcoin did " +
 				"for money -- it opens the floodgates for the next billion crypto users.",
-			Quantity: 200,
+			Quantity: Tier2Quantity,
 		},
 		Prize{
 			Tier:      Tier3,
@@ -58,7 +58,7 @@ func GetGenesisPrizes() GenesisPrizes {
 			PrizeText: "Ledger Nano S",
 			PrizeDescription: "Securely hold your crypto assets. The Ledger Nano S is built around the most secure " +
 				"type of chip on the market, ensuring optimal security for your crypto.",
-			Quantity: 300,
+			Quantity: Tier3Quantity,
 		},
 		Prize{
 			Tier:      Tier4,
@@ -68,7 +68,7 @@ func GetGenesisPrizes() GenesisPrizes {
 				"groundbreaking flex PCBs, and time-locked smart contracts. You can keep it in your pocket, or " +
 				"spend it just like cash. No transaction fees, no paper trail. Kong does for cash what Bitcoin did " +
 				"for money -- it opens the floodgates for the next billion crypto users.",
-			Quantity: 50,
+			Quantity: Tier4Quantity,
 		},
 		Prize{
 			Tier:      Tier5,
@@ -78,13 +78,13 @@ func GetGenesisPrizes() GenesisPrizes {
 				"groundbreaking flex PCBs, and time-locked smart contracts. You can keep it in your pocket, or " +
 				"spend it just like cash. No transaction fees, no paper trail. Kong does for cash what Bitcoin did " +
 				"for money -- it opens the floodgates for the next billion crypto users.",
-			Quantity: 150,
+			Quantity: Tier5Quantity,
 		}, Prize{
 			Tier:             Tier6,
 			RepNeeded:        Tier6Rep,
 			PrizeText:        "Customized SFBW Physical Coin",
 			PrizeDescription: "Limited Edition SFBW 2019 Physical Coin",
-			Quantity:         100,
+			Quantity:         Tier6Quantity,
 		}, Prize{
 			Tier:      Tier7,
 			RepNeeded: Tier7Rep,
@@ -93,7 +93,7 @@ func GetGenesisPrizes() GenesisPrizes {
 				"Additional passphrase protection\n" +
 				"Customizable transaction speeds\n" +
 				"Limitless wallet addresses on one device",
-			Quantity: 100,
+			Quantity: Tier7Quantity,
 		}, Prize{
 			Tier:      Tier8,
 			RepNeeded: Tier8Rep,
@@ -105,7 +105,7 @@ func GetGenesisPrizes() GenesisPrizes {
 				"Shoulder-to-shoulder taping\n" +
 				"Side-seamed\n" +
 				"Assorted sizes and colors",
-			Quantity: 150,
+			Quantity: Tier8Quantity,
 		}, Prize{
 			Tier:      Tier9,
 			RepNeeded: Tier9Rep,
@@ -114,7 +114,7 @@ func GetGenesisPrizes() GenesisPrizes {
 				"Signed and numbered, limited-edition of 100\n" +
 				"11 in x 13 in (28 cm x 33 cm)\n" +
 				"Aqueous pigment fine art, semi-gloss archival rag print",
-			Quantity: 1,
+			Quantity: Tier9Quantity,
 		},
 	}
 }
