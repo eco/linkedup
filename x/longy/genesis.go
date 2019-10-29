@@ -23,9 +23,10 @@ func DefaultGenesisState() GenesisState {
 }
 
 //NewGenesisState returns a genesis object of the state given the input params
-func NewGenesisState(service GenesisService, attendees []types.Attendee, scans []types.Scan,
-	prizes types.GenesisPrizes) GenesisState {
-	return GenesisState{KeyService: service, Attendees: attendees, Scans: scans, Prizes: prizes}
+func NewGenesisState(service GenesisService, bonusService GenesisService,
+	attendees []types.Attendee, scans []types.Scan, prizes types.GenesisPrizes) GenesisState {
+	return GenesisState{KeyService: service, BonusService: bonusService,
+		Attendees: attendees, Scans: scans, Prizes: prizes}
 }
 
 // ValidateGenesis validates that the passed genesis state is valid
@@ -133,8 +134,9 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, state GenesisState) {
 //nolint:gocritic
 func ExportGenesis(ctx sdk.Context, k Keeper) GenesisState {
 	service := k.GetService(ctx)
+	bonusService := k.GetBonusService(ctx)
 	attendees := k.GetAllAttendees(ctx)
 	scans := k.GetAllScans(ctx)
 	prizes, _ := k.GetPrizes(ctx)
-	return NewGenesisState(service, attendees, scans, prizes)
+	return NewGenesisState(service, bonusService, attendees, scans, prizes)
 }

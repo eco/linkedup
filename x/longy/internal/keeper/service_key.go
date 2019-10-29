@@ -43,7 +43,27 @@ func (k *Keeper) GetService(ctx sdk.Context) types.GenesisService {
 	serviceAccount := k.accountKeeper.GetAccount(ctx, address)
 	if serviceAccount == nil {
 		return types.GenesisService{}
+	}
 
+	return types.GenesisService{
+		Address: serviceAccount.GetAddress(),
+		PubKey:  serviceAccount.GetPubKey(),
+	}
+}
+
+// GetBonusService retrieves the service account and returns it
+//nolint:gocritic
+func (k *Keeper) GetBonusService(ctx sdk.Context) types.GenesisService {
+	key := types.BonusServiceKey()
+	bz, err := k.Get(ctx, key)
+	if err != nil {
+		return types.GenesisService{}
+	}
+	address := sdk.AccAddress(bz)
+
+	serviceAccount := k.accountKeeper.GetAccount(ctx, address)
+	if serviceAccount == nil {
+		return types.GenesisService{}
 	}
 
 	return types.GenesisService{

@@ -20,10 +20,11 @@ var _ = Describe("Genesis Tests", func() {
 	Context("ValidateGenesis", func() {
 		It("should fail to validate when service is not set", func() {
 			state := longy.GenesisState{
-				KeyService: longy.GenesisService{},
-				Attendees:  nil,
-				Scans:      nil,
-				Prizes:     nil,
+				KeyService:   longy.GenesisService{},
+				BonusService: longy.GenesisService{},
+				Attendees:    nil,
+				Scans:        nil,
+				Prizes:       nil,
 			}
 			err := longy.ValidateGenesis(state)
 			Expect(err).ToNot(BeNil())
@@ -33,6 +34,10 @@ var _ = Describe("Genesis Tests", func() {
 			state := longy.GenesisState{
 				KeyService: longy.GenesisService{
 					Address: util.IDToAddress("asdf"),
+					PubKey:  secp.GenPrivKeySecp256k1([]byte("service")).PubKey(),
+				},
+				BonusService: longy.GenesisService{
+					Address: util.IDToAddress("foo"),
 					PubKey:  secp.GenPrivKeySecp256k1([]byte("service")).PubKey(),
 				},
 				Attendees: nil,
@@ -49,6 +54,10 @@ var _ = Describe("Genesis Tests", func() {
 					Address: util.IDToAddress("asdf"),
 					PubKey:  secp.GenPrivKeySecp256k1([]byte("service")).PubKey(),
 				},
+				BonusService: longy.GenesisService{
+					Address: util.IDToAddress("foo"),
+					PubKey:  secp.GenPrivKeySecp256k1([]byte("service")).PubKey(),
+				},
 				Attendees: longy.GenesisAttendees{},
 				Scans:     nil,
 				Prizes:    nil,
@@ -61,6 +70,10 @@ var _ = Describe("Genesis Tests", func() {
 			state := longy.GenesisState{
 				KeyService: longy.GenesisService{
 					Address: util.IDToAddress("asdf"),
+					PubKey:  secp.GenPrivKeySecp256k1([]byte("service")).PubKey(),
+				},
+				BonusService: longy.GenesisService{
+					Address: util.IDToAddress("foo"),
 					PubKey:  secp.GenPrivKeySecp256k1([]byte("service")).PubKey(),
 				},
 				Attendees: longy.GenesisAttendees{},
@@ -83,20 +96,38 @@ var _ = Describe("Genesis Tests", func() {
 				Address: util.IDToAddress("asdf"),
 				PubKey:  secp.GenPrivKeySecp256k1([]byte("service")).PubKey(),
 			}
+			bonusService := longy.GenesisService{
+				Address: util.IDToAddress("foo"),
+				PubKey:  secp.GenPrivKeySecp256k1([]byte("service")).PubKey(),
+			}
 			account := keeper.AccountKeeper().NewAccountWithAddress(ctx, service.Address)
+			bonusAcc := keeper.AccountKeeper().NewAccountWithAddress(ctx, bonusService.Address)
 			keeper.AccountKeeper().SetAccount(ctx, account)
+			keeper.AccountKeeper().SetAccount(ctx, bonusAcc)
 
 			err := keeper.SetServiceAddress(ctx, service.Address)
 			Expect(err).To(BeNil())
+			err = keeper.SetBonusServiceAddress(ctx, bonusService.Address)
+			Expect(err).To(BeNil())
+
 			acc := keeper.AccountKeeper().GetAccount(ctx, service.Address)
-			e := acc.SetPubKey(service.PubKey)
-			Expect(e).To(BeNil())
+			err = acc.SetPubKey(service.PubKey)
+			Expect(err).To(BeNil())
+			keeper.AccountKeeper().SetAccount(ctx, acc)
+
+			acc = keeper.AccountKeeper().GetAccount(ctx, bonusService.Address)
+			err = acc.SetPubKey(bonusService.PubKey)
+			Expect(err).To(BeNil())
 			keeper.AccountKeeper().SetAccount(ctx, acc)
 
 			genesis := longy.ExportGenesis(ctx, keeper)
 			Expect(genesis.KeyService).ToNot(BeNil())
 			Expect(genesis.KeyService.PubKey).To(Equal(service.PubKey))
 			Expect(genesis.KeyService.Address.Equals(service.Address)).To(BeTrue())
+
+			Expect(genesis.BonusKeyService).ToNot(BeNil())
+			Expect(genesis.BonusKeyService.PubKey).To(Equal(bonusService.PubKey))
+			Expect(genesis.BonusKeyService.Address.Equals(bonusService.Address)).To(BeTrue())
 		})
 
 		It("should export the attendees", func() {
@@ -140,6 +171,10 @@ var _ = Describe("Genesis Tests", func() {
 		var service longy.GenesisService
 		var serviceAddr sdk.AccAddress
 		var servicePubKey crypto.PubKey
+
+		var bonusService longy.GenesisService
+		var bonusServiceAddr sdk.AccAddress
+		var bonusServicePubKey crypto.PubKey
 		BeforeEach(func() {
 			serviceAddr = util.IDToAddress("asdf")
 			servicePubKey = secp.GenPrivKeySecp256k1([]byte("service")).PubKey()
@@ -147,14 +182,22 @@ var _ = Describe("Genesis Tests", func() {
 				Address: serviceAddr,
 				PubKey:  servicePubKey,
 			}
+
+			bonusServiceAddr = util.IDToAddress("foo")
+			bonusServicePubKey = secp.GenPrivKeySecp256k1([]byte("service")).PubKey()
+			bonusService = longy.GenesisService{
+				Address: bonusServiceAddr,
+				PubKey:  bonusServicePubKey,
+			}
 		})
 		It("should init the key service", func() {
 
 			state := longy.GenesisState{
-				KeyService: service,
-				Attendees:  nil,
-				Scans:      nil,
-				Prizes:     nil,
+				KeyService:   service,
+				BonusService: bonusService,
+				Attendees:    nil,
+				Scans:        nil,
+				Prizes:       nil,
 			}
 
 			longy.InitGenesis(ctx, keeper, state)
@@ -164,6 +207,13 @@ var _ = Describe("Genesis Tests", func() {
 			Expect(s.Address.Equals(serviceAddr)).To(BeTrue())
 			Expect(s.PubKey).To(Equal(servicePubKey))
 			acc := keeper.AccountKeeper().GetAccount(ctx, s.Address)
+			Expect(acc).ToNot(BeNil())
+
+			s = keeper.GetBonusService(ctx)
+			Expect(s).ToNot(BeNil())
+			Expect(s.Address.Equals(bonusServiceAddress)).To(BeTrue())
+			Expect(s.PubKey).To(Equal(bonusServicePubKey))
+			acc = keeper.AccountKeeper().GetAccount(ctx, s.Address)
 			Expect(acc).ToNot(BeNil())
 		})
 
@@ -185,7 +235,8 @@ var _ = Describe("Genesis Tests", func() {
 				Claimed: true,
 			}}
 			state := longy.GenesisState{
-				KeyService: service,
+				KeyService:   service,
+				BonusService: bonusService,
 				Attendees: longy.GenesisAttendees{
 					a.ToGenesisAttendee(),
 					ba,
@@ -212,10 +263,11 @@ var _ = Describe("Genesis Tests", func() {
 			scan, err := types.NewScan(s1, s2, d1, d2, 1, 2)
 			Expect(err).To(BeNil())
 			state := longy.GenesisState{
-				KeyService: service,
-				Attendees:  nil,
-				Scans:      longy.GenesisScans{*scan},
-				Prizes:     nil,
+				KeyService:   service,
+				BonusService: bonusService,
+				Attendees:    nil,
+				Scans:        longy.GenesisScans{*scan},
+				Prizes:       nil,
 			}
 			longy.InitGenesis(ctx, keeper, state)
 
@@ -230,10 +282,11 @@ var _ = Describe("Genesis Tests", func() {
 		It("should init the prizes", func() {
 			prizes := types.GetGenesisPrizes()
 			state := longy.GenesisState{
-				KeyService: service,
-				Attendees:  nil,
-				Scans:      nil,
-				Prizes:     prizes,
+				KeyService:   service,
+				BonusService: bonusService,
+				Attendees:    nil,
+				Scans:        nil,
+				Prizes:       prizes,
 			}
 
 			longy.InitGenesis(ctx, keeper, state)
