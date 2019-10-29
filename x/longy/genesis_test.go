@@ -111,13 +111,13 @@ var _ = Describe("Genesis Tests", func() {
 			Expect(err).To(BeNil())
 
 			acc := keeper.AccountKeeper().GetAccount(ctx, service.Address)
-			err = acc.SetPubKey(service.PubKey)
-			Expect(err).To(BeNil())
+			e := acc.SetPubKey(service.PubKey)
+			Expect(e).To(BeNil())
 			keeper.AccountKeeper().SetAccount(ctx, acc)
 
 			acc = keeper.AccountKeeper().GetAccount(ctx, bonusService.Address)
-			err = acc.SetPubKey(bonusService.PubKey)
-			Expect(err).To(BeNil())
+			e = acc.SetPubKey(bonusService.PubKey)
+			Expect(e).To(BeNil())
 			keeper.AccountKeeper().SetAccount(ctx, acc)
 
 			genesis := longy.ExportGenesis(ctx, keeper)
@@ -125,9 +125,9 @@ var _ = Describe("Genesis Tests", func() {
 			Expect(genesis.KeyService.PubKey).To(Equal(service.PubKey))
 			Expect(genesis.KeyService.Address.Equals(service.Address)).To(BeTrue())
 
-			Expect(genesis.BonusKeyService).ToNot(BeNil())
-			Expect(genesis.BonusKeyService.PubKey).To(Equal(bonusService.PubKey))
-			Expect(genesis.BonusKeyService.Address.Equals(bonusService.Address)).To(BeTrue())
+			Expect(genesis.BonusService).ToNot(BeNil())
+			Expect(genesis.BonusService.PubKey).To(Equal(bonusService.PubKey))
+			Expect(genesis.BonusService.Address.Equals(bonusService.Address)).To(BeTrue())
 		})
 
 		It("should export the attendees", func() {
@@ -211,8 +211,8 @@ var _ = Describe("Genesis Tests", func() {
 
 			s = keeper.GetBonusService(ctx)
 			Expect(s).ToNot(BeNil())
-			Expect(s.Address.Equals(bonusServiceAddress)).To(BeTrue())
-			Expect(s.PubKey).To(Equal(bonusServicePubKey))
+			Expect(s.Address.Equals(bonusService.Address)).To(BeTrue())
+			Expect(s.PubKey).To(Equal(bonusService.PubKey))
 			acc = keeper.AccountKeeper().GetAccount(ctx, s.Address)
 			Expect(acc).ToNot(BeNil())
 		})
