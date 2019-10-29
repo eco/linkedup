@@ -14,6 +14,7 @@ require (
 	github.com/mattn/go-isatty v0.0.9 // indirect
 	github.com/onsi/ginkgo v1.10.2
 	github.com/onsi/gomega v1.7.0
+	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/pelletier/go-toml v1.5.0 // indirect
 	github.com/prometheus/client_golang v1.1.0 // indirect
 	github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4 // indirect
