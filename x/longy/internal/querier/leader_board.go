@@ -28,6 +28,7 @@ func leaderBoard(ctx sdk.Context, keeper keeper.Keeper) (res []byte, err sdk.Err
 		top[i] = types.Attendee{
 			ID:      top[i].ID,
 			Address: top[i].Address,
+			Name:    top[i].Name,
 			Rep:     top[i].Rep,
 		}
 	}
