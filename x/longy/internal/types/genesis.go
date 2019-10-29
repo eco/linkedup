@@ -88,6 +88,7 @@ func GetGenesisPrizes() GenesisPrizes {
 		}, Prize{
 			Tier:      Tier7,
 			RepNeeded: Tier7Rep,
+			PrizeText: "KeyKeep Wallet",
 			PrizeDescription: "KeyKeep Hardware Wallet\n" +
 				"PIN protection against unauthorized use\n" +
 				"Additional passphrase protection\n" +
