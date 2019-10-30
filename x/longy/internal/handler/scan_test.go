@@ -17,6 +17,12 @@ var _ = Describe("Scan Handler Tests", func() {
 		//create public account addresses
 		sender = util.IDToAddress(qr1)
 		receiver = util.IDToAddress(qr2)
+
+		//set prizes since they can move tiers on claim for the beta testing
+		prizes := types.GetGenesisPrizes()
+		for i := range prizes {
+			keeper.SetPrize(ctx, &prizes[i])
+		}
 	})
 
 	It("should fail when attendee for qr code does not exist", func() {
@@ -44,14 +50,14 @@ var _ = Describe("Scan Handler Tests", func() {
 	})
 
 	It("should succeed to create a new scan record without data", func() {
-		createScan(qr1, qr2, sender, receiver, nil, false)
+		createScan(qr1, qr2, sender, receiver, nil, false, false)
 		inspectScan(sender, receiver, 0, 0, false)
 
 	})
 
 	It("should succeed to create a new scan record with data", func() {
 		data := []byte("asdfasdfa")
-		createScan(qr1, qr2, sender, receiver, data, false)
+		createScan(qr1, qr2, sender, receiver, data, false, false)
 		inspectScan(sender, receiver, 0, 0, false)
 	})
 
@@ -59,15 +65,9 @@ var _ = Describe("Scan Handler Tests", func() {
 		var data []byte
 		BeforeEach(func() {
 			//Add the partial scan to the keeper
-			createScan(qr1, qr2, sender, receiver, nil, false)
+			createScan(qr1, qr2, sender, receiver, nil, false, false)
 			inspectScan(sender, receiver, 0, 0, false)
 			data = []byte("asdfasdfa")
-
-			//set prizes since they can move tiers on claim for the beta testing
-			prizes := types.GetGenesisPrizes()
-			for i := range prizes {
-				keeper.SetPrize(ctx, &prizes[i])
-			}
 		})
 
 		It("should add info for s1 without increment points", func() {
@@ -113,7 +113,7 @@ var _ = Describe("Scan Handler Tests", func() {
 		})
 
 		It("should add scan and share points for s1 and s2 when s2 accepts and one is a sponsor", func() {
-			createScan(qr1, qr2, sender, receiver, nil, true) //make sponsor
+			createScan(qr1, qr2, sender, receiver, nil, true, false) //make sponsor
 			msg := types.NewMsgQrScan(sender, qr2, data)
 			result := handler(ctx, msg)
 			Expect(result.Code).To(Equal(sdk.CodeOK))
@@ -123,6 +123,25 @@ var _ = Describe("Scan Handler Tests", func() {
 			result = handler(ctx, msg)
 			Expect(result.Code).To(Equal(sdk.CodeOK))
 			attendeePoints := types.ScanSponsorAwardPoints + types.ShareSponsorAwardPoints
+			sponsorPoints := types.ScanAttendeeAwardPoints + types.ShareAttendeeAwardPoints
+			inspectScan(sender, receiver, sponsorPoints, attendeePoints, true)
+		})
+
+		It("should add scan and only apply bonus to one that is not a sponsor", func() {
+			bonus := uint(2)
+			keeper.SetBonus(ctx, types.Bonus{Multiplier: bonus})
+			//make sponsor
+			createScan(qr1, qr2, sender, receiver, nil, true, false) //make sponsor
+
+			msg := types.NewMsgQrScan(sender, qr2, data)
+			result := handler(ctx, msg)
+			Expect(result.Code).To(Equal(sdk.CodeOK))
+			inspectScan(sender, receiver, 0, 0, false)
+
+			msg = types.NewMsgQrScan(receiver, qr1, data)
+			result = handler(ctx, msg)
+			Expect(result.Code).To(Equal(sdk.CodeOK))
+			attendeePoints := (types.ScanSponsorAwardPoints + types.ShareSponsorAwardPoints) * bonus
 			sponsorPoints := types.ScanAttendeeAwardPoints + types.ShareAttendeeAwardPoints
 			inspectScan(sender, receiver, sponsorPoints, attendeePoints, true)
 		})
@@ -145,7 +164,7 @@ var _ = Describe("Scan Handler Tests", func() {
 			points := types.ScanAttendeeAwardPoints + types.ShareAttendeeAwardPoints
 			BeforeEach(func() {
 				//Add the partial scan to the keeper
-				createScan(qr1, qr2, sender, receiver, data, false)
+				createScan(qr1, qr2, sender, receiver, data, false, false)
 				inspectScan(sender, receiver, 0, 0, false)
 				msg := types.NewMsgQrScan(receiver, qr1, data)
 				result := handler(ctx, msg)
@@ -176,6 +195,41 @@ var _ = Describe("Scan Handler Tests", func() {
 				Expect(result.Code).To(Equal(sdk.CodeOK))
 				inspectScan(sender, receiver, points, points, true)
 			})
+		})
+	})
+
+	Context("when both attendees are sponsors", func() {
+		BeforeEach(func() {
+			createScan(qr1, qr2, sender, receiver, []byte("asdf"), true, true)
+			inspectScan(sender, receiver, 0, 0, false)
+		})
+
+		It("should not add sponsor scan bonus to a sponsor", func() {
+			msg := types.NewMsgQrScan(receiver, qr1, []byte("asdf"))
+			result := handler(ctx, msg)
+			Expect(result.Code).To(Equal(sdk.CodeOK))
+			points := types.ScanAttendeeAwardPoints + types.ShareAttendeeAwardPoints
+			inspectScan(sender, receiver, points, points, true)
+		})
+
+		It("should not add sponsor scan bonus to a sponsor", func() {
+			msg := types.NewMsgQrScan(receiver, qr1, nil)
+			result := handler(ctx, msg)
+			Expect(result.Code).To(Equal(sdk.CodeOK))
+			p1 := types.ScanAttendeeAwardPoints + types.ShareAttendeeAwardPoints
+			p2 := types.ScanAttendeeAwardPoints
+			inspectScan(sender, receiver, p1, p2, true)
+		})
+
+		It("should not apply bonus multiplier to sponsor scan", func() {
+			bonus := uint(2)
+			keeper.SetBonus(ctx, types.Bonus{Multiplier: bonus})
+			msg := types.NewMsgQrScan(receiver, qr1, nil)
+			result := handler(ctx, msg)
+			Expect(result.Code).To(Equal(sdk.CodeOK))
+			p1 := types.ScanAttendeeAwardPoints + types.ShareAttendeeAwardPoints
+			p2 := types.ScanAttendeeAwardPoints
+			inspectScan(sender, receiver, p1, p2, true)
 		})
 	})
 })
@@ -216,11 +270,11 @@ func inspectScan(s1 sdk.AccAddress, s2 sdk.AccAddress, p1 uint, p2 uint, accepte
 
 //nolint:unparam
 func createScan(qr1 string, qr2 string,
-	s1 sdk.AccAddress, s2 sdk.AccAddress, data []byte, sponsor bool) {
+	s1 sdk.AccAddress, s2 sdk.AccAddress, data []byte, sp1 bool, sp2 bool) {
 	//add sender to keeper
-	utils.AddAttendeeToKeeper(ctx, &keeper, qr1, true, sponsor)
+	utils.AddAttendeeToKeeper(ctx, &keeper, qr1, true, sp1)
 	//add scanned to keeper
-	utils.AddAttendeeToKeeper(ctx, &keeper, qr2, true, false)
+	utils.AddAttendeeToKeeper(ctx, &keeper, qr2, true, sp2)
 
 	msg := types.NewMsgQrScan(s1, qr2, data)
 	result := handler(ctx, msg)
