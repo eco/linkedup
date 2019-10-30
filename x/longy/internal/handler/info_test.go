@@ -50,7 +50,7 @@ var _ = Describe("Info Handler Tests", func() {
 
 			Context("when there is a non-accepted scan", func() {
 				BeforeEach(func() {
-					createScan(qr1, qr2, sender, receiver, nil, false)
+					createScan(qr1, qr2, sender, receiver, nil, false, false)
 					inspectScan(sender, receiver, 0, 0, false)
 
 					//set prizes since they can move tiers on claim for the beta testing
@@ -96,7 +96,7 @@ var _ = Describe("Info Handler Tests", func() {
 				})
 
 				It("should add scan and share points for s1 and s2 when s2 accepts and one is a sponsor", func() {
-					createScan(qr1, qr2, sender, receiver, data, true) //make sponsor
+					createScan(qr1, qr2, sender, receiver, data, true, false) //make sponsor
 					inspectScan(sender, receiver, 0, 0, false)
 					//
 					msg := types.NewMsgInfo(receiver, sender, data)
@@ -111,7 +111,7 @@ var _ = Describe("Info Handler Tests", func() {
 					points := types.ScanAttendeeAwardPoints + types.ShareAttendeeAwardPoints
 					BeforeEach(func() {
 						//Add the partial scan to the keeper
-						createScan(qr1, qr2, sender, receiver, data, false)
+						createScan(qr1, qr2, sender, receiver, data, false, false)
 						inspectScan(sender, receiver, 0, 0, false)
 						msg := types.NewMsgInfo(receiver, sender, data)
 						result := handler(ctx, msg)
