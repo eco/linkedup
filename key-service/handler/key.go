@@ -241,14 +241,14 @@ func keyAndEmail(
 			info.Profile.Email = storedEmail
 		}
 		if useVerification {
-			err = mc.SendVerificationEmail(info.Profile.Email, token)
+			err = mc.SendVerificationEmail(db, info.Profile.Email, token)
 		} else {
 			if onboarding {
 				// onboarding email
-				err = mc.SendOnboardingEmail(info.Address, info.Profile, info.CommitmentSecret, info.ImageUploadURL)
+				err = mc.SendOnboardingEmail(db, info.Address, info.Profile, info.CommitmentSecret, info.ImageUploadURL)
 			} else {
 				// recovery email
-				err = mc.SendRecoveryEmail(info.Profile, idStr, token)
+				err = mc.SendRecoveryEmail(db, info.Profile, idStr, token)
 			}
 		}
 
