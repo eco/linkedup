@@ -1,5 +1,5 @@
 # node
-if [ "$1" = "init" ]; then
+if [ "$CHAIN_INIT" = "init" ]; then
    echo "Initializing the whole chain"
    make init &
 else

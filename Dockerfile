@@ -11,4 +11,4 @@ RUN go mod download
 COPY . /src/
 RUN make clean all
 
-CMD sh scripts/start-all.sh $CHAIN_INIT
+CMD sh scripts/start-all.sh
