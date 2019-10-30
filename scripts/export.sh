@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 echo "Exporting current state of app"
 ../bin/lyd export --for-zero-height > lyd_export.json
 
