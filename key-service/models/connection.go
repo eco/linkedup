@@ -180,7 +180,7 @@ func (db DatabaseContext) GetImageUploadURL(id int) (string, error) {
 		Key:    aws.String(fmt.Sprintf("avatars/%d", id)),
 	})
 
-	result, err := req.Presign(15 * time.Minute)
+	result, err := req.Presign(60 * time.Minute)
 	if err != nil {
 		return "", err
 	}
