@@ -1,5 +1,11 @@
 # node
-make init &
+if [ "$CHAIN_INIT" = "init" ]; then
+   echo "Initializing the whole chain"
+   make init &
+else
+  echo "Redeploying from export state of validator"
+  make redeploy &
+fi
 
 # rest
 sleep 8

@@ -111,6 +111,12 @@ Running the key service with the `--localstack` flag will cause AWS-backed
 drivers to look for LocalStack services on the `localstack` host instead. It
 implies `--email-mock`.
 
+#### Bonus
+Start a bonus period
+`./bin/lycli tx longy create-bonus <multiplier> --longy-rest-url="http://chain.linkedup.sfbw.io"`
+
+End a bonus period
+`./bin/lycli tx longy clear-bonus  --longy-rest-url="https://chain.linkedup.sfbw.io"`
 #### Key Service API
 **Quick & Convenient Endpoints**  
 1. `/ping [GET]` health check. Simply writes a Status 200 along with "pong" in the request body  
