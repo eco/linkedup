@@ -91,10 +91,10 @@ func (k *Keeper) AwardScanPoints(ctx sdk.Context, scan *types.Scan) sdk.Error {
 
 	a1Points := types.ScanAttendeeAwardPoints
 	a2Points := types.ScanAttendeeAwardPoints
-	if a2.Sponsor && !a1.Sponser {
+	if a2.Sponsor && !a1.Sponsor {
 		a1Points = uint(math.Floor(float64(types.ScanSponsorAwardPoints) * multiplier))
 	}
-	if a1.Sponsor && !a2.Sponser {
+	if a1.Sponsor && !a2.Sponsor {
 		a2Points = uint(math.Floor(float64(types.ScanSponsorAwardPoints) * multiplier))
 	}
 
