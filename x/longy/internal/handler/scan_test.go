@@ -128,7 +128,7 @@ var _ = Describe("Scan Handler Tests", func() {
 		})
 
 		It("should add scan and only apply bonus to one that is not a sponsor", func() {
-			bonus := uint(2)
+			bonus := "2"
 			keeper.SetBonus(ctx, types.Bonus{Multiplier: bonus})
 			//make sponsor
 			createScan(qr1, qr2, sender, receiver, nil, true, false) //make sponsor
@@ -222,7 +222,7 @@ var _ = Describe("Scan Handler Tests", func() {
 		})
 
 		It("should not apply bonus multiplier to sponsor scan", func() {
-			bonus := uint(2)
+			bonus := "2"
 			keeper.SetBonus(ctx, types.Bonus{Multiplier: bonus})
 			msg := types.NewMsgQrScan(receiver, qr1, nil)
 			result := handler(ctx, msg)
