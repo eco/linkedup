@@ -11,5 +11,4 @@ echo "Moving exported state to genesis"
 cp lyd_export.json ~/.lyd/config/genesis.json
 
 echo "Restarting the chain"
-$LYD start
-
+$LYD start --rpc.laddr "tcp://0.0.0.0:26657"
