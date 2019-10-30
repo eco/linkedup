@@ -91,10 +91,10 @@ func (k *Keeper) AwardScanPoints(ctx sdk.Context, scan *types.Scan) sdk.Error {
 
 	a1Points := types.ScanAttendeeAwardPoints
 	a2Points := types.ScanAttendeeAwardPoints
-	if a2.Sponsor {
+	if a2.Sponsor && !a1.Sponser {
 		a1Points = uint(math.Floor(float64(types.ScanSponsorAwardPoints) * multiplier))
 	}
-	if a1.Sponsor {
+	if a1.Sponsor && !a2.Sponser {
 		a2Points = uint(math.Floor(float64(types.ScanSponsorAwardPoints) * multiplier))
 	}
 
@@ -162,7 +162,7 @@ func (k *Keeper) AwardShareInfoPoints(ctx sdk.Context, scan *types.Scan, senderA
 
 	//give sender points for sharing, check if receiver is a sponsor
 	val := types.ShareAttendeeAwardPoints
-	if receiver.Sponsor {
+	if receiver.Sponsor && !sender.Sponsor {
 		val = uint(math.Floor(float64(types.ShareSponsorAwardPoints) * multiplier))
 	}
 

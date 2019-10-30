@@ -17,3 +17,9 @@ type storeEmail struct {
 	ID    int
 	Email string
 }
+
+// provides a way to manage an email blacklist for bounced emails
+type blacklistEmail struct {
+	Email       string
+	Blacklisted bool
+}
