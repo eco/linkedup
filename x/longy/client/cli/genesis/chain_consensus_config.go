@@ -1,7 +1,6 @@
 package genesis
 
 import (
-	"fmt"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
@@ -32,7 +31,6 @@ func setTendermintConsensus(ctx *server.Context) error {
 	genFile := ctx.Config.GenesisFile()
 	genDoc, err := types.GenesisDocFromFile(genFile)
 	if err != nil {
-		fmt.Printf(err.Error())
 		return err
 	}
 	genDoc.ConsensusParams.Block.TimeIotaMs = 1
