@@ -13,9 +13,10 @@ import (
 )
 
 const (
-	infoTableName  = "linkedup-keyservice"
-	authTableName  = "linkedup-keyservice-auth"
-	emailTableName = "linkedup-email"
+	infoTableName      = "linkedup-keyservice"
+	authTableName      = "linkedup-keyservice-auth"
+	emailTableName     = "linkedup-email"
+	blacklistTableName = "linkedup-blacklist"
 )
 
 var (
@@ -97,6 +98,27 @@ func createTables(db *dynamodb.DynamoDB) error {
 
 	/** create table to store emails attendees that change it manually **/
 	err = createTable(db, emailTableName)
+	if err != nil {
+		return err
+	}
+
+	_, err = db.CreateTable(&dynamodb.CreateTableInput{
+		BillingMode: aws.String("PAY_PER_REQUEST"),
+		TableName:   aws.String(blacklistTableName),
+		AttributeDefinitions: []*dynamodb.AttributeDefinition{
+			{
+				AttributeName: aws.String("Email"),
+				AttributeType: aws.String("S"),
+			},
+		},
+		KeySchema: []*dynamodb.KeySchemaElement{
+			{
+				AttributeName: aws.String("Email"),
+				KeyType:       aws.String("HASH"),
+			},
+		},
+	})
+	
 	return err
 }
 
@@ -186,4 +208,13 @@ func (db DatabaseContext) GetImageUploadURL(id int) (string, error) {
 	}
 
 	return result, nil
+}
+
+// GetBlacklistEntry checks if a particular email is blacklisted
+func (db DatabaseContext) GetBlacklistEntry(email string) bool {
+	entry := getBlacklistEntry(&db, email)
+	if entry != nil {
+		return entry.Blacklisted
+	}
+	return false
 }

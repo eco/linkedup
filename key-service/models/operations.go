@@ -161,6 +161,29 @@ func setEmail(db *DatabaseContext, email *storeEmail) bool {
 	return true
 }
 
+func getBlacklistEntry(db *DatabaseContext, email string) *blacklistEmail {
+	result, err := db.db.GetItem(&dynamodb.GetItemInput{
+		TableName: aws.String(blacklistTableName),
+		Key: map[string]*dynamodb.AttributeValue{
+			"Email": {
+				S: aws.String(email),
+			},
+		},
+	})
+
+	if err != nil {
+		return nil
+	}
+
+	var e blacklistEmail
+	err = dynamodbattribute.UnmarshalMap(result.Item, &e)
+	if err != nil {
+		return nil
+	}
+
+	return &e
+}
+
 /** Helpers **/
 func idToString(i int) string {
 	return fmt.Sprintf("%d", i)

@@ -12,6 +12,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	eb "github.com/eco/longy/eventbrite"
 	"github.com/sirupsen/logrus"
+	"github.com/eco/longy/key-service/models"
 )
 
 var log = logrus.WithField("module", "mail")
@@ -25,10 +26,10 @@ const (
 
 // Client used to send emails
 type Client interface {
-	SendOnboardingEmail(sdk.AccAddress, *eb.AttendeeProfile, string, string) error
-	SendRecoveryEmail(*eb.AttendeeProfile, string, string) error
+	SendOnboardingEmail(*models.DatabaseContext, sdk.AccAddress, *eb.AttendeeProfile, string, string) error
+	SendRecoveryEmail(*models.DatabaseContext, *eb.AttendeeProfile, string, string) error
 
-	SendVerificationEmail(string, string) error
+	SendVerificationEmail(*models.DatabaseContext, string, string) error
 }
 
 type sesClient struct {
@@ -75,6 +76,7 @@ func NewSESClient(cfg client.ConfigProvider, localstack bool, longyAppURL string
 // SendOnboardingEmail will construct and send the email containing the initial
 // onboarding message and URL with the given secret
 func (c sesClient) SendOnboardingEmail(
+	db *models.DatabaseContext,
 	attendeeAddr sdk.AccAddress,
 	profile *eb.AttendeeProfile,
 	secret string,
@@ -88,7 +90,7 @@ func (c sesClient) SendOnboardingEmail(
 
 	log.Tracef("sending onboarding email to: %s", profile.Email)
 
-	err = c.sendEmailWithURL(profile.Email, redirectURI, onboardingRedirectTemplate)
+	err = c.sendEmailWithURL(db, profile.Email, redirectURI, onboardingRedirectTemplate)
 	if err != nil {
 		log.WithError(err).Errorf("unable to send onboarding email to %s", profile.Email)
 	}
@@ -98,7 +100,12 @@ func (c sesClient) SendOnboardingEmail(
 
 // SendRecoveryEmail will construct and send the email containing the account
 // recovery message and URL with the given secret
-func (c sesClient) SendRecoveryEmail(profile *eb.AttendeeProfile, id string, token string) error {
+func (c sesClient) SendRecoveryEmail(
+	db *models.DatabaseContext,
+	profile *eb.AttendeeProfile,
+	id string,
+	token string,
+) error {
 	redirectURI, err := makeRecoveryURI(c.longyAppURL, id, token)
 	if err != nil {
 		return err
@@ -106,7 +113,7 @@ func (c sesClient) SendRecoveryEmail(profile *eb.AttendeeProfile, id string, tok
 
 	log.Tracef("sending recovery email to: %s", profile.Email)
 
-	err = c.sendEmailWithURL(profile.Email, redirectURI, rekeyRedirectTemplate)
+	err = c.sendEmailWithURL(db, profile.Email, redirectURI, rekeyRedirectTemplate)
 	if err != nil {
 		log.WithError(err).Errorf("unable to send recovery email to %s", profile.Email)
 	}
@@ -114,7 +121,15 @@ func (c sesClient) SendRecoveryEmail(profile *eb.AttendeeProfile, id string, tok
 	return err
 }
 
-func (c sesClient) SendVerificationEmail(dest string, token string) error {
+func (c sesClient) SendVerificationEmail(
+	db *models.DatabaseContext,
+	dest string,
+	token string,
+) error {
+	if db.GetBlacklistEntry(dest) {
+		log.WithField("dest", dest).Trace("refusing to email to blacklisted address")
+		return nil
+	}
 	var template = verificationTemplate
 	templateData := fmt.Sprintf("{\"token\":\"%s\"}", token)
 	_, err := c.ses.SendTemplatedEmail(&ses.SendTemplatedEmailInput{
@@ -129,7 +144,16 @@ func (c sesClient) SendVerificationEmail(dest string, token string) error {
 	return err
 }
 
-func (c sesClient) sendEmailWithURL(dest string, url string, template string) error {
+func (c sesClient) sendEmailWithURL(
+	db *models.DatabaseContext,
+	dest string,
+	url string,
+	template string,
+) error {
+	if db.GetBlacklistEntry(dest) {
+		log.WithField("dest", dest).Trace("refusing to email to blacklisted address")
+		return nil
+	}
 	templateData := fmt.Sprintf("{\"url\":\"%s\"}", url)
 	_, err := c.ses.SendTemplatedEmail(&ses.SendTemplatedEmailInput{
 		Destination: &ses.Destination{
@@ -145,6 +169,7 @@ func (c sesClient) sendEmailWithURL(dest string, url string, template string) er
 
 // SendOnboardingEmail will construct and send the email corresponding to onboarding the user
 func (c mockClient) SendOnboardingEmail(
+	db *models.DatabaseContext,
 	attendeeAddr sdk.AccAddress,
 	profile *eb.AttendeeProfile,
 	secret string,
@@ -159,7 +184,12 @@ func (c mockClient) SendOnboardingEmail(
 	return nil
 }
 
-func (c mockClient) SendRecoveryEmail(profile *eb.AttendeeProfile, id string, token string) error {
+func (c mockClient) SendRecoveryEmail(
+	db *models.DatabaseContext,
+	profile *eb.AttendeeProfile,
+	id string,
+	token string,
+) error {
 	redirectURI, err := makeRecoveryURI(c.longyAppURL, id, token)
 	if err != nil {
 		return err
@@ -169,7 +199,11 @@ func (c mockClient) SendRecoveryEmail(profile *eb.AttendeeProfile, id string, to
 	return nil
 }
 
-func (c mockClient) SendVerificationEmail(dest string, token string) error {
+func (c mockClient) SendVerificationEmail(
+	db *models.DatabaseContext,
+	dest string,
+	token string,
+) error {
 	log.Warnf("mock verification token: %s", token)
 	return nil
 }
