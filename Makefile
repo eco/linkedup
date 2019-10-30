@@ -17,8 +17,8 @@ test-unit:
 	@echo "Running tests with LCD chain"
 	$(GINKGO) $(TEST_PATHS)
 
-init: bin/lyd bin/lycli scripts/initChain.sh
-	scripts/initChain.sh
+init: bin/lyd bin/lycli
+	cd scripts; ./initChain.sh
 
 clean:
 	rm -rf bin/
@@ -29,14 +29,4 @@ bin/%: cmd/%/* $(shell find x/ -type f)
 default: all init
 
 redeploy: bin/lyd
-	echo "Exporting current state of app"
-	@bin/lyd export --for-zero-height > lyd_export.json
-
-	echo "Reseting the chain state to 0"
-	@bin/lyd unsafe-reset-all
-
-	echo "Moving exported state to genesis"
-	cp lyd_export.json ~/.lyd/config/genesis.json
-
-	echo "Restarting the chain"
-	bin/lyd start
+	cd scripts; ./export.sh

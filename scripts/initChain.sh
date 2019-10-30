@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-LYD=bin/lyd
-LYCLI=bin/lycli
+LYD=../bin/lyd
+LYCLI=../bin/lycli
 
 # clears any remaining files from a previous chain
 rm -rf $HOME/.lyd
