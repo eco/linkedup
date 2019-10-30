@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
+LYD=bin/lyd
+LYCLI=bin/lycli
 
 # clears any remaining files from a previous chain
 rm -rf $HOME/.lyd
 rm -rf $HOME/.lycli
 
-../bin/lyd init longy --chain-id longychain
+$LYD init longy --chain-id longychain
 
 PWD_FILE=passwords.txt
 
@@ -16,41 +18,41 @@ else
 fi
 
 # creates accounts keys with passwords, adds them to the keys list
-../bin/lycli keys add alice < $PWD_FILE
-../bin/lycli keys add bob < $PWD_FILE
-../bin/lycli keys add redeemer < $PWD_FILE
+$LYCLI keys add alice < $PWD_FILE
+$LYCLI keys add bob < $PWD_FILE
+$LYCLI keys add redeemer < $PWD_FILE
 
 # Add 2 accounts, with coins to the genesis file
-../bin/lyd add-genesis-account $(../bin/lycli keys show alice -a) 1000longy,100000000stake
-../bin/lyd add-genesis-account $(../bin/lycli keys show bob -a) 1000longy,100000000stake
-../bin/lyd add-genesis-account $(../bin/lycli keys show redeemer -a) 1000longy,100000000stake
+$LYD add-genesis-account $($LYCLI keys show alice -a) 1000longy,100000000stake
+$LYD add-genesis-account $($LYCLI keys show bob -a) 1000longy,100000000stake
+$LYD add-genesis-account $($LYCLI keys show redeemer -a) 1000longy,100000000stake
 
 # Set the default master and bonus key
-../bin/lyd set-genesis-key-service
-../bin/lyd set-genesis-bonus-service
+$LYD set-genesis-key-service
+$LYD set-genesis-bonus-service
 
 # Generate the genesis attendees from the eventbrite api
-../bin/lyd add-genesis-attendees
+$LYD add-genesis-attendees
 
 # Generate the genesis prizes from the event
-../bin/lyd add-genesis-prizes
+$LYD add-genesis-prizes
 
 # Sets the consensus configurations file for the node to quicken block times
-../bin/lyd consensus-config
+$LYD consensus-config
 
 # Configure your CLI to eliminate need for chain-id flag
-../bin/lycli config chain-id longychain
-../bin/lycli config output json
-../bin/lycli config indent true
-../bin/lycli config trust-node true
+$LYCLI config chain-id longychain
+$LYCLI config output json
+$LYCLI config indent true
+$LYCLI config trust-node true
 
-../bin/lyd gentx --name alice < $PWD_FILE
-../bin/lyd gentx --name bob < $PWD_FILE
+$LYD gentx --name alice < $PWD_FILE
+$LYD gentx --name bob < $PWD_FILE
 
 # input the gentx into the genesis file so chain is aware of validators
-../bin/lyd collect-gentxs
+$LYD collect-gentxs
 
 # validate genesis
-../bin/lyd validate-genesis
+$LYD validate-genesis
 
-../bin/lyd start --rpc.laddr "tcp://0.0.0.0:26657"
+$LYD start --rpc.laddr "tcp://0.0.0.0:26657"
