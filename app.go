@@ -28,7 +28,6 @@ import (
 
 const appName = longy.ModuleName
 
-//nolint: dupl
 var (
 	// DefaultCLIHome is the default home directories for the application CLI
 	DefaultCLIHome = os.ExpandEnv("$HOME/.lycli")
@@ -77,17 +76,15 @@ type LongyApp struct {
 	keys  map[string]*sdk.KVStoreKey
 	tkeys map[string]*sdk.TransientStoreKey
 
-	// Main Keepers
-	accountKeeper auth.AccountKeeper
-	longyKeeper   longy.Keeper
-
-	// Keepers relating to staking
+	// Keepers
+	accountKeeper  auth.AccountKeeper
 	bankKeeper     bank.Keeper
 	stakingKeeper  staking.Keeper
 	slashingKeeper slashing.Keeper
 	distrKeeper    distr.Keeper
 	supplyKeeper   supply.Keeper
 	paramsKeeper   params.Keeper
+	longyKeeper    longy.Keeper
 
 	// Module Manager
 	mm *module.Manager
@@ -105,6 +102,8 @@ func NewLongyApp(
 	// BaseApp handles interactions with Tendermint through the ABCI protocol
 	bApp := bam.NewBaseApp(appName, logger, db, auth.DefaultTxDecoder(cdc), baseAppOptions...)
 
+	bApp.SetAppVersion("")
+
 	keys := sdk.NewKVStoreKeys(bam.MainStoreKey, auth.StoreKey, staking.StoreKey,
 		supply.StoreKey, distr.StoreKey, slashing.StoreKey, params.StoreKey, longy.StoreKey)
 
@@ -120,7 +119,6 @@ func NewLongyApp(
 
 	// The ParamsKeeper handles parameter storage for the application
 	app.paramsKeeper = params.NewKeeper(app.cdc, keys[params.StoreKey], tkeys[params.TStoreKey], params.DefaultCodespace)
-
 	// Set specific supspaces
 	authSubspace := app.paramsKeeper.Subspace(auth.DefaultParamspace)
 	bankSupspace := app.paramsKeeper.Subspace(bank.DefaultParamspace)
@@ -128,7 +126,7 @@ func NewLongyApp(
 	distrSubspace := app.paramsKeeper.Subspace(distr.DefaultParamspace)
 	slashingSubspace := app.paramsKeeper.Subspace(slashing.DefaultParamspace)
 
-	// The accountKeeper handles address -> account lookups
+	// The AccountKeeper handles address -> account lookups
 	app.accountKeeper = auth.NewAccountKeeper(
 		app.cdc,
 		keys[auth.StoreKey],
@@ -218,12 +216,12 @@ func NewLongyApp(
 	app.mm.SetOrderInitGenesis(
 		genaccounts.ModuleName,
 		distr.ModuleName,
-		bank.ModuleName,
-		supply.ModuleName,
-		slashing.ModuleName,
 		staking.ModuleName,
 		auth.ModuleName,
+		bank.ModuleName,
+		slashing.ModuleName,
 		longy.ModuleName,
+		supply.ModuleName,
 		genutil.ModuleName,
 	)
 
