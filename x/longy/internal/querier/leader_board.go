@@ -10,7 +10,7 @@ import (
 )
 
 //LeaderBoard returns the leader board after building it from the attendees in the event
-//nolint:gocritic,unparam
+//nolint:gocritic,unparam,nakedret
 func leaderBoard(ctx sdk.Context, keeper keeper.Keeper) (res []byte, err sdk.Error) { //test this
 	attendees := keeper.GetAllAttendees(ctx)
 	countAll := len(attendees)
@@ -24,7 +24,12 @@ func leaderBoard(ctx sdk.Context, keeper keeper.Keeper) (res []byte, err sdk.Err
 	}
 	top := make([]types.Attendee, min, types.LeaderBoardCount)
 	copy(top, attendees)
+	withRep := 0
 	for i := range top {
+		if top[i].Rep == 0 {
+			break
+		}
+		withRep++
 		top[i] = types.Attendee{
 			ID:      top[i].ID,
 			Address: top[i].Address,
@@ -32,13 +37,13 @@ func leaderBoard(ctx sdk.Context, keeper keeper.Keeper) (res []byte, err sdk.Err
 			Rep:     top[i].Rep,
 		}
 	}
-
-	lb = types.NewLeaderBoard(countAll, top)
+	topCleaned := make([]types.Attendee, withRep)
+	copy(topCleaned, top)
+	lb = types.NewLeaderBoard(countAll, topCleaned)
 	lb.Time = time.Now()
 	res, e := codec.MarshalJSONIndent(keeper.Cdc, lb)
 	if e != nil {
 		panic("could not marshal result to JSON")
 	}
-
 	return
 }
