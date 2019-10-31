@@ -28,4 +28,3 @@ services:
       - DATA_DIR=/tmp/localstack/data
 volumes:
   daemon:
-  cli:
