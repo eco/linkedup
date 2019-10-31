@@ -13,7 +13,7 @@ import (
 	"math/rand"
 )
 
-var _ = FDescribe("Leader Board Querier Tests", func() {
+var _ = Describe("Leader Board Querier Tests", func() {
 
 	var getLead = func() types.LeaderBoard {
 		res, err := querier(ctx, []string{querier2.LeaderKey}, abci.RequestQuery{})
