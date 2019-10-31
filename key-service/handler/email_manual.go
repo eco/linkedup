@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/badoux/checkmail"
+	ebSession "github.com/eco/longy/key-service/eventbrite"
 	"github.com/eco/longy/key-service/models"
 	"github.com/gorilla/mux"
 	"net/http"
@@ -33,14 +34,14 @@ func init() {
 	}
 }
 
-func registerEmailManual(r *mux.Router, db *models.DatabaseContext) {
+func registerEmailManual(r *mux.Router, db *models.DatabaseContext, eb *ebSession.Session) {
 	s := r.PathPrefix("/emails").Subrouter()
 	s.HandleFunc("", setEmailForAttendee(db)).Methods(http.MethodPost, http.MethodOptions)
-	s.HandleFunc(fmt.Sprintf("/{%s}", idKey), getEmailForAttendee(db)).Methods(http.MethodGet, http.MethodOptions)
+	s.HandleFunc(fmt.Sprintf("/{%s}", idKey), getEmailForAttendee(db, eb)).Methods(http.MethodGet, http.MethodOptions)
 	s.Use(EmailAuthMiddleware)
 }
 
-func getEmailForAttendee(db *models.DatabaseContext) func(
+func getEmailForAttendee(db *models.DatabaseContext, eb *ebSession.Session) func(
 	http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
@@ -49,13 +50,34 @@ func getEmailForAttendee(db *models.DatabaseContext) func(
 			http.Error(w, "id expected to be a positive integer", http.StatusBadRequest)
 			return
 		}
-		email := db.GetEmail(id)
-		if email == "" {
-			w.WriteHeader(http.StatusNotFound)
+
+		attendee, found := eb.AttendeeProfile(id)
+		if !found {
+			http.Error(w, "unregistered badge", http.StatusNotFound)
 			return
 		}
+
+		email := attendee.Email
+		overrideEmail := db.GetEmail(id)
+
+		type respBody struct {
+			EventbriteEmail string `json:"eventbrite_email"`
+			OverrideEmail   string `json:"override_email"`
+		}
+
+		resp := respBody{
+			EventbriteEmail: email,
+			OverrideEmail:   overrideEmail,
+		}
+
+		bz, err := json.Marshal(resp)
+		if err != nil {
+			http.Error(w, "internal error", http.StatusInternalServerError)
+			return
+		}
+
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(email))
+		_, _ = w.Write(bz)
 	}
 }
 
