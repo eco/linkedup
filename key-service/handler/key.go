@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/eco/longy/eventbrite"
@@ -257,7 +258,9 @@ func keyAndEmail(
 			return
 		}
 
+		maskedEmail := maskEmail(info.Profile.Email)
 		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(maskedEmail))
 	}
 }
 
@@ -315,4 +318,26 @@ func generateVerificationToken() string {
 		b[i] = table[int(b[i])%len(table)]
 	}
 	return string(b)
+}
+
+func maskEmail(email string) string {
+	splitEmail := strings.Split(email, "@")
+	if len(splitEmail) != 2 {
+		return "malformed email. see support"
+	}
+
+	username := splitEmail[0]
+
+	var maskedUsername string
+	if len(username) == 1 {
+		// we won't mask this
+		maskedUsername = username
+	} else if len(username) == 2 {
+		maskedUsername = string(username[0]) + "*"
+	} else {
+		maskedUsername = string(username[0]) + strings.Repeat("*", len(username)-2) + string(username[len(username)-1])
+	}
+
+	maskedEmail := maskedUsername + "@" + splitEmail[1]
+	return maskedEmail
 }
