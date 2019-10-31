@@ -100,14 +100,17 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, state GenesisState) {
 
 	for i := range state.Attendees {
 		a := &state.Attendees[i]
-		if accountKeeper.GetAccount(ctx, a.GetAddress()) == nil {
-			account := accountKeeper.NewAccountWithAddress(ctx, a.GetAddress())
-			accountKeeper.SetAccount(ctx, account)
+		account := accountKeeper.GetAccount(ctx, a.GetAddress())
+		if account == nil {
+			account = accountKeeper.NewAccountWithAddress(ctx, a.GetAddress())
 			_, e := coinKeeper.AddCoins(ctx, account.GetAddress(), coins)
 			if e != nil {
 				panic(e)
 			}
 		}
+
+		_ = account.SetPubKey(a.PubKey)
+		accountKeeper.SetAccount(ctx, account)
 		k.SetAttendee(ctx, a)
 	}
 
