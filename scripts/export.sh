@@ -10,5 +10,8 @@ $LYD unsafe-reset-all
 echo "Moving exported state to genesis"
 cp lyd_export.json ~/.lyd/config/genesis.json
 
+echo "Setting claim service for migration"
+$LYD set-genesis-claim-service
+
 echo "Restarting the chain"
 $LYD start --rpc.laddr "tcp://0.0.0.0:26657"
