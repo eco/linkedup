@@ -128,8 +128,8 @@ var _ = Describe("Scan Handler Tests", func() {
 		})
 
 		It("should add scan and only apply bonus to one that is not a sponsor", func() {
-			bonus := "2"
-			keeper.SetBonus(ctx, types.Bonus{Multiplier: bonus})
+			bonus := types.NewBonus("2")
+			keeper.SetBonus(ctx, bonus)
 			//make sponsor
 			createScan(qr1, qr2, sender, receiver, nil, true, false) //make sponsor
 
@@ -141,7 +141,8 @@ var _ = Describe("Scan Handler Tests", func() {
 			msg = types.NewMsgQrScan(receiver, qr1, data)
 			result = handler(ctx, msg)
 			Expect(result.Code).To(Equal(sdk.CodeOK))
-			attendeePoints := (types.ScanSponsorAwardPoints + types.ShareSponsorAwardPoints) * bonus
+			attendeePoints := uint(
+				float64(types.ScanSponsorAwardPoints+types.ShareSponsorAwardPoints) * bonus.GetMultiplier())
 			sponsorPoints := types.ScanAttendeeAwardPoints + types.ShareAttendeeAwardPoints
 			inspectScan(sender, receiver, sponsorPoints, attendeePoints, true)
 		})
@@ -222,8 +223,8 @@ var _ = Describe("Scan Handler Tests", func() {
 		})
 
 		It("should not apply bonus multiplier to sponsor scan", func() {
-			bonus := "2"
-			keeper.SetBonus(ctx, types.Bonus{Multiplier: bonus})
+			bonus := types.NewBonus("2")
+			keeper.SetBonus(ctx, bonus)
 			msg := types.NewMsgQrScan(receiver, qr1, nil)
 			result := handler(ctx, msg)
 			Expect(result.Code).To(Equal(sdk.CodeOK))
