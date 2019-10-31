@@ -45,7 +45,7 @@ func GetGenesisPrizes() GenesisPrizes {
 		Prize{
 			Tier:      Tier2,
 			RepNeeded: Tier2Rep,
-			PrizeText: "5 Kong Notes",
+			PrizeText: "5 KONG Note",
 			PrizeDescription: "Kong is the first crypto-cash; it combines state-of-the-art secure elements, " +
 				"groundbreaking flex PCBs, and time-locked smart contracts. You can keep it in your pocket, or " +
 				"spend it just like cash. No transaction fees, no paper trail. Kong does for cash what Bitcoin did " +
@@ -63,7 +63,7 @@ func GetGenesisPrizes() GenesisPrizes {
 		Prize{
 			Tier:      Tier4,
 			RepNeeded: Tier4Rep,
-			PrizeText: "20 KONG Notes",
+			PrizeText: "20 KONG Note",
 			PrizeDescription: "Kong is the first crypto-cash; it combines state-of-the-art secure elements, " +
 				"groundbreaking flex PCBs, and time-locked smart contracts. You can keep it in your pocket, or " +
 				"spend it just like cash. No transaction fees, no paper trail. Kong does for cash what Bitcoin did " +
@@ -73,7 +73,7 @@ func GetGenesisPrizes() GenesisPrizes {
 		Prize{
 			Tier:      Tier5,
 			RepNeeded: Tier5Rep,
-			PrizeText: "100 KONG Notes",
+			PrizeText: "100 KONG Note",
 			PrizeDescription: "Kong is the first crypto-cash; it combines state-of-the-art secure elements, " +
 				"groundbreaking flex PCBs, and time-locked smart contracts. You can keep it in your pocket, or " +
 				"spend it just like cash. No transaction fees, no paper trail. Kong does for cash what Bitcoin did " +
