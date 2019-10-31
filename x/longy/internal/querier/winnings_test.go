@@ -66,45 +66,45 @@ var _ = Describe("Winnings Querier Tests", func() {
 
 		It("should return all the unclaimed winnings for an attendee", func() {
 			a := utils.AddAttendeeToKeeper(ctx, &keeper, qr1, true, false)
-			err := keeper.AddRep(ctx, &a, types.Tier1Rep)
-			Expect(err).To(BeNil())
-			err = keeper.AddRep(ctx, &a, types.Tier2Rep)
+			err := keeper.AddRep(ctx, &a, types.Tier3Rep)
 			Expect(err).To(BeNil())
 			var exists bool
 			a, exists = keeper.GetAttendee(ctx, a.Address)
 			Expect(exists).To(BeTrue())
-			Expect(len(a.Winnings)).To(Equal(2))
+			Expect(len(a.Winnings)).To(Equal(3))
 			Expect(a.Winnings[0].Claimed).To(BeFalse())
 			Expect(a.Winnings[1].Claimed).To(BeFalse())
+			Expect(a.Winnings[2].Claimed).To(BeFalse())
 
 			winnings, err := getWinnings(a.Address.String())
 			Expect(err).To(BeNil())
-			Expect(len(winnings)).To(Equal(2))
+			Expect(len(winnings)).To(Equal(3))
 			compare(a.Winnings[0], winnings[0])
 			compare(a.Winnings[1], winnings[1])
+			compare(a.Winnings[2], winnings[2])
 		})
 
 		It("should return claimed and unclaimed winnings for an attendee", func() {
 			a := utils.AddAttendeeToKeeper(ctx, &keeper, qr1, true, false)
-			err := keeper.AddRep(ctx, &a, types.Tier1Rep)
-			Expect(err).To(BeNil())
-			err = keeper.AddRep(ctx, &a, types.Tier2Rep)
+			err := keeper.AddRep(ctx, &a, types.Tier3Rep)
 			Expect(err).To(BeNil())
 			var exists bool
 			a, exists = keeper.GetAttendee(ctx, a.Address)
 			Expect(exists).To(BeTrue())
-			Expect(len(a.Winnings)).To(Equal(2))
+			Expect(len(a.Winnings)).To(Equal(3))
 			Expect(a.Winnings[0].Claimed).To(BeFalse())
 			Expect(a.Winnings[1].Claimed).To(BeFalse())
+			Expect(a.Winnings[2].Claimed).To(BeFalse())
 
 			a.Winnings[0].Claimed = true
 			keeper.SetAttendee(ctx, &a)
 
 			winnings, err := getWinnings(a.Address.String())
 			Expect(err).To(BeNil())
-			Expect(len(winnings)).To(Equal(2))
+			Expect(len(winnings)).To(Equal(3))
 			compare(a.Winnings[0], winnings[0])
 			compare(a.Winnings[1], winnings[1])
+			compare(a.Winnings[2], winnings[2])
 		})
 
 	})

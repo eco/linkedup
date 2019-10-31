@@ -46,26 +46,44 @@ var _ = Describe("Redeem Keeper Tests", func() {
 				Expect(err).To(BeNil())
 			})
 
-			It("should succeed when all winnings are initially unclaimed", func() {
+			It("should succeed when all winnings are initially unclaimed, over single tier", func() {
 				err := keeper.AddRep(ctx, &a, types.Tier1Rep)
-				Expect(err).To(BeNil())
-				err = keeper.AddRep(ctx, &a, types.Tier2Rep)
 				Expect(err).To(BeNil())
 				var exists bool
 				a, exists = keeper.GetAttendee(ctx, a.Address)
 				Expect(exists).To(BeTrue())
-				Expect(len(a.Winnings)).To(Equal(2))
+				Expect(len(a.Winnings)).To(Equal(1))
 				Expect(a.Winnings[0].Claimed).To(BeFalse())
-				Expect(a.Winnings[1].Claimed).To(BeFalse())
 
 				err = keeper.RedeemPrizes(ctx, s1)
 				Expect(err).To(BeNil())
 
 				a, exists = keeper.GetAttendee(ctx, a.Address)
 				Expect(exists).To(BeTrue())
-				Expect(len(a.Winnings)).To(Equal(2))
+				Expect(len(a.Winnings)).To(Equal(1))
+				Expect(a.Winnings[0].Claimed).To(BeTrue())
+			})
+
+			It("should succeed when all winnings are initially unclaimed, over multiple tiers", func() {
+				err := keeper.AddRep(ctx, &a, types.Tier3Rep)
+				Expect(err).To(BeNil())
+				var exists bool
+				a, exists = keeper.GetAttendee(ctx, a.Address)
+				Expect(exists).To(BeTrue())
+				Expect(len(a.Winnings)).To(Equal(3))
+				Expect(a.Winnings[0].Claimed).To(BeFalse())
+				Expect(a.Winnings[1].Claimed).To(BeFalse())
+				Expect(a.Winnings[2].Claimed).To(BeFalse())
+
+				err = keeper.RedeemPrizes(ctx, s1)
+				Expect(err).To(BeNil())
+
+				a, exists = keeper.GetAttendee(ctx, a.Address)
+				Expect(exists).To(BeTrue())
+				Expect(len(a.Winnings)).To(Equal(3))
 				Expect(a.Winnings[0].Claimed).To(BeTrue())
 				Expect(a.Winnings[1].Claimed).To(BeTrue())
+				Expect(a.Winnings[2].Claimed).To(BeTrue())
 			})
 
 			It("should succeed when there are claimed and unclaimed winnings ", func() {

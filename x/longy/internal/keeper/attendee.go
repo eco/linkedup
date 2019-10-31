@@ -121,19 +121,21 @@ func (k *Keeper) AddRep(ctx sdk.Context, attendee *types.Attendee, points uint) 
 	attendee.AddRep(points)
 
 	if attendee.GetTier() > before {
-		prize, err := k.GetPrize(ctx, types.GetPrizeIDByTier(attendee.GetTier()))
-		if err != nil {
-			return err
-		}
-		if prize.Quantity > 0 {
-			added := attendee.AddWinning(&types.Win{
-				Tier:    prize.Tier,
-				Name:    prize.PrizeText,
-				Claimed: false,
-			})
-			if added {
-				prize.Quantity--
-				k.SetPrize(ctx, &prize)
+		for i := before + 1; i <= attendee.GetTier(); i++ {
+			prize, err := k.GetPrize(ctx, types.GetPrizeIDByTier(i))
+			if err != nil {
+				return err
+			}
+			if prize.Quantity > 0 {
+				added := attendee.AddWinning(&types.Win{
+					Tier:    prize.Tier,
+					Name:    prize.PrizeText,
+					Claimed: false,
+				})
+				if added {
+					prize.Quantity--
+					k.SetPrize(ctx, &prize)
+				}
 			}
 		}
 	}
