@@ -8,7 +8,6 @@ services:
       AWS_ACCESS_KEY_ID: ignored
       AWS_SECRET_ACCESS_KEY: ignored
       AWS_REGION: "us-west-2"
-      CHAIN_INIT: "init"
     ports:
       - 1317:1317
       - 1337:1337
