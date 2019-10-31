@@ -8,7 +8,6 @@ import (
 	"github.com/eco/longy/x/longy/internal/querier"
 	"github.com/gorilla/mux"
 	"net/http"
-	"strings"
 )
 
 const (
@@ -73,12 +72,14 @@ func CorsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", LinkedUpHTTPS)
 		if r.Method == http.MethodOptions {
-			var headers []string
-			for k := range r.Header {
-				headers = append(headers, k)
-				//fmt.Fprintf(w, "Header field %q, Value %q\n", k, v)
-			}
-			allHeaders := strings.Join(headers, ",")
+			//var headers []string
+
+			//for k := range r.Header {
+			//	headers = append(headers, k)
+			//	//fmt.Fprintf(w, "Header field %q, Value %q\n", k, v)
+			//}
+			//allHeaders := strings.Join(headers, ",")
+			allHeaders := r.Header.Get("Access-Control-Request-Headers")
 			//fmt.Fprintf(w, "Allow headers : %s", allHeaders)
 			w.Header().Set("Access-Control-Allow-Headers", allHeaders)
 			return
