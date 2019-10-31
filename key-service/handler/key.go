@@ -260,7 +260,7 @@ func keyAndEmail(
 
 		maskedEmail := maskEmail(info.Profile.Email)
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(maskedEmail))
+		w.Write([]byte(maskedEmail)) //nolint
 	}
 }
 
@@ -329,12 +329,13 @@ func maskEmail(email string) string {
 	username := splitEmail[0]
 
 	var maskedUsername string
-	if len(username) == 1 {
+	switch {
+	case len(username) == 1:
 		// we won't mask this
 		maskedUsername = username
-	} else if len(username) == 2 {
+	case len(username) == 2:
 		maskedUsername = string(username[0]) + "*"
-	} else {
+	default:
 		maskedUsername = string(username[0]) + strings.Repeat("*", len(username)-2) + string(username[len(username)-1])
 	}
 
