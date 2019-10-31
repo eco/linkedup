@@ -100,18 +100,18 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, state GenesisState) {
 
 	for i := range state.Attendees {
 		a := &state.Attendees[i]
-		acc := accountKeeper.GetAccount(ctx, a.GetAddress())
-		if acc == nil {
+		if accountKeeper.GetAccount(ctx, a.GetAddress()) == nil {
 			account := accountKeeper.NewAccountWithAddress(ctx, a.GetAddress())
+			if a.PubKey != nil {
+				// atendee has already onboarded onto the game
+				account.SetPubKey(a.PubKey)
+			}
+
 			accountKeeper.SetAccount(ctx, account)
 			_, e := coinKeeper.AddCoins(ctx, account.GetAddress(), coins)
 			if e != nil {
 				panic(e)
 			}
-		} else {
-			// this must be a restart where the attende has previously registered
-			pubKey := acc.GetPubKey()
-			a.PubKey = pubKey
 		}
 		k.SetAttendee(ctx, a)
 	}
