@@ -2,6 +2,7 @@ package types
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"strconv"
 )
 
 var _ sdk.Msg = MsgBonus{}
@@ -12,11 +13,11 @@ var _ sdk.Msg = MsgClearBonus{}
 // MsgBonus triggers a bonus period
 type MsgBonus struct {
 	BonusServiceAddress sdk.AccAddress `json:"bonus_service_address"`
-	Multiplier          uint           `json:"multiplier"`
+	Multiplier          string         `json:"multiplier"`
 }
 
 // NewMsgBonus -
-func NewMsgBonus(multiplier uint, addr sdk.AccAddress) MsgBonus {
+func NewMsgBonus(multiplier string, addr sdk.AccAddress) MsgBonus {
 	return MsgBonus{
 		BonusServiceAddress: addr,
 		Multiplier:          multiplier,
@@ -38,8 +39,15 @@ func (msg MsgBonus) ValidateBasic() sdk.Error {
 	switch {
 	case msg.BonusServiceAddress.Empty():
 		return sdk.ErrInvalidAddress("unset bonus service address")
-	case msg.Multiplier == 0:
+	case len(msg.Multiplier) == 0:
 		return ErrDefault("zero multiplier")
+	}
+
+	num, err := strconv.ParseFloat(msg.Multiplier, 64)
+	if err != nil {
+		return ErrDefault("non-parsable multiplier")
+	} else if num <= 0 {
+		return ErrDefault("multiplier must be >= 0")
 	}
 
 	return nil
