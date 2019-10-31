@@ -330,7 +330,7 @@ func maskEmail(email string) string {
 
 	var maskedUsername string
 	switch {
-	case len(username) == 1:
+	case len(username) == 1 || len(username) == 0:
 		// we won't mask this
 		maskedUsername = username
 	case len(username) == 2:
