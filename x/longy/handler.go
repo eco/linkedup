@@ -118,6 +118,8 @@ func handleBonus(ctx sdk.Context, k Keeper, msg types.MsgBonus) sdk.Result {
 		return types.ErrInsufficientPrivileges("only the bonus service account can call this").Result()
 	}
 
+	// we are sure via ValidateBasic on CheckTx that `msg.Multiplier` is a parsable float > 0
+
 	// check if a bonus is already live
 	if k.HasLiveBonus(ctx) {
 		return sdk.ErrUnauthorized("current bonus must be cleared before setting a new one").Result()

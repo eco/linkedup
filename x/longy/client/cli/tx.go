@@ -56,8 +56,9 @@ func createBonusCmd() *cobra.Command {
 			fmt.Printf("Longy Rest Service URL: %s\n", restURL)
 			longyCfg.SetLongyRestURL(restURL)
 
-			bonusAmt, err := strconv.Atoi(args[0])
-			if err != nil || bonusAmt <= 0 {
+			bonusAmt := args[0]
+			bonusNum, err := strconv.ParseFloat(args[0], 64)
+			if err != nil || bonusNum <= 0 {
 				return fmt.Errorf("multiplier must be a positive number > 0 in decimal format")
 			}
 
@@ -68,7 +69,7 @@ func createBonusCmd() *cobra.Command {
 			}
 
 			/** construct the message **/
-			bonusMsg := longy.NewMsgBonus(uint(bonusAmt), bonusAccount.GetAddress())
+			bonusMsg := longy.NewMsgBonus(bonusAmt, bonusAccount.GetAddress())
 
 			/** send the message **/
 			tx, err := createAuthTx(bonusMsg, privKey, chainID,
