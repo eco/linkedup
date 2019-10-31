@@ -100,13 +100,18 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, state GenesisState) {
 
 	for i := range state.Attendees {
 		a := &state.Attendees[i]
-		if accountKeeper.GetAccount(ctx, a.GetAddress()) == nil {
+		acc := accountKeeper.GetAccount(ctx, a.GetAddress())
+		if acc == nil {
 			account := accountKeeper.NewAccountWithAddress(ctx, a.GetAddress())
 			accountKeeper.SetAccount(ctx, account)
 			_, e := coinKeeper.AddCoins(ctx, account.GetAddress(), coins)
 			if e != nil {
 				panic(e)
 			}
+		} else {
+			// this must be a restart where the attende has previously registered
+			pubKey := acc.GetPubKey()
+			a.PubKey = pubKey
 		}
 		k.SetAttendee(ctx, a)
 	}
