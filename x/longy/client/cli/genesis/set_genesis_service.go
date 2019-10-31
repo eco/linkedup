@@ -1,11 +1,13 @@
 package genesis
 
 import (
+	"fmt"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/server"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	"github.com/eco/longy/x/longy"
+	"github.com/eco/longy/x/longy/internal/types"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	tmcrypto "github.com/tendermint/tendermint/crypto/secp256k1"
@@ -17,7 +19,7 @@ func AddSetGenesisKeyServiceCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Co
 	cmd := &cobra.Command{
 		Use: "set-genesis-key-service",
 		RunE: func(_ *cobra.Command, args []string) error {
-			return setGenesisService(ctx, cdc, true)
+			return setGenesisService(ctx, cdc, types.ServiceSeed)
 		},
 	}
 
@@ -29,14 +31,26 @@ func AddSetGenesisBonusServiceCmd(ctx *server.Context, cdc *codec.Codec) *cobra.
 	cmd := &cobra.Command{
 		Use: "set-genesis-bonus-service",
 		RunE: func(_ *cobra.Command, args []string) error {
-			return setGenesisService(ctx, cdc, false)
+			return setGenesisService(ctx, cdc, types.BonusServiceSeed)
 		},
 	}
 
 	return cmd
 }
 
-func setGenesisService(ctx *server.Context, cdc *codec.Codec, isKeyService bool) error {
+//AddSetGenesisClaimServiceCmd sets the claim service account for prize redemption
+func AddSetGenesisClaimServiceCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
+	cmd := &cobra.Command{
+		Use: "set-genesis-claim-service",
+		RunE: func(_ *cobra.Command, args []string) error {
+			return setGenesisService(ctx, cdc, types.ClaimServiceSeed)
+		},
+	}
+
+	return cmd
+}
+
+func setGenesisService(ctx *server.Context, cdc *codec.Codec, seed string) error {
 	config := ctx.Config
 	config.SetRoot(viper.GetString(cli.HomeFlag))
 
@@ -53,17 +67,21 @@ func setGenesisService(ctx *server.Context, cdc *codec.Codec, isKeyService bool)
 	if err != nil {
 		return err
 	}
+	pubKey := tmcrypto.GenPrivKeySecp256k1([]byte(seed)).PubKey()
+	sdkAddr := sdk.AccAddress(pubKey.Address())
 
-	if isKeyService {
-		pubKey := tmcrypto.GenPrivKeySecp256k1([]byte("master")).PubKey()
-		sdkAddr := sdk.AccAddress(pubKey.Address())
+	switch seed {
+	case types.ServiceSeed:
 		genState.KeyService.Address = sdkAddr
 		genState.KeyService.PubKey = pubKey
-	} else {
-		pubKey := tmcrypto.GenPrivKeySecp256k1([]byte("bonus")).PubKey()
-		sdkAddr := sdk.AccAddress(pubKey.Address())
+	case types.BonusServiceSeed:
 		genState.BonusService.Address = sdkAddr
 		genState.BonusService.PubKey = pubKey
+	case types.ClaimServiceSeed:
+		genState.ClaimService.Address = sdkAddr
+		genState.ClaimService.PubKey = pubKey
+	default:
+		return fmt.Errorf("seed %s is not allowed for a service account", seed)
 	}
 
 	bz, err := cdc.MarshalJSON(genState)

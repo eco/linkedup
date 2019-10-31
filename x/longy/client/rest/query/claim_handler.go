@@ -20,7 +20,7 @@ type Claim struct {
 var signer *crypto.Signer
 
 func init() {
-	key := tmcrypto.GenPrivKeySecp256k1([]byte("master"))
+	key := tmcrypto.GenPrivKeySecp256k1([]byte(types.ClaimServiceSeed))
 	addr := sdk.AccAddress(key.PubKey().Address())
 	signer = crypto.NewSigner(addr, key)
 }

@@ -16,6 +16,15 @@ const (
 	RouterKey = ModuleName
 )
 
+const (
+	//ServiceSeed is the seed for the service account
+	ServiceSeed = "master"
+	//BonusServiceSeed is the seed for the bonus service account
+	BonusServiceSeed = "bonus"
+	//ClaimServiceSeed is the seed for the claim service account
+	ClaimServiceSeed = "claim"
+)
+
 var (
 	//AttendeePrefix is the prefix for the attendee type
 	AttendeePrefix = []byte{0x0}
@@ -29,6 +38,8 @@ var (
 	BonusKeyPrefix = []byte{0x4}
 	//BonusServicePrefix =
 	BonusServicePrefix = []byte{0x5}
+	//ClaimServicePrefix is the prefix for the account that sends claims
+	ClaimServicePrefix = []byte{0x6}
 	//KeySeparator is the separator between the prefix and the type key
 	KeySeparator = []byte("::")
 )
@@ -56,6 +67,11 @@ func ServiceKey() []byte {
 // BonusServiceKey -
 func BonusServiceKey() []byte {
 	return BonusServicePrefix
+}
+
+// ClaimServiceKey returns the prefix for the claim key
+func ClaimServiceKey() []byte {
+	return ClaimServicePrefix
 }
 
 // BonusKey -

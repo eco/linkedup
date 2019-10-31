@@ -7,6 +7,7 @@ import (
 	"github.com/eco/longy/x/longy/utils"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	crypto "github.com/tendermint/tendermint/crypto/secp256k1"
 )
 
 var _ = Describe("Redeem Handler Tests", func() {
@@ -27,6 +28,13 @@ var _ = Describe("Redeem Handler Tests", func() {
 	Context("when master account set", func() {
 		BeforeEach(func() {
 			utils.SetServiceAccount(ctx, keeper, sender)
+			acc := keeper.AccountKeeper().NewAccountWithAddress(ctx, sender)
+			pubKey := crypto.GenPrivKeySecp256k1([]byte(types.ClaimServiceSeed)).PubKey()
+			err := acc.SetPubKey(pubKey)
+			Expect(err).To(BeNil())
+			keeper.AccountKeeper().SetAccount(ctx, acc)
+			err = keeper.SetClaimServiceAddress(ctx, sender)
+			Expect(err).To(BeNil())
 		})
 
 		It("should fail when the sender is the master account, but attendee doesn't exist", func() {
