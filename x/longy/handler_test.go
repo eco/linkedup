@@ -40,6 +40,9 @@ var _ = Describe("Longy Handler Tests", func() {
 			BonusService: types.GenesisService{
 				Address: util.IDToAddress("foo"),
 			},
+			ClaimService: types.GenesisService{
+				Address: util.IDToAddress("asfd"),
+			},
 			Attendees: []types.Attendee{
 				et.ToGenesisAttendee(),
 			},

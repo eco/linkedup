@@ -56,6 +56,7 @@ func main() {
 		// service commands
 		genesis.AddSetGenesisKeyServiceCmd(ctx, cdc),
 		genesis.AddSetGenesisBonusServiceCmd(ctx, cdc),
+		genesis.AddSetGenesisClaimServiceCmd(ctx, cdc),
 		// ConsensusConfigCmd sets the consensus configurations file for the node to quicken block times
 		genesis.ConsensusConfigCmd(ctx, cdc),
 	)

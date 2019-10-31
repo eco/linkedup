@@ -75,4 +75,52 @@ var _ = Describe("Service Key Keeper Tests", func() {
 		Expect(service.Address.Empty()).To(BeFalse())
 		Expect(service.PubKey).ToNot(BeNil())
 	})
+
+	Context("bonus service", func() {
+		It("should fail is bonus service account when its not set", func() {
+			is := keeper.IsBonusServiceAccount(ctx, s1)
+			Expect(is).To(Equal(false))
+		})
+
+		It("should succeed to set a bonus service account", func() {
+			acc := keeper.AccountKeeper().NewAccountWithAddress(ctx, s1)
+			keeper.AccountKeeper().SetAccount(ctx, acc)
+			err := keeper.SetBonusServiceAddress(ctx, s1)
+			Expect(err).To(BeNil())
+		})
+
+		It("should succeed to is bonus service account when set", func() {
+			acc := keeper.AccountKeeper().NewAccountWithAddress(ctx, s1)
+			keeper.AccountKeeper().SetAccount(ctx, acc)
+			err := keeper.SetBonusServiceAddress(ctx, s1)
+			Expect(err).To(BeNil())
+
+			is := keeper.IsBonusServiceAccount(ctx, s1)
+			Expect(is).To(BeTrue())
+		})
+	})
+
+	Context("claim service", func() {
+		It("should fail is claim service account when its not set", func() {
+			is := keeper.IsClaimServiceAccount(ctx, s1)
+			Expect(is).To(Equal(false))
+		})
+
+		It("should succeed to set a claim service account", func() {
+			acc := keeper.AccountKeeper().NewAccountWithAddress(ctx, s1)
+			keeper.AccountKeeper().SetAccount(ctx, acc)
+			err := keeper.SetClaimServiceAddress(ctx, s1)
+			Expect(err).To(BeNil())
+		})
+
+		It("should succeed to is claim service account when set", func() {
+			acc := keeper.AccountKeeper().NewAccountWithAddress(ctx, s1)
+			keeper.AccountKeeper().SetAccount(ctx, acc)
+			err := keeper.SetClaimServiceAddress(ctx, s1)
+			Expect(err).To(BeNil())
+
+			is := keeper.IsClaimServiceAccount(ctx, s1)
+			Expect(is).To(BeTrue())
+		})
+	})
 })

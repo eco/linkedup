@@ -30,6 +30,7 @@ $LYD add-genesis-account $($LYCLI keys show redeemer -a) 1000longy,100000000stak
 # Set the default master and bonus key
 $LYD set-genesis-key-service
 $LYD set-genesis-bonus-service
+$LYD set-genesis-claim-service
 
 # Generate the genesis attendees from the eventbrite api
 $LYD add-genesis-attendees

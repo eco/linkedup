@@ -74,7 +74,11 @@ var _ = Describe("Genesis Tests", func() {
 				},
 				BonusService: longy.GenesisService{
 					Address: util.IDToAddress("foo"),
-					PubKey:  secp.GenPrivKeySecp256k1([]byte("service")).PubKey(),
+					PubKey:  secp.GenPrivKeySecp256k1([]byte("bonus")).PubKey(),
+				},
+				ClaimService: longy.GenesisService{
+					Address: util.IDToAddress("foasdfao"),
+					PubKey:  secp.GenPrivKeySecp256k1([]byte("claim")).PubKey(),
 				},
 				Attendees: longy.GenesisAttendees{},
 				Scans:     nil,
@@ -175,6 +179,10 @@ var _ = Describe("Genesis Tests", func() {
 		var bonusService longy.GenesisService
 		var bonusServiceAddr sdk.AccAddress
 		var bonusServicePubKey crypto.PubKey
+
+		var claimService longy.GenesisService
+		var claimServiceAddr sdk.AccAddress
+		var claimServicePubKey crypto.PubKey
 		BeforeEach(func() {
 			serviceAddr = util.IDToAddress("asdf")
 			servicePubKey = secp.GenPrivKeySecp256k1([]byte("service")).PubKey()
@@ -183,11 +191,18 @@ var _ = Describe("Genesis Tests", func() {
 				PubKey:  servicePubKey,
 			}
 
-			bonusServiceAddr = util.IDToAddress("foo")
-			bonusServicePubKey = secp.GenPrivKeySecp256k1([]byte("service")).PubKey()
+			bonusServiceAddr = util.IDToAddress("bonus")
+			bonusServicePubKey = secp.GenPrivKeySecp256k1([]byte("bonus")).PubKey()
 			bonusService = longy.GenesisService{
 				Address: bonusServiceAddr,
 				PubKey:  bonusServicePubKey,
+			}
+
+			claimServiceAddr = util.IDToAddress("claim")
+			claimServicePubKey = secp.GenPrivKeySecp256k1([]byte("claim")).PubKey()
+			claimService = longy.GenesisService{
+				Address: claimServiceAddr,
+				PubKey:  claimServicePubKey,
 			}
 		})
 		It("should init the key service", func() {
@@ -195,6 +210,7 @@ var _ = Describe("Genesis Tests", func() {
 			state := longy.GenesisState{
 				KeyService:   service,
 				BonusService: bonusService,
+				ClaimService: claimService,
 				Attendees:    nil,
 				Scans:        nil,
 				Prizes:       nil,
@@ -237,6 +253,7 @@ var _ = Describe("Genesis Tests", func() {
 			state := longy.GenesisState{
 				KeyService:   service,
 				BonusService: bonusService,
+				ClaimService: claimService,
 				Attendees: longy.GenesisAttendees{
 					a.ToGenesisAttendee(),
 					ba,
@@ -265,6 +282,7 @@ var _ = Describe("Genesis Tests", func() {
 			state := longy.GenesisState{
 				KeyService:   service,
 				BonusService: bonusService,
+				ClaimService: claimService,
 				Attendees:    nil,
 				Scans:        longy.GenesisScans{*scan},
 				Prizes:       nil,
@@ -284,6 +302,7 @@ var _ = Describe("Genesis Tests", func() {
 			state := longy.GenesisState{
 				KeyService:   service,
 				BonusService: bonusService,
+				ClaimService: claimService,
 				Attendees:    nil,
 				Scans:        nil,
 				Prizes:       prizes,
