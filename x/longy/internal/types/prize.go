@@ -14,15 +14,15 @@ const (
 	ShareSponsorAwardPoints uint = 6
 
 	//Tier is the rep needed to be in that tier level
-	Tier1Rep uint = 5  //20
-	Tier2Rep uint = 9  //30
-	Tier3Rep uint = 14 //40
-	Tier4Rep uint = 18 //50
-	Tier5Rep uint = 22 //75
-	Tier6Rep uint = 24 //100
-	Tier7Rep uint = 28 //125
-	Tier8Rep uint = 30 //170
-	Tier9Rep uint = 32 //220
+	Tier1Rep uint = 30  //20
+	Tier2Rep uint = 50  //30
+	Tier3Rep uint = 75  //40
+	Tier4Rep uint = 100 //50
+	Tier5Rep uint = 125 //75
+	Tier6Rep uint = 150 //100
+	Tier7Rep uint = 175 //125
+	Tier8Rep uint = 250 //170
+	Tier9Rep uint = 600 //220
 
 	//Quantity of prizes per tier
 	Tier1Quantity uint = 150
