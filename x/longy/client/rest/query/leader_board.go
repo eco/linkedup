@@ -39,6 +39,7 @@ func LeaderBoardHandler(cliCtx context.CLIContext, storeName string) http.Handle
 		//pass through for any routines that queued on the lock while the cache was updated
 		res, found = boardCache.Get(BoardCacheKey)
 		if found {
+			mutex.Unlock()
 			rest.PostProcessResponse(w, cliCtx, res)
 			return
 		}
@@ -51,8 +52,8 @@ func LeaderBoardHandler(cliCtx context.CLIContext, storeName string) http.Handle
 			return
 		}
 		boardCache.Set(BoardCacheKey, res, cache.DefaultExpiration)
-		mutex.Unlock()
 
+		mutex.Unlock()
 		rest.PostProcessResponse(w, cliCtx, res)
 	}
 }
