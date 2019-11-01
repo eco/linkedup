@@ -1,0 +1,200 @@
+{
+  "height": "0",
+  "result": {
+    "type": "longy/LeaderBoard",
+    "value": {
+      "totalCount": "2606",
+      "tier1": {
+        "prizeAmount": "5000",
+        "attendees": [
+          {
+            "id": "1451919443",
+            "address": "cosmos13sau6mtvgdq72nwygrsl86st7xfgf9f7r5hyck",
+            "name": "Darryll D",
+            "rep": "781"
+          },
+          {
+            "id": "1439036217",
+            "address": "cosmos1ksezpr579j8wjuz8pvehtxgfj7r3vd3sh2c0lq",
+            "name": "Christopher B",
+            "rep": "749"
+          },
+          {
+            "id": "1476598877",
+            "address": "cosmos1jf5x9lt7c8a7lc2m89xfkt5mfx0z600nur8ffy",
+            "name": "Annelise S",
+            "rep": "745"
+          },
+          {
+            "id": "1471606233",
+            "address": "cosmos1dkuarv7pzasucktnn8h7ulyc2wjf2dm3l7ym25",
+            "name": "Arvin V",
+            "rep": "661"
+          },
+          {
+            "id": "1493165395",
+            "address": "cosmos1mm5a40ygh8hax7kpp9akcxsejgnkg0zntkql52",
+            "name": "Varun V",
+            "rep": "650"
+          },
+          {
+            "id": "1465489381",
+            "address": "cosmos19qs0yzkq7gvdxuklfv2knpcmm39vnn896wp7vv",
+            "name": "Saros",
+            "rep": "633"
+          },
+          {
+            "id": "1420927307",
+            "address": "cosmos1qkhrcl0tn8sd4f4l53kg547fsjrdtyunpre3mc",
+            "name": "Alexander P",
+            "rep": "621"
+          },
+          {
+            "id": "1434230711",
+            "address": "cosmos19y8ax56qvyhl5pz4kzs6a9tl08gqg7kysr484y",
+            "name": "Hardik B",
+            "rep": "593"
+          },
+          {
+            "id": "1420687035",
+            "address": "cosmos1wk5t63ue4advsw7zzae54p0zecghp8v2sgl2z2",
+            "name": "Zach Z",
+            "rep": "589"
+          },
+          {
+            "id": "1428871113",
+            "address": "cosmos1qdjj673afddathkhznd7tm6wh8ef4hr0mgp0wt",
+            "name": "dennis juanito",
+            "rep": "581"
+          }
+        ]
+      },
+      "tier2": {
+        "prizeAmount": "2000",
+        "attendees": [
+          {
+            "id": "1493075883",
+            "address": "cosmos10rfmy3j349f2qvktr9w3735xe0z8l7emejnmyk",
+            "name": "Chris",
+            "rep": "489"
+          },
+          {
+            "id": "1454144331",
+            "address": "cosmos1tjx26qkd66mv4mrufck7sxlelke58n2t244euv",
+            "name": "Dray King",
+            "rep": "421"
+          },
+          {
+            "id": "1500418571",
+            "address": "cosmos10llkg4aux4al56f8wmfsulxe8kqye36zw8vcl7",
+            "name": "Emiliano P",
+            "rep": "417"
+          },
+          {
+            "id": "1493784695",
+            "address": "cosmos1wd5925a0u69ule6lhwlewjctvamr46n8ys36wh",
+            "name": "Nikhil C",
+            "rep": "409"
+          },
+          {
+            "id": "1493083209",
+            "address": "cosmos13l3j0aqte9uky6awyt939mwkgv73uvrw48c493",
+            "name": "Roshan M",
+            "rep": "401"
+          },
+          {
+            "id": "1499525489",
+            "address": "cosmos187aq8l4up72exwfttemvrndeg6ak4zl30r2gsl",
+            "name": "Kamish R",
+            "rep": "353"
+          },
+          {
+            "id": "1496989289",
+            "address": "cosmos1gtd72f795p0kc24uf8dkymmlcpxhsm2aaspzcl",
+            "name": "Ben O",
+            "rep": "345"
+          },
+          {
+            "id": "1454647219",
+            "address": "cosmos1xaz5hzrfrpfx27egtsawuuwd80zzseslxw299f",
+            "name": "Satish B",
+            "rep": "325"
+          },
+          {
+            "id": "1420415959",
+            "address": "cosmos1gus8rkm294xlhzzyex30vvgja3tcy3d4dngylk",
+            "name": "Ray Q",
+            "rep": "313"
+          },
+          {
+            "id": "1425522061",
+            "address": "cosmos18n9vqr0c2l946hj0tfpylvdhdqhqaugk8s36gv",
+            "name": "IRYNA D",
+            "rep": "305"
+          },
+          {
+            "id": "1457211011",
+            "address": "cosmos1j93npxfjm2qp2mv3j28gnvpe8jemrc0ttjfc5g",
+            "name": "Sahil S",
+            "rep": "301"
+          },
+          {
+            "id": "1486074721",
+            "address": "cosmos1ah89u6ys3f9nj3y3qxhgfffy2atvahknd2m5xj",
+            "name": "Sergi Delgado",
+            "rep": "297"
+          },
+          {
+            "id": "1486238471",
+            "address": "cosmos1v4z2wc9ceht07pd4m7w8xjhwljup2s6kvzqgkp",
+            "name": "Bana H",
+            "rep": "285"
+          },
+          {
+            "id": "1498204859",
+            "address": "cosmos1w2ka5t2xy0qlt7s0h7mqyxsf5c65cex7fp33gg",
+            "name": "Alexei D",
+            "rep": "285"
+          },
+          {
+            "id": "1425474265",
+            "address": "cosmos1unmf0s79g67jmy6h0dq8u5rmp3v0jse3pww9w7",
+            "name": "Douglas V",
+            "rep": "285"
+          },
+          {
+            "id": "1454877543",
+            "address": "cosmos1swyqaxfage0ww089td4z3mts63ky3vpyjqce4v",
+            "name": "Zack Shaikh",
+            "rep": "269"
+          },
+          {
+            "id": "1472240983",
+            "address": "cosmos1tg3h5mhvgkkgcclc898y8uppq9cq4yxe7cxykm",
+            "name": "Kat P",
+            "rep": "261"
+          },
+          {
+            "id": "1504175669",
+            "address": "cosmos187mvd9zqngstmjcg3qrggttk0jdhvwsresdq8e",
+            "name": "Hamdi Allam",
+            "rep": "249"
+          },
+          {
+            "id": "1493521413",
+            "address": "cosmos1j3u968sg7cf25j3zagqenh4e77jc5gtdfltsga",
+            "name": "Danny H",
+            "rep": "243"
+          },
+          {
+            "id": "1486242025",
+            "address": "cosmos1g005lxsg5h8pek23a5rypmzume23cgzmfcagra",
+            "name": "MinSeung Kang",
+            "rep": "233"
+          }
+        ]
+      },
+      "time": "2019-11-01T21:59:52.268573967Z"
+    }
+  }
+}
