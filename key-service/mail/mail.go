@@ -1,9 +1,12 @@
 package mail
 
 import (
+	"bytes"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/go-gomail/gomail"
+	"io"
 	"net/url"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -11,8 +14,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/ses"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	eb "github.com/eco/longy/eventbrite"
-	"github.com/sirupsen/logrus"
 	"github.com/eco/longy/key-service/models"
+	"github.com/sirupsen/logrus"
 )
 
 var log = logrus.WithField("module", "mail")
@@ -30,6 +33,8 @@ type Client interface {
 	SendRecoveryEmail(*models.DatabaseContext, *eb.AttendeeProfile, string, string) error
 
 	SendVerificationEmail(*models.DatabaseContext, string, string) error
+
+	SendAttendeeSharedInfoEmail(ctx *models.DatabaseContext, attendeeEmail string, sharedInfo string) error
 }
 
 type sesClient struct {
@@ -144,6 +149,35 @@ func (c sesClient) SendVerificationEmail(
 	return err
 }
 
+//SendAttendeeSharedInfoEmail sends the shared info to an attendee
+func (c sesClient) SendAttendeeSharedInfoEmail(
+	db *models.DatabaseContext,
+	attendeeEmail string,
+	sharedInfo string) error {
+	if db.GetBlacklistEntry(attendeeEmail) {
+		log.WithField("dest", attendeeEmail).Trace("refusing to email to blacklisted address")
+		return nil
+	}
+	shareData := []byte("this is a message")
+	msg := gomail.NewMessage()
+	msg.SetHeader("From", "alex@example.com")
+	msg.SetHeader("To", "bob@example.com", "cora@example.com")
+	msg.SetHeader("Subject", "Hello!")
+	msg.SetBody("text/html", "Hello <b>Bob</b> and <i>Cora</i>!")
+	msg.Attach("contactInfo.csv", gomail.SetCopyFunc(func(w io.Writer) error {
+		_, err := w.Write(shareData)
+		return err
+	}))
+
+	var emailRaw bytes.Buffer
+	message := ses.RawMessage{Data: emailRaw.Bytes()}
+	source := aws.String("XXX <xxx@xxx.com>")
+	destinations := []*string{aws.String("xxx <xxx@xxx.com>")}
+	input := ses.SendRawEmailInput{Source: source, Destinations: destinations, RawMessage: &message}
+	_, err := c.ses.SendRawEmail(&input)
+	return err
+}
+
 func (c sesClient) sendEmailWithURL(
 	db *models.DatabaseContext,
 	dest string,
@@ -205,6 +239,14 @@ func (c mockClient) SendVerificationEmail(
 	token string,
 ) error {
 	log.Warnf("mock verification token: %s", token)
+	return nil
+}
+
+func (c mockClient) SendAttendeeSharedInfoEmail(
+	ctx *models.DatabaseContext,
+	attendeeEmail string,
+	sharedInfo string) error {
+	log.Warnf("mock attendee share info : %s", sharedInfo)
 	return nil
 }
 

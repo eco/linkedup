@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/badoux/checkmail"
 	ebSession "github.com/eco/longy/key-service/eventbrite"
+	"github.com/eco/longy/key-service/mail"
 	"github.com/eco/longy/key-service/models"
 	"github.com/gorilla/mux"
 	"net/http"
@@ -34,10 +35,11 @@ func init() {
 	}
 }
 
-func registerEmailManual(r *mux.Router, db *models.DatabaseContext, eb *ebSession.Session) {
+func registerEmailManual(r *mux.Router, db *models.DatabaseContext, eb *ebSession.Session, mc mail.Client) {
 	s := r.PathPrefix("/emails").Subrouter()
 	s.HandleFunc("", setEmailForAttendee(db)).Methods(http.MethodPost, http.MethodOptions)
 	s.HandleFunc(fmt.Sprintf("/{%s}", idKey), getEmailForAttendee(db, eb)).Methods(http.MethodGet, http.MethodOptions)
+	s.HandleFunc("/send", sendEmailToAttendee(db, mc)).Methods(http.MethodPost, http.MethodOptions)
 	s.Use(EmailAuthMiddleware)
 }
 
@@ -113,6 +115,59 @@ func setEmailForAttendee(db *models.DatabaseContext) func(
 		}
 	}
 
+}
+
+func sendEmailToAttendee(db *models.DatabaseContext, mc mail.Client) func(
+	http.ResponseWriter, *http.Request) {
+	type sendBody struct {
+		ID   int    `json:"id"`
+		Msg  string `json:"msg"`
+		Sig  string `json:"sig"`
+		Data string `json:"data"`
+	}
+	return func(w http.ResponseWriter, r *http.Request) {
+		var sb sendBody
+		if err := json.NewDecoder(r.Body).Decode(&sb); err != nil {
+			http.Error(w, fmt.Sprintf("request body invalid: %s", err), http.StatusBadRequest)
+			return
+		} else if sb.ID < 0 {
+			http.Error(w, "attendee id must be a positive integer", http.StatusBadRequest)
+			return
+		}
+
+		infoBz, err := db.GetAttendeeInfo(sb.ID)
+		if err != nil {
+			http.Error(w, "key-service down", http.StatusServiceUnavailable)
+			return
+		} else if len(infoBz) != 0 {
+			http.Error(w, "attendee does not exist", http.StatusNotFound)
+			return
+		}
+
+		var info AttendeeInfo
+		err = json.Unmarshal(infoBz, &info)
+		if err != nil {
+			http.Error(w, "failed to unmarshal attendee info", http.StatusInternalServerError)
+			return
+		}
+
+		//check if the email has been changed manually for the attendee
+		storedEmail := db.GetEmail(info.Profile.ID)
+		if storedEmail != "" {
+			info.Profile.Email = storedEmail
+		}
+
+		err = mc.SendAttendeeSharedInfoEmail(db, info.Profile.Email, "sharedInfoStuff")
+		if err != nil {
+			http.Error(w, "email error. try again", http.StatusServiceUnavailable)
+			return
+		}
+
+		maskedEmail := maskEmail(info.Profile.Email)
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(maskedEmail)) //nolint
+
+	}
 }
 
 //EmailAuthMiddleware checks all requests
