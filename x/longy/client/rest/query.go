@@ -111,6 +111,20 @@ func scanGetHandler(cliCtx context.CLIContext, storeName string) http.HandlerFun
 }
 
 //nolint:gocritic
+func scansGetHandler(cliCtx context.CLIContext, storeName string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		res, _, err := cliCtx.Query(fmt.Sprintf("custom/%s/%s",
+			storeName, querier.QueryScans))
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusNotFound, err.Error())
+			return
+		}
+
+		rest.PostProcessResponse(w, cliCtx, res)
+	}
+}
+
+//nolint:gocritic
 func attendeeAddressHandler(cliCtx context.CLIContext, storeName string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
@@ -136,6 +150,20 @@ func attendeeHandler(cliCtx context.CLIContext, storeName string) http.HandlerFu
 
 		res, _, err := cliCtx.Query(fmt.Sprintf("custom/%s/%s/%s",
 			storeName, querier.QueryAttendees, paramType))
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusNotFound, err.Error())
+			return
+		}
+
+		rest.PostProcessResponse(w, cliCtx, res)
+	}
+}
+
+//nolint:gocritic
+func attendeesHandler(cliCtx context.CLIContext, storeName string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		res, _, err := cliCtx.Query(fmt.Sprintf("custom/%s/%s",
+			storeName, querier.QueryAttendees))
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusNotFound, err.Error())
 			return

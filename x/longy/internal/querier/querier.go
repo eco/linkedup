@@ -36,7 +36,7 @@ const (
 )
 
 // NewQuerier is the module level router for state queries
-//nolint:gocritic
+//nolint:gocritic,gocyclo
 func NewQuerier(keeper keeper.Keeper) sdk.Querier {
 	return func(ctx sdk.Context, path []string, req abci.RequestQuery) (res []byte, err sdk.Error) {
 		queryType := path[0]
@@ -44,11 +44,14 @@ func NewQuerier(keeper keeper.Keeper) sdk.Querier {
 
 		switch queryType {
 		case QueryAttendees:
+			if len(queryArgs) > 0 {
+				return queryAttendees(ctx, keeper)
+			}
 			if path[1] == AddressKey {
 				queryArgs = path[2:]
 				return queryAttendeesByAddr(ctx, queryArgs, keeper)
 			}
-			return queryAttendees(ctx, queryArgs, keeper)
+			return queryAttendee(ctx, queryArgs, keeper)
 
 		case QueryAttendeeClaimed:
 			return queryAttendeeClaimed(ctx, queryArgs, keeper)
@@ -57,7 +60,11 @@ func NewQuerier(keeper keeper.Keeper) sdk.Querier {
 			return queryAttendeeKeyed(ctx, queryArgs, keeper)
 
 		case QueryScans:
-			return queryScans(ctx, queryArgs, keeper)
+			if len(queryArgs) > 0 {
+				return queryScan(ctx, queryArgs, keeper)
+			}
+
+			return queryScans(ctx, keeper)
 
 		case PrizesKey:
 			return queryPrizes(ctx, keeper)
