@@ -10,7 +10,7 @@ import (
 )
 
 //nolint:gocritic,unparam
-func queryAttendees(ctx sdk.Context, path []string, keeper keeper.Keeper) (res []byte, err sdk.Error) {
+func queryAttendee(ctx sdk.Context, path []string, keeper keeper.Keeper) (res []byte, err sdk.Error) {
 	id := path[0]
 	attendee, ok := keeper.GetAttendeeWithID(ctx, id)
 	if !ok {
@@ -18,6 +18,18 @@ func queryAttendees(ctx sdk.Context, path []string, keeper keeper.Keeper) (res [
 	}
 
 	res, e := codec.MarshalJSONIndent(keeper.Cdc, attendee)
+	if e != nil {
+		panic("could not marshal result to JSON")
+	}
+
+	return res, nil
+}
+
+//nolint:gocritic,unparam
+func queryAttendees(ctx sdk.Context, keeper keeper.Keeper) (res []byte, err sdk.Error) {
+	attendees := keeper.GetAllAttendees(ctx)
+
+	res, e := codec.MarshalJSONIndent(keeper.Cdc, attendees)
 	if e != nil {
 		panic("could not marshal result to JSON")
 	}
