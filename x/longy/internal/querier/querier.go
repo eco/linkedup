@@ -44,7 +44,7 @@ func NewQuerier(keeper keeper.Keeper) sdk.Querier {
 
 		switch queryType {
 		case QueryAttendees:
-			if len(queryArgs) > 0 {
+			if len(queryArgs) == 0 {
 				return queryAttendees(ctx, keeper)
 			}
 			if path[1] == AddressKey {
