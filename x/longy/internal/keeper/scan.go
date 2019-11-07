@@ -10,6 +10,7 @@ import (
 func (k *Keeper) GetAllScans(ctx sdk.Context) (scans []types.Scan) {
 	it := k.KVStore(ctx).Iterator(nil, nil)
 	defer it.Close()
+	scans = make([]types.Scan, 0)
 	for ; it.Valid(); it.Next() {
 		key := it.Key()
 		if types.IsScanKey(key) {

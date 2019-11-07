@@ -18,6 +18,11 @@ const (
 // RegisterRoutes - Central function to define routes that get registered by the main application
 //nolint:gocritic
 func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, storeName string) {
+
+	// longy/attendees
+	r.HandleFunc(fmt.Sprintf("/%s/%s", storeName, querier.QueryAttendees),
+		attendeesHandler(cliCtx, storeName)).Methods(http.MethodGet, http.MethodOptions)
+
 	// <storeName>/attendees/{attendee_id}
 	r.HandleFunc(fmt.Sprintf("/%s/%s/{%s}", storeName, querier.QueryAttendees, query.AttendeeIDKey),
 		attendeeHandler(cliCtx, storeName)).Methods(http.MethodGet, http.MethodOptions)
@@ -37,6 +42,10 @@ func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, storeName string) 
 	// <storeName>/scans/{scan_id}
 	r.HandleFunc(fmt.Sprintf("/%s/%s/{%s}", storeName, querier.QueryScans, query.ScanIDKey),
 		scanGetHandler(cliCtx, storeName)).Methods(http.MethodGet, http.MethodOptions)
+
+	// longy/scans
+	r.HandleFunc(fmt.Sprintf("/%s/%s", storeName, querier.QueryScans),
+		scansGetHandler(cliCtx, storeName)).Methods(http.MethodGet, http.MethodOptions)
 
 	// <storeName>/prizes
 	r.HandleFunc(fmt.Sprintf("/%s/%s", storeName, querier.PrizesKey),
