@@ -1,12 +1,9 @@
 package mail
 
 import (
-	"bytes"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/go-gomail/gomail"
-	"io"
 	"net/url"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -158,23 +155,9 @@ func (c sesClient) SendAttendeeSharedInfoEmail(
 		log.WithField("dest", attendeeEmail).Trace("refusing to email to blacklisted address")
 		return nil
 	}
-	shareData := []byte("this is a message")
-	msg := gomail.NewMessage()
-	msg.SetHeader("From", "alex@example.com")
-	msg.SetHeader("To", "bob@example.com", "cora@example.com")
-	msg.SetHeader("Subject", "Hello!")
-	msg.SetBody("text/html", "Hello <b>Bob</b> and <i>Cora</i>!")
-	msg.Attach("contactInfo.csv", gomail.SetCopyFunc(func(w io.Writer) error {
-		_, err := w.Write(shareData)
-		return err
-	}))
 
-	var emailRaw bytes.Buffer
-	message := ses.RawMessage{Data: emailRaw.Bytes()}
-	source := aws.String("XXX <xxx@xxx.com>")
-	destinations := []*string{aws.String("xxx <xxx@xxx.com>")}
-	input := ses.SendRawEmailInput{Source: source, Destinations: destinations, RawMessage: &message}
-	_, err := c.ses.SendRawEmail(&input)
+	_, err := sendRaw(c.ses, attendeeEmail, sharedInfo)
+
 	return err
 }
 
