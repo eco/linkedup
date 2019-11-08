@@ -17,11 +17,13 @@ func sendRaw(svc *ses.SES, toAddress string, data string) (result *ses.SendRawEm
 	source := aws.String(LinkedUpSender)
 	destinations := []*string{aws.String(toAddress)}
 
+	//https://linkedup.sfbw.io/s/export/index.html?id=1284763463&token=584353
+
 	msg := gomail.NewMessage()
 	msg.SetHeader("From", LinkedUpSender)
 	msg.SetHeader("To", toAddress)
 	msg.SetHeader("Subject", "Hello!")
-	msg.SetBody("text/html", "Hello <b>Bob</b> and <i>Cora</i>!")
+	msg.SetBody("text/html", "Hello <b>this is ur data</b>!")
 	msg.Attach("contactInfo.csv", gomail.SetCopyFunc(func(w io.Writer) error {
 		_, err = w.Write([]byte(data))
 		return err
