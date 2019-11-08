@@ -5,7 +5,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/context"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/eco/longy/x/longy/internal/crypto"
+	"github.com/eco/longy/x/longy/crypto"
 	"github.com/eco/longy/x/longy/internal/types"
 	tmcrypto "github.com/tendermint/tendermint/crypto/secp256k1"
 	"net/http"

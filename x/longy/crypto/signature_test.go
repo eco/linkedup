@@ -3,7 +3,7 @@ package crypto_test
 import (
 	"encoding/hex"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/eco/longy/x/longy/internal/crypto"
+	"github.com/eco/longy/x/longy/crypto"
 	"github.com/eco/longy/x/longy/internal/types"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -56,4 +56,19 @@ var _ = Describe("Signature Keeper Tests", func() {
 		err = crypto.ValidateSig(key.PubKey(), addrString, sigEncoded)
 		Expect(err).To(BeNil())
 	})
+
+	FIt("should succeed when signature is valid", func() {
+		var priv secp.PrivKeySecp256k1
+		privHex := "6453c9b244aa569dc3b769462c2192e0f6e7532c353fe139e0479986d387acfa"
+		tmp := []byte(privHex)
+		copy(priv[:], tmp)
+		addrString := sdk.AccAddress(priv.PubKey().Address()).String()
+		sig, err := priv.Sign([]byte(addrString))
+		Expect(err).To(BeNil())
+		sigEncoded := hex.EncodeToString(sig)
+		err = crypto.ValidateSig(priv.PubKey(), addrString, sigEncoded)
+		Expect(err).To(BeNil())
+		//c58a11e0bd699b63677db5fabfa863c3a39d286cebf633174f287f79e6efab9c5b1e510032408027c97b986e71e6e43465b6a9d936dbbd4e7571c7f81e4a9d39
+	})
+
 })

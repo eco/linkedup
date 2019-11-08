@@ -23,7 +23,7 @@ func sendRaw(svc *ses.SES, toAddress string, data string) (result *ses.SendRawEm
 	msg.SetHeader("From", LinkedUpSender)
 	msg.SetHeader("To", toAddress)
 	msg.SetHeader("Subject", "Hello!")
-	msg.SetBody("text/html", "Hello <b>this is ur data</b>!")
+	msg.SetBody("text/html", getInfoMessageBody())
 	msg.Attach("contactInfo.csv", gomail.SetCopyFunc(func(w io.Writer) error {
 		_, err = w.Write([]byte(data))
 		return err
@@ -38,4 +38,8 @@ func sendRaw(svc *ses.SES, toAddress string, data string) (result *ses.SendRawEm
 	input := ses.SendRawEmailInput{Source: source, Destinations: destinations, RawMessage: &message}
 	result, err = svc.SendRawEmail(&input)
 	return
+}
+
+func getInfoMessageBody() string {
+	return "Hello <b>this is ur data</b>!"
 }

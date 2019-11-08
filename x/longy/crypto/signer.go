@@ -111,7 +111,7 @@ func (s *Signer) buildAndSign(cdc *codec.Codec, bldr auth.TxBuilder, msgs []sdk.
 	}
 
 	fee := msg.Fee
-	fee.Gas = fee.Gas*2
+	fee.Gas = fee.Gas * 2
 
 	return bldr.TxEncoder()(auth.NewStdTx(msg.Msgs, fee, []auth.StdSignature{sig}, msg.Memo))
 }

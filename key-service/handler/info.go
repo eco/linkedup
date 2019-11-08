@@ -3,9 +3,12 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/eco/longy/key-service/mail"
 	"github.com/eco/longy/key-service/models"
+	"github.com/eco/longy/x/longy/crypto"
 	"github.com/gorilla/mux"
+	"github.com/tendermint/tendermint/crypto/secp256k1"
 	"net/http"
 )
 
@@ -17,7 +20,6 @@ func sendEmailToAttendee(db *models.DatabaseContext, mc mail.Client) func(
 	http.ResponseWriter, *http.Request) {
 	type sendBody struct {
 		ID   int    `json:"id"`
-		Msg  string `json:"msg"`
 		Sig  string `json:"sig"`
 		Data string `json:"data"`
 	}
@@ -47,6 +49,12 @@ func sendEmailToAttendee(db *models.DatabaseContext, mc mail.Client) func(
 			return
 		}
 
+		err = validSig(info.CosmosPrivateKey, sb.Sig)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusUnauthorized)
+			return
+		}
+
 		//check if the email has been changed manually for the attendee
 		storedEmail := db.GetEmail(info.Profile.ID)
 		if storedEmail != "" {
@@ -64,4 +72,12 @@ func sendEmailToAttendee(db *models.DatabaseContext, mc mail.Client) func(
 		_, _ = w.Write([]byte(maskedEmail))
 
 	}
+}
+
+func validSig(privKey string, sig string) error {
+	var priv secp256k1.PrivKeySecp256k1
+	tmp := []byte(privKey)
+	copy(priv[:], tmp)
+	addrString := sdk.AccAddress(priv.PubKey().Address()).String()
+	return crypto.ValidateSig(priv.PubKey(), addrString, sig)
 }
