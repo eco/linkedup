@@ -8,6 +8,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	tmCrypto "github.com/tendermint/tendermint/crypto"
+
 	secp "github.com/tendermint/tendermint/crypto/secp256k1"
 )
 
@@ -63,12 +64,17 @@ var _ = Describe("Signature Keeper Tests", func() {
 		tmp := []byte(privHex)
 		copy(priv[:], tmp)
 		addrString := sdk.AccAddress(priv.PubKey().Address()).String()
+		//hash := hex.EncodeToString([]byte(addrString))
+		//fmt.Println(hash)
 		sig, err := priv.Sign([]byte(addrString))
 		Expect(err).To(BeNil())
 		sigEncoded := hex.EncodeToString(sig)
 		err = crypto.ValidateSig(priv.PubKey(), addrString, sigEncoded)
 		Expect(err).To(BeNil())
-		//c58a11e0bd699b63677db5fabfa863c3a39d286cebf633174f287f79e6efab9c5b1e510032408027c97b986e71e6e43465b6a9d936dbbd4e7571c7f81e4a9d39
+
+		fromJs := "050f543a67f78059e3ff022230aa0a9df86b40ce31a77f85b81ccf2d55e0ca7b6455a7ea366a0217aafc7293cafaf7104f2980a52feae325e0155566b19162f8"
+		err = crypto.ValidateSig(priv.PubKey(), addrString, fromJs)
+		Expect(err).To(BeNil())
 	})
 
 })
