@@ -3,12 +3,9 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/eco/longy/key-service/mail"
 	"github.com/eco/longy/key-service/models"
-	"github.com/eco/longy/x/longy/crypto"
 	"github.com/gorilla/mux"
-	"github.com/tendermint/tendermint/crypto/secp256k1"
 	"net/http"
 )
 
@@ -16,12 +13,13 @@ func registerInfo(r *mux.Router, db *models.DatabaseContext, mc mail.Client) {
 	r.HandleFunc("/sendEmail", sendEmailToAttendee(db, mc)).Methods(http.MethodPost, http.MethodOptions)
 }
 
+//nolint:gocyclo
 func sendEmailToAttendee(db *models.DatabaseContext, mc mail.Client) func(
 	http.ResponseWriter, *http.Request) {
 	type sendBody struct {
-		ID   int    `json:"id"`
-		Sig  string `json:"sig"`
-		Data string `json:"data"`
+		ID    int    `json:"id"`
+		Token string `json:"token"`
+		Data  string `json:"data"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		var sb sendBody
@@ -49,9 +47,19 @@ func sendEmailToAttendee(db *models.DatabaseContext, mc mail.Client) func(
 			return
 		}
 
-		err = validSig(info.CosmosPrivateKey, sb.Sig)
+		expectedToken, err := db.GetVerificationToken(info.Profile.ID)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusUnauthorized)
+			http.Error(w, "could not retrieve expected token for account", http.StatusServiceUnavailable)
+			return
+		}
+
+		if len(expectedToken) == 0 {
+			http.Error(w, "attendee has no auth token stored", http.StatusUnauthorized)
+			return
+		}
+
+		if expectedToken != sb.Token {
+			http.Error(w, "incorrect auth token", http.StatusUnauthorized)
 			return
 		}
 
@@ -72,12 +80,4 @@ func sendEmailToAttendee(db *models.DatabaseContext, mc mail.Client) func(
 		_, _ = w.Write([]byte(maskedEmail))
 
 	}
-}
-
-func validSig(privKey string, sig string) error {
-	var priv secp256k1.PrivKeySecp256k1
-	tmp := []byte(privKey)
-	copy(priv[:], tmp)
-	addrString := sdk.AccAddress(priv.PubKey().Address()).String()
-	return crypto.ValidateSig(priv.PubKey(), addrString, sig)
 }

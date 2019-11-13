@@ -8,19 +8,12 @@ import (
 	"io"
 )
 
-const (
-	//LinkedUpSender is the account we send the info request email from
-	LinkedUpSender = "linkedup@sfbw.io"
-)
-
 func sendRaw(svc *ses.SES, toAddress string, data string) (result *ses.SendRawEmailOutput, err error) {
-	source := aws.String(LinkedUpSender)
+	source := aws.String(GmEmail)
 	destinations := []*string{aws.String(toAddress)}
 
-	//https://linkedup.sfbw.io/s/export/index.html?id=1284763463&token=584353
-
 	msg := gomail.NewMessage()
-	msg.SetHeader("From", LinkedUpSender)
+	msg.SetHeader("From", GmEmail)
 	msg.SetHeader("To", toAddress)
 	msg.SetHeader("Subject", "Hello!")
 	msg.SetBody("text/html", getInfoMessageBody())

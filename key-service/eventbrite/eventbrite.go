@@ -68,6 +68,11 @@ func (s *Session) AttendeeProfile(id int) (*eventbrite.AttendeeProfile, bool) {
 	return &profile, ok
 }
 
+//GetAttendees returns all the attendees from eventbrite
+func (s *Session) GetAttendees() map[int]eventbrite.AttendeeProfile {
+	return s.attendees
+}
+
 func (s *Session) poll(ticker *time.Ticker, eventID int, authToken string) {
 	for range ticker.C {
 		attendees, err := eventbrite.GetAttendees(eventID, authToken)
