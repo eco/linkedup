@@ -3,11 +3,12 @@ package crypto_test
 import (
 	"encoding/hex"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/eco/longy/x/longy/internal/crypto"
+	"github.com/eco/longy/x/longy/crypto"
 	"github.com/eco/longy/x/longy/internal/types"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	tmCrypto "github.com/tendermint/tendermint/crypto"
+
 	secp "github.com/tendermint/tendermint/crypto/secp256k1"
 )
 
@@ -56,4 +57,5 @@ var _ = Describe("Signature Keeper Tests", func() {
 		err = crypto.ValidateSig(key.PubKey(), addrString, sigEncoded)
 		Expect(err).To(BeNil())
 	})
+
 })

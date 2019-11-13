@@ -11,17 +11,22 @@ import (
 	"github.com/aws/aws-sdk-go/service/ses"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	eb "github.com/eco/longy/eventbrite"
-	"github.com/sirupsen/logrus"
 	"github.com/eco/longy/key-service/models"
+	"github.com/sirupsen/logrus"
 )
 
 var log = logrus.WithField("module", "mail")
-var gmEmail = "LinkedUp Game <gm@linkedup.sfblockchainweek.io>"
+
+//GmEmail is the authorized from email for AWS SES email sending
+var GmEmail = "LinkedUp Game <gm@linkedup.sfblockchainweek.io>"
+
+//var GmEmail = "LinkedUp Game <linkedup@sfbw.io>"
 
 const (
 	onboardingRedirectTemplate = "linkedup-onboarding"
 	rekeyRedirectTemplate      = "linkedup-rekey"
 	verificationTemplate       = "linkedup-verification"
+	retrieveTemplate           = "linkedup-retrieve"
 )
 
 // Client used to send emails
@@ -30,6 +35,10 @@ type Client interface {
 	SendRecoveryEmail(*models.DatabaseContext, *eb.AttendeeProfile, string, string) error
 
 	SendVerificationEmail(*models.DatabaseContext, string, string) error
+
+	SendExportEmail(db *models.DatabaseContext, attendeeEmail string, id int, token string) error
+
+	SendAttendeeSharedInfoEmail(ctx *models.DatabaseContext, attendeeEmail string, sharedInfo string) error
 }
 
 type sesClient struct {
@@ -136,10 +145,38 @@ func (c sesClient) SendVerificationEmail(
 		Destination: &ses.Destination{
 			ToAddresses: []*string{&dest},
 		},
-		Source:       &gmEmail,
+		Source:       &GmEmail,
 		Template:     &template,
 		TemplateData: &templateData,
 	})
+
+	return err
+}
+
+func (c sesClient) SendExportEmail(db *models.DatabaseContext, dstEmail string, id int, token string) error {
+	//https://linkedup.sfbw.io/s/export/index.html?id=1284763463&token=584353
+	//EmailExportUrlBase is the base url for info export
+	link := fmt.Sprintf("%s/s/export/index.html?id=%d&token=%s", c.longyAppURL, id, token)
+
+	err := c.sendEmailWithURL(db, dstEmail, link, retrieveTemplate)
+	if err != nil {
+		log.WithError(err).Errorf("unable to send recovery email to %s", dstEmail)
+	}
+
+	return err
+}
+
+//SendAttendeeSharedInfoEmail sends the shared info to an attendee
+func (c sesClient) SendAttendeeSharedInfoEmail(
+	db *models.DatabaseContext,
+	attendeeEmail string,
+	sharedInfo string) error {
+	if db.GetBlacklistEntry(attendeeEmail) {
+		log.WithField("dest", attendeeEmail).Trace("refusing to email to blacklisted address")
+		return nil
+	}
+
+	_, err := sendRaw(c.ses, attendeeEmail, sharedInfo)
 
 	return err
 }
@@ -159,7 +196,7 @@ func (c sesClient) sendEmailWithURL(
 		Destination: &ses.Destination{
 			ToAddresses: []*string{&dest},
 		},
-		Source:       &gmEmail,
+		Source:       &GmEmail,
 		Template:     &template,
 		TemplateData: &templateData,
 	})
@@ -205,6 +242,20 @@ func (c mockClient) SendVerificationEmail(
 	token string,
 ) error {
 	log.Warnf("mock verification token: %s", token)
+	return nil
+}
+
+func (c mockClient) SendExportEmail(db *models.DatabaseContext, dstEmail string, id int, token string) error {
+	link := fmt.Sprintf("%s/s/export/index.html?id=%d&token=%s", c.longyAppURL, id, token)
+	log.Warnf("mock SendExportEmail : %s", link)
+	return nil
+}
+
+func (c mockClient) SendAttendeeSharedInfoEmail(
+	ctx *models.DatabaseContext,
+	attendeeEmail string,
+	sharedInfo string) error {
+	log.Warnf("mock attendee share info : %s", sharedInfo)
 	return nil
 }
 

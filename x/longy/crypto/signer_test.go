@@ -2,7 +2,7 @@ package crypto_test
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/eco/longy/x/longy/internal/crypto"
+	"github.com/eco/longy/x/longy/crypto"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	tmCrypto "github.com/tendermint/tendermint/crypto"
