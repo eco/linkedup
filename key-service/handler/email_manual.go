@@ -95,6 +95,7 @@ func sendReceiveInfo(db *models.DatabaseContext, eb *ebSession.Session, mc mail.
 		}
 
 		//generate recover tokens for them
+		var ids []int
 		for k := range attendees {
 			infoBz, err := db.GetAttendeeInfo(k)
 			if err != nil || len(infoBz) == 0 {
@@ -121,11 +122,22 @@ func sendReceiveInfo(db *models.DatabaseContext, eb *ebSession.Session, mc mail.
 
 			err = mc.SendExportEmail(db, info.Profile.Email, k, token)
 			if err != nil {
-				http.Error(w, fmt.Sprintf("failed to send export email to  : %s", info.Profile.Email),
-					http.StatusServiceUnavailable)
-				return
+				fmt.Printf("failed to send export email to  : %s", info.Profile.Email)
+				continue
 			}
+			ids = append(ids, info.Profile.ID)
 		}
+		type res struct {
+			Ids []int `json:"ids"`
+		}
+		bz, err := json.Marshal(res{ids})
+		if err != nil {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write(bz)
+
 	}
 }
 
