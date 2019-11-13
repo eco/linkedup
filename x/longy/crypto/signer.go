@@ -109,11 +109,7 @@ func (s *Signer) buildAndSign(cdc *codec.Codec, bldr auth.TxBuilder, msgs []sdk.
 	if err != nil {
 		return nil, err
 	}
-
-	fee := msg.Fee
-	fee.Gas = fee.Gas * 2
-
-	return bldr.TxEncoder()(auth.NewStdTx(msg.Msgs, fee, []auth.StdSignature{sig}, msg.Memo))
+	return bldr.TxEncoder()(auth.NewStdTx(msg.Msgs, msg.Fee, []auth.StdSignature{sig}, msg.Memo))
 }
 
 //nolint[hugeParam]

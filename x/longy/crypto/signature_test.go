@@ -58,23 +58,4 @@ var _ = Describe("Signature Keeper Tests", func() {
 		Expect(err).To(BeNil())
 	})
 
-	FIt("should succeed when signature is valid", func() {
-		var priv secp.PrivKeySecp256k1
-		privHex := "6453c9b244aa569dc3b769462c2192e0f6e7532c353fe139e0479986d387acfa"
-		tmp := []byte(privHex)
-		copy(priv[:], tmp)
-		addrString := sdk.AccAddress(priv.PubKey().Address()).String()
-		//hash := hex.EncodeToString([]byte(addrString))
-		//fmt.Println(hash)
-		sig, err := priv.Sign([]byte(addrString))
-		Expect(err).To(BeNil())
-		sigEncoded := hex.EncodeToString(sig)
-		err = crypto.ValidateSig(priv.PubKey(), addrString, sigEncoded)
-		Expect(err).To(BeNil())
-
-		fromJs := "050f543a67f78059e3ff022230aa0a9df86b40ce31a77f85b81ccf2d55e0ca7b6455a7ea366a0217aafc7293cafaf7104f2980a52feae325e0155566b19162f8"
-		err = crypto.ValidateSig(priv.PubKey(), addrString, fromJs)
-		Expect(err).To(BeNil())
-	})
-
 })
