@@ -69,7 +69,7 @@ func ClaimHandler(cliCtx context.CLIContext) http.HandlerFunc {
 
 		err = signer.SendTx(&cliCtx, cliCtx.Codec, msg)
 		if err != nil {
-			respondWithError(w, http.StatusBadRequest, err.Error())
+			respondWithError(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 
