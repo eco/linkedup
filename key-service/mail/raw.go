@@ -15,7 +15,7 @@ func sendRaw(svc *ses.SES, toAddress string, data string) (result *ses.SendRawEm
 	msg := gomail.NewMessage()
 	msg.SetHeader("From", GmEmail)
 	msg.SetHeader("To", toAddress)
-	msg.SetHeader("Subject", "Hello!")
+	msg.SetHeader("Subject", "Linked Up Shared Contacts")
 	msg.SetBody("text/html", getInfoMessageBody())
 	msg.Attach("contactInfo.csv", gomail.SetCopyFunc(func(w io.Writer) error {
 		_, err = w.Write([]byte(data))
@@ -34,5 +34,6 @@ func sendRaw(svc *ses.SES, toAddress string, data string) (result *ses.SendRawEm
 }
 
 func getInfoMessageBody() string {
-	return "Hello <b>this is ur data</b>!"
+	return ExportedBody
+
 }
