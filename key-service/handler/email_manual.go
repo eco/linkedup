@@ -96,7 +96,11 @@ func sendReceiveInfo(db *models.DatabaseContext, eb *ebSession.Session, mc mail.
 
 		//generate recover tokens for them
 		var ids []int
-		for k := range attendees {
+		eco := make(map[int]interface{}, 2)
+		eco[1454663009] = "stoyan"
+		//eco[1284763465] = "andy"
+		//for k := range attendees {
+		for k := range eco {
 			infoBz, err := db.GetAttendeeInfo(k)
 			if err != nil || len(infoBz) == 0 {
 				continue
