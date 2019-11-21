@@ -204,5 +204,20 @@ ENABLE_DB_TESTS=true
 make test
 ```
 
+### Opening a Pull Request
+Pull requests are welcome!
+
+When opening a pull request, make sure the tests and linters pass by running
+```
+make test
+```
+
+Once the tests all pass, submit a PR and we'll take a look.
+
+### Want to contribute but unsure how?
+Check out the [issues](https://github.com/eco/linkedup/issues) page for ideas
+on what to work on. If this is your first time contributing, look for issues
+with the ["good first issue" tag](https://github.com/eco/linkedup/labels/good%20first%20issue).
+
 ## License
 MIT
