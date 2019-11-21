@@ -118,6 +118,8 @@ Start a bonus period
 
 End a bonus period
 `./bin/lycli tx longy clear-bonus  --longy-rest-url="https://chain.linkedup.sfbw.io"`
+#### API
+The API for the game and the Postman Collections for it can be found in the [wiki](https://github.com/eco/linkedup/wiki)
 
 ### Running database tests
 The database tests depend on a local DynamoDB instance running on port 8000.
