@@ -1,0 +1,661 @@
+{
+	"info": {
+		"_postman_id": "b4befdea-5020-4519-87fa-88b95c910a5d",
+		"name": "linkedup",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "service",
+			"item": [
+				{
+					"name": "setEmail",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authEmailToken}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \"id\": 1422410109, \"address\":\"stoyan@beam.io\"}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{keyServiceUrl}}/emails",
+							"host": [
+								"{{keyServiceUrl}}"
+							],
+							"path": [
+								"emails"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "sendEmail",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "{{authEmailToken}}",
+								"disabled": true
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \"id\": 1454663009, \"sig\":\"c58a11e0bd699b63677db5fabfa863c3a39d286cebf633174f287f79e6efab9c5b1e510032408027c97b986e71e6e43465b6a9d936dbbd4e7571c7f81e4a9d39\", \"data\":\"a cool, message,again\\nwhat,up,man\"}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{keyServiceUrl}}/sendEmail",
+							"host": [
+								"{{keyServiceUrl}}"
+							],
+							"path": [
+								"sendEmail"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "sendRecieveInfo",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "{{authEmailToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{keyServiceUrl}}/emails/sendReceiveInfo",
+							"host": [
+								"{{keyServiceUrl}}"
+							],
+							"path": [
+								"emails",
+								"sendReceiveInfo"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getEmail",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authEmailToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{keyServiceUrl}}/emails/1422410109",
+							"host": [
+								"{{keyServiceUrl}}"
+							],
+							"path": [
+								"emails",
+								"1422410109"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "options",
+					"request": {
+						"method": "OPTIONS",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{keyServiceUrl}}/key",
+							"host": [
+								"{{keyServiceUrl}}"
+							],
+							"path": [
+								"key"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "validator",
+			"item": [
+				{
+					"name": "getAttendee",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{chainApi}}/longy/attendees/1422410109",
+							"host": [
+								"{{chainApi}}"
+							],
+							"path": [
+								"longy",
+								"attendees",
+								"1422410109"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAccount",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{chainApi}}/longy/attendees/1422410109",
+							"host": [
+								"{{chainApi}}"
+							],
+							"path": [
+								"longy",
+								"attendees",
+								"1422410109"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getScan",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{chainApi}}/longy/scans/013a3a643144eee5024cc8bb074fd3040d20f80af66ce5378713f224d06963df3125c084484e02e9929bce",
+							"host": [
+								"{{chainApi}}"
+							],
+							"path": [
+								"longy",
+								"scans",
+								"013a3a643144eee5024cc8bb074fd3040d20f80af66ce5378713f224d06963df3125c084484e02e9929bce"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getScans",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{chainApi}}/longy/scans/013a3a643144eee5024cc8bb074fd3040d20f80af66ce5378713f224d06963df3125c084484e02e9929bce",
+							"host": [
+								"{{chainApi}}"
+							],
+							"path": [
+								"longy",
+								"scans",
+								"013a3a643144eee5024cc8bb074fd3040d20f80af66ce5378713f224d06963df3125c084484e02e9929bce"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAttendeeByAddress",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{chainApi}}/longy/attendees/1422426129",
+							"host": [
+								"{{chainApi}}"
+							],
+							"path": [
+								"longy",
+								"attendees",
+								"1422426129"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAccount",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{chainApi}}/auth/accounts/cosmos1gxy60m55xdxwuzdmnhg04xntq2ms03ap7r55pf",
+							"host": [
+								"{{chainApi}}"
+							],
+							"path": [
+								"auth",
+								"accounts",
+								"cosmos1gxy60m55xdxwuzdmnhg04xntq2ms03ap7r55pf"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "bonus",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{chainApi}}/longy/bonus",
+							"host": [
+								"{{chainApi}}"
+							],
+							"path": [
+								"longy",
+								"bonus"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "leader",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{chainApi}}/longy/leader",
+							"host": [
+								"{{chainApi}}"
+							],
+							"path": [
+								"longy",
+								"leader"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "prizes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "127.0.0.1:1317/longy/prizes",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "1317",
+							"path": [
+								"longy",
+								"prizes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "claim",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"address\": \"cosmos1dps7hzqra3n45dam9wwnlppt04vacwcjr837rw\",\n\t\"sig\":\"9df3748273d05825a605892d9bf0caa35def6ad7d2f69ffd1a9822646c080bab327cc6bfbbbb5857c4054d8cfbe60a1694d9237b32308a6f9e542562be3a5b67\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{chainApi}}/longy/claim",
+							"host": [
+								"{{chainApi}}"
+							],
+							"path": [
+								"longy",
+								"claim"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "sig",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"hash\": \"3a103a4e5729ad68c02a678ae39accfbc0ae208096437401b7ceab63cca0622f\",\n\t\"privateKey\":\"d4183ec6fdfa121dee13cd204d3d4ce1730c0a903c062138ea99bd3cd442953d\",\n\t\"sig\":\"ee610ae1bc792cdd47c8b86caabdb62e2c6f8e40f200edf5a208c92f5204d99b4a1784ee4f7b5ce075a0af365012837ea6d87c2ffc54083b7bf8df8517b5c8c2\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{chainApi}}/longy/sig",
+							"host": [
+								"{{chainApi}}"
+							],
+							"path": [
+								"longy",
+								"sig"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "sigJs",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"val\": \"cosmos18r5dazj3mqz7d4lhhs95vlgvphgdehnst7fx5n\",\n\t\"privateKey\":\"d4183ec6fdfa121dee13cd204d3d4ce1730c0a903c062138ea99bd3cd442953d\",\n\t\"sig\":\"440ef7335adf8a3d203c07267ef11115f431c397ed8175f12e880b304ecd586804ef56ca0a2fcf15d841272f909eb0e046bccab3c871ac11bc8a3f4c3a269fce\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{chainApi}}/longy/sig",
+							"host": [
+								"{{chainApi}}"
+							],
+							"path": [
+								"longy",
+								"sig"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "eventbrite",
+			"item": [
+				{
+					"name": "attendees",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{bearerToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://www.eventbriteapi.com/v3/events/{{eventbriteID}}/attendees?page=12",
+							"protocol": "https",
+							"host": [
+								"www",
+								"eventbriteapi",
+								"com"
+							],
+							"path": [
+								"v3",
+								"events",
+								"{{eventbriteID}}",
+								"attendees"
+							],
+							"query": [
+								{
+									"key": "continuation",
+									"value": "eyJwYWdlIjogNX0",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "12"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "tickets",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Bearer {{bearerToken}}"
+							}
+						],
+						"url": {
+							"raw": "https://www.eventbriteapi.com/v3/events/{{eventbriteID}}/ticket_classes?",
+							"protocol": "https",
+							"host": [
+								"www",
+								"eventbriteapi",
+								"com"
+							],
+							"path": [
+								"v3",
+								"events",
+								"{{eventbriteID}}",
+								"ticket_classes"
+							],
+							"query": [
+								{
+									"key": "continuation",
+									"value": "eyJwYWdlIjogNX0",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "attendeesDev",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Bearer {{bearerToken}}"
+							}
+						],
+						"url": {
+							"raw": "https://www.eventbriteapi.com/v3/events/{{eventbriteID}}/attendees?page=0",
+							"protocol": "https",
+							"host": [
+								"www",
+								"eventbriteapi",
+								"com"
+							],
+							"path": [
+								"v3",
+								"events",
+								"{{eventbriteID}}",
+								"attendees"
+							],
+							"query": [
+								{
+									"key": "continuation",
+									"value": "eyJwYWdlIjogNX0",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "0"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ticketsDev",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Bearer  {{bearerToken}}"
+							}
+						],
+						"url": {
+							"raw": "https://www.eventbriteapi.com/v3/events/{{eventbriteID}}/ticket_classes?",
+							"protocol": "https",
+							"host": [
+								"www",
+								"eventbriteapi",
+								"com"
+							],
+							"path": [
+								"v3",
+								"events",
+								"{{eventbriteID}}",
+								"ticket_classes"
+							],
+							"query": [
+								{
+									"key": "continuation",
+									"value": "eyJwYWdlIjogNX0",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "attendees_test",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer  {{bearerToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://www.eventbriteapi.com/v3/events/{{eventbriteID}}/attendees?page=0",
+							"protocol": "https",
+							"host": [
+								"www",
+								"eventbriteapi",
+								"com"
+							],
+							"path": [
+								"v3",
+								"events",
+								"{{eventbriteID}}",
+								"attendees"
+							],
+							"query": [
+								{
+									"key": "continuation",
+									"value": "eyJwYWdlIjogNX0",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "0"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		}
+	],
+	"protocolProfileBehavior": {}
+}
