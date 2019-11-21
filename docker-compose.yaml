@@ -3,8 +3,8 @@ services:
   chain:
     build: .
     environment:
-      EVENTBRITE_AUTH: HPH2Q3QWLVB6K4BQSND3
-      EVENTBRITE_EVENT: 74857698391
+      EVENTBRITE_AUTH: ignored #set for `lyd add-genesis-attendees` call
+      EVENTBRITE_EVENT: ignored #set for `lyd add-genesis-attendees` call
       AWS_ACCESS_KEY_ID: ignored
       AWS_SECRET_ACCESS_KEY: ignored
       AWS_REGION: "us-west-2"
